@@ -1,0 +1,24 @@
+# =========================================
+#   ShopAdmin - Configuration Principale
+# =========================================
+
+shop:
+  # Quantités disponibles lors de l'achat/vente (Shift+clic ouvre un sélecteur)
+  buy-amounts: [1, 8, 16, 32, 64]
+  sell-amounts: [1, 8, 16, 32, 64]
+  # Autoriser la vente d'items enchantés ?
+  allow-enchanted-sell: false
+  # Autoriser la vente d'items endommagés ?
+  allow-damaged-sell: false
+
+messages:
+  prefix: "&8[&6Shop&8] &7"
+  buy-success: "&aAchat effectué: &ex{amount} {item} &apour &e{price}"
+  sell-success: "&aVente effectuée: &ex{amount} {item} &apour &e{price}"
+  insufficient-funds: "&cSolde insuffisant. Il te faut &e{price}&c."
+  insufficient-stock: "&cStock insuffisant. Stock actuel: &e{stock}&c."
+  inventory-full: "&cTon inventaire est plein."
+  not-enough-items: "&cTu n'as pas assez de &e{item}&c dans ton inventaire."
+  sell-disabled: "&cCet item ne peut pas être vendu."
+  no-permission: "&cTu n'as pas la permission."
+  reload-success: "&aShop rechargé avec succès."

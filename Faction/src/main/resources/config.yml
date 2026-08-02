@@ -1,0 +1,79 @@
+# =========================================
+#   Faction - Configuration
+# =========================================
+
+faction:
+  # Longueur max du nom d'une faction
+  max-name-length: 16
+  # Nombre max de membres par faction (0 = illimité)
+  max-members: 0
+
+# Grades disponibles, dans l'ordre hiérarchique (Chef en premier = rang le plus haut).
+# "permissions" liste ce que ce grade peut faire.
+# Valeurs possibles: invite, kick, promote, demote, deposit, withdraw, delete
+grades:
+  CHEF:
+    display: "Chef"
+    color: "&c"
+    permissions: [invite, kick, promote, demote, deposit, withdraw, delete]
+  BRAS_DROIT:
+    display: "Bras-Droit"
+    color: "&6"
+    permissions: [invite, kick, promote, demote, deposit, withdraw]
+  MODO:
+    display: "Modo"
+    color: "&e"
+    permissions: [invite, kick, deposit]
+  MEMBRE:
+    display: "Membre"
+    color: "&a"
+    permissions: [deposit]
+  INVITE:
+    display: "Invité"
+    color: "&7"
+    permissions: []
+
+messages:
+  prefix: "&8[&6Faction&8] &7"
+  no-permission: "&cTu n'as pas la permission d'effectuer cette action."
+  not-in-faction: "&cTu n'es dans aucune faction."
+  already-in-faction: "&cTu es déjà dans une faction."
+  faction-not-found: "&cFaction introuvable: &e{name}"
+  player-not-found: "&cJoueur introuvable: &e{name}"
+  player-not-in-faction: "&cCe joueur n'est pas dans ta faction."
+
+  create-success: "&aFaction &e{name} &acréée avec succès !"
+  create-already-exists: "&cUne faction nommée &e{name} &cexiste déjà."
+  create-name-invalid: "&cNom invalide. Max {max} caractères, pas d'espaces."
+
+  delete-success: "&aFaction &e{name} &adissoute."
+  delete-confirm: "&cTu es sur le point de dissoudre ta faction. Retape la commande dans les 10s pour confirmer."
+
+  invite-sent: "&aInvitation envoyée à &e{player}&a."
+  invite-received: "&aLa faction &e{faction} &at'a invité ! Tape &b/f join {faction} &apour rejoindre."
+  invite-none: "&cAucune invitation en attente de cette faction."
+
+  join-success: "&aTu as rejoint la faction &e{faction}&a !"
+  join-broadcast: "&e{player} &aa rejoint la faction !"
+
+  leave-success: "&aTu as quitté la faction &e{faction}&a."
+  leave-chef: "&cTu es le chef. Transfère d'abord ton grade via /f promote, ou dissous la faction avec /f delete."
+  leave-broadcast: "&e{player} &aa quitté la faction."
+
+  kick-success: "&e{player} &aa été exclu de la faction."
+  kick-broadcast: "&e{player} &aa été exclu par &e{by}&a."
+  kick-self: "&cTu ne peux pas t'exclure toi-même."
+  kick-outranks: "&cTu ne peux pas exclure quelqu'un de rang supérieur ou égal."
+
+  promote-success: "&e{player} &aa été promu &6{grade}&a."
+  promote-max: "&e{player} &aest déjà au grade maximum."
+  promote-outranks: "&cTu ne peux pas promouvoir quelqu'un à ton rang ou au-dessus."
+  demote-success: "&e{player} &aa été rétrogradé à &6{grade}&a."
+  demote-min: "&e{player} &aest déjà au grade minimum."
+
+  bank-header: "&8─── &6Bank de {faction} &8───"
+  bank-balance: "&7Solde: &e{amount}"
+  deposit-success: "&aTu as déposé &e{amount} &adans la bank."
+  deposit-insufficient: "&cSolde personnel insuffisant."
+  withdraw-success: "&aTu as retiré &e{amount} &ade la bank."
+  withdraw-insufficient: "&cSolde de la bank insuffisant."

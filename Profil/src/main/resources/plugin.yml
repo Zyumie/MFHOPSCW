@@ -1,0 +1,12 @@
+name: Profile
+version: '${version}'
+main: fr.zyumie.profile.Profile
+api-version: '1.21'
+author: Zyumie
+depend: [Main]
+softdepend: [Faction, Vault]
+
+commands:
+  profile:
+    description: Affiche ton profil ou celui d'un autre joueur
+    usage: /profile [joueur]

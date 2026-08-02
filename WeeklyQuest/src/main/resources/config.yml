@@ -1,0 +1,71 @@
+# =========================================
+#   WeeklyQuest - Configuration
+# =========================================
+
+quest:
+  # Durée totale du cycle en semaines (au-delà, le cycle recommence à la semaine 1)
+  cycle-weeks: 12
+  # Nombre de quêtes actives par semaine par faction
+  quests-per-week: 3
+  # Date de départ du cycle (ISO-8601: yyyy-MM-dd). Modifie pour caler sur le lancement du serveur.
+  cycle-start-date: "2025-01-06"
+
+# Pool complet des quêtes. Elles sont assignées par rotation fixe (semaine → indices).
+# Type peut être: KILL_MOB, MINE_BLOCK, CRAFT_ITEM, TRAVEL_DISTANCE (extensible)
+quests:
+  # Semaine 1
+  - id: "w1_q1"
+    week: 1
+    title: "Chasseurs débutants"
+    description: "Tuez 50 zombies."
+    type: KILL_MOB
+    target: ZOMBIE
+    amount: 50
+    reward-money: 500
+    reward-message: "&a+500 dans la bank de faction !"
+
+  - id: "w1_q2"
+    week: 1
+    title: "Mineurs en herbe"
+    description: "Minez 100 blocs de pierre."
+    type: MINE_BLOCK
+    target: STONE
+    amount: 100
+    reward-money: 300
+
+  - id: "w1_q3"
+    week: 1
+    title: "Voyageurs"
+    description: "Parcourez 5000 blocs."
+    type: TRAVEL_DISTANCE
+    amount: 5000
+    reward-money: 400
+
+  # Semaine 2
+  - id: "w2_q1"
+    week: 2
+    title: "Extermination"
+    description: "Tuez 100 squelettes."
+    type: KILL_MOB
+    target: SKELETON
+    amount: 100
+    reward-money: 800
+
+  - id: "w2_q2"
+    week: 2
+    title: "Fer forgé"
+    description: "Craftez 20 épées en fer."
+    type: CRAFT_ITEM
+    target: IRON_SWORD
+    amount: 20
+    reward-money: 600
+
+  - id: "w2_q3"
+    week: 2
+    title: "Explorateurs"
+    description: "Parcourez 10000 blocs."
+    type: TRAVEL_DISTANCE
+    amount: 10000
+    reward-money: 700
+
+  # (Semaines 3 à 12 à compléter selon ton contenu)

@@ -1,0 +1,22 @@
+name: CustomItems
+version: '${version}'
+main: fr.zyumie.customitems.CustomItems
+api-version: '1.21'
+author: Zyumie
+depend: [Main]
+softdepend: [Storm, Faction]
+
+commands:
+  items:
+    description: Donner un item custom
+    usage: /items give <joueur> <item> [quantité]
+    aliases: [customitems, ci]
+    permission: customitems.admin
+
+permissions:
+  customitems.admin:
+    description: Accès aux commandes admin des items custom
+    default: op
+  storm.bypass:
+    description: Immunité totale aux effets de la tempête (accordé par l'armure anti-tempête)
+    default: false

@@ -1,0 +1,36 @@
+# =========================================
+#   Oxygen - Configuration
+# =========================================
+
+oxygen:
+  # Hauteur Y à partir de laquelle on considère que le joueur est "en Surface"
+  # (zone SANS oxygène naturel). Sous cette hauteur = Sous Terre (oxygène naturel, sûr).
+  surface-y-threshold: 60
+
+  # Vitesse de vidage de la jauge en surface (en % par seconde) quand le joueur
+  # n'a pas (ou plus) de source d'oxygène externe (ex: armure, à implémenter dans OxygenArmorPlugin).
+  depletion-rate-percent-per-second: 1.0
+
+  # Vitesse de régénération de la jauge sous terre (en % par seconde)
+  regen-rate-percent-per-second: 5.0
+
+  # Jauge de départ pour un nouveau joueur
+  starting-percent: 100.0
+
+  # Que se passe-t-il quand la jauge atteint 0 en surface
+  suffocation:
+    # Intervalle (en secondes) entre chaque tick de dégâts d'asphyxie
+    damage-interval-seconds: 3
+    # Dégâts en cœurs (1 cœur = 2 points de vie). 2 cœurs = 4 points de vie par tick.
+    damage-hearts: 2
+    blindness-duration-ticks: 100
+    nausea-duration-ticks: 100
+
+  # Fréquence (en ticks serveur, 20 ticks = 1s) à laquelle le module vérifie tous les joueurs
+  check-interval-ticks: 20
+
+messages:
+  prefix: "&8[&bOxygène&8] &7"
+  surface-warning: "&c⚠ Tu n'as plus d'oxygène ! Rejoins la Surface... ou les profondeurs avant qu'il ne soit trop tard."
+  death-imminent: "&4&l☠ Mort imminente ! Tente de rejoindre la surface ou de redescendre sous terre !"
+  oxygen-restored: "&aTu respires à nouveau normalement."

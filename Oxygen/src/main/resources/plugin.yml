@@ -1,0 +1,13 @@
+name: Oxygen
+version: '${version}'
+main: fr.zyumie.main.oxygen.Oxygen
+api-version: '1.21'
+author: Zyumie
+depend: [Main]
+load: STARTUP
+
+commands:
+  oxygen:
+    description: Commandes du système d'oxygène
+    usage: /oxygen <reload|set|get> [joueur] [valeur]
+    permission: oxygenplugin.admin

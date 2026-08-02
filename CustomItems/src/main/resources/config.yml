@@ -1,0 +1,314 @@
+# =========================================================
+#   CustomItems — Configuration Complète
+# =========================================================
+# Chaque item est identifié par une clé PDC (PersistentDataContainer)
+# invisible pour les joueurs et unique par item.
+# custom-model-data : référence aux textures de votre resource pack (0 = désactivé)
+
+# ─────────────────────────────────────────────────────────
+#  ARMURES CUSTOM
+# ─────────────────────────────────────────────────────────
+
+armors:
+
+  # ── Armure Anti-Tempête ──────────────────────────────────
+  storm:
+    enabled: true
+    # Nécessite les 4 pièces pour l'immunité (true) ou une seule suffit (false)
+    require-full-set: true
+    display-name: "&9&lArmure Anti-Tempête"
+    lore:
+      - "&7Forgée dans l'œil d'une tempête millénaire."
+      - ""
+      - "&9✦ Immunité totale à la tempête apocalyptique"
+      - "&9✦ Effets et dégâts de tempête annulés"
+      - ""
+      - "&8ID: storm_armor"
+    # Matériaux de chaque pièce (DIAMOND, NETHERITE, IRON, GOLD, CHAINMAIL, LEATHER)
+    helmet:
+      material: DIAMOND_HELMET
+      custom-model-data: 2001
+      color: null   # null = couleur par défaut (pour LEATHER uniquement)
+    chestplate:
+      material: DIAMOND_CHESTPLATE
+      custom-model-data: 2002
+      color: null
+    leggings:
+      material: DIAMOND_LEGGINGS
+      custom-model-data: 2003
+      color: null
+    boots:
+      material: DIAMOND_BOOTS
+      custom-model-data: 2004
+      color: null
+    # Enchantements appliqués à chaque pièce (nom Bukkit : niveau)
+    enchantments:
+      PROTECTION_ENVIRONMENTAL: 4
+      DURABILITY: 3
+    messages:
+      equipped:   "&9⛈ Armure anti-tempête enfilée. Tu es protégé."
+      unequipped: "&7L'armure anti-tempête a été retirée."
+
+  # ── Armure d'Invisibilité Fantôme ───────────────────────
+  ghost:
+    enabled: true
+    require-full-set: true
+    display-name: "&f&lArmure Fantôme"
+    lore:
+      - "&7L'âme de ceux qui voulaient disparaître..."
+      - ""
+      - "&f✦ Invisibilité totale (armure + pseudo masqués)"
+      - "&c✦ Un seul coup brise l'invisibilité 5 secondes"
+      - ""
+      - "&8ID: ghost_armor"
+    helmet:
+      material: LEATHER_HELMET
+      custom-model-data: 2011
+      color: "0x000000"   # Noir — minimise la visibilité
+    chestplate:
+      material: LEATHER_CHESTPLATE
+      custom-model-data: 2012
+      color: "0x000000"
+    leggings:
+      material: LEATHER_LEGGINGS
+      custom-model-data: 2013
+      color: "0x000000"
+    boots:
+      material: LEATHER_BOOTS
+      custom-model-data: 2014
+      color: "0x000000"
+    enchantments:
+      PROTECTION_ENVIRONMENTAL: 2
+    # Durée de visibilité forcée après réception d'un coup (secondes)
+    reveal-duration-seconds: 5
+    messages:
+      invisible:  "&f👻 Tu es invisible."
+      revealed:   "&c💥 Invisibilité brisée pendant &e{duration}s&c !"
+      restored:   "&f👻 Tu redeviens invisible."
+
+  # ── Armure de Sauvetage ──────────────────────────────────
+  rescue:
+    enabled: true
+    require-full-set: false   # Une seule pièce suffit
+    display-name: "&a&lArmure de Sauvetage"
+    lore:
+      - "&7Conçue pour les situations désespérées."
+      - ""
+      - "&a✦ Téléportation d'urgence à &e1 cœur"
+      - "&a✦ Rayon aléatoire: &e{radius} blocs"
+      - "&7(Cooldown: &e{cooldown}s&7)"
+      - ""
+      - "&8ID: rescue_armor"
+    helmet:
+      material: IRON_HELMET
+      custom-model-data: 2021
+      color: null
+    chestplate:
+      material: IRON_CHESTPLATE
+      custom-model-data: 2022
+      color: null
+    leggings:
+      material: IRON_LEGGINGS
+      custom-model-data: 2023
+      color: null
+    boots:
+      material: IRON_BOOTS
+      custom-model-data: 2024
+      color: null
+    enchantments:
+      PROTECTION_ENVIRONMENTAL: 3
+      DURABILITY: 2
+    # Rayon de téléportation aléatoire (en blocs)
+    teleport-radius: 15
+    # HP seuil de déclenchement (en demi-cœurs, 2 = 1 cœur)
+    trigger-health: 2.0
+    # Cooldown entre deux téléportations d'urgence (secondes)
+    cooldown-seconds: 30
+    messages:
+      triggered: "&a⚡ Téléportation d'urgence ! Tu as été sauvé."
+      cooldown:  "&cCooldown actif encore &e{remaining}s&c."
+
+  # ── Armure Voleuse d'Âmes ───────────────────────────────
+  soul:
+    enabled: true
+    require-full-set: true
+    display-name: "&5&lArmure Voleuse d'Âmes"
+    lore:
+      - "&7Chaque mort nourrit ta puissance..."
+      - ""
+      - "&5✦ +2 cœurs par kill (cumulable)"
+      - "&c✦ Perte totale si pièce retirée ou mort"
+      - ""
+      - "&8ID: soul_armor"
+    helmet:
+      material: NETHERITE_HELMET
+      custom-model-data: 2031
+      color: null
+    chestplate:
+      material: NETHERITE_CHESTPLATE
+      custom-model-data: 2032
+      color: null
+    leggings:
+      material: NETHERITE_LEGGINGS
+      custom-model-data: 2033
+      color: null
+    boots:
+      material: NETHERITE_BOOTS
+      custom-model-data: 2034
+      color: null
+    enchantments:
+      PROTECTION_ENVIRONMENTAL: 4
+      DURABILITY: 3
+    # HP bonus par kill (en demi-cœurs, 4 = 2 cœurs)
+    hp-per-kill: 4.0
+    # Limite max de cœurs bonus (0 = illimité)
+    max-bonus-hp: 0
+    messages:
+      kill-bonus:  "&5+2 cœurs ! &8[&5{total}&8 bonus actif(s)]"
+      reset-death: "&5💀 Âmes perdues à la mort."
+      reset-unequip: "&5💔 Âmes libérées en retirant l'armure."
+
+# ─────────────────────────────────────────────────────────
+#  ARMES CUSTOM
+# ─────────────────────────────────────────────────────────
+
+weapons:
+
+  # ── Épée / Masse Céleste ─────────────────────────────────
+  celestial-sword:
+    enabled: true
+    display-name: "&e&l✦ Épée Céleste"
+    lore:
+      - "&7Forgée par les dieux pour punir les impies."
+      - ""
+      - "&e✦ Kill → Propulsion &e30 blocs en hauteur"
+      - "&e✦ En chute → Masse céleste"
+      - "&e  ✗ Raté : 0 dégât de chute"
+      - "&e  ✓ Touché : One-shot + re-propulsion"
+      - ""
+      - "&8ID: celestial_sword"
+    material: DIAMOND_SWORD
+    custom-model-data: 3001
+    enchantments:
+      DAMAGE_ALL: 5
+      DURABILITY: 3
+      FIRE_ASPECT: 2
+    # Hauteur de propulsion (blocs/seconde → vitesse verticale)
+    launch-velocity: 2.5    # ~30 blocs de hauteur
+    # Material de la forme "Masse" pendant la chute
+    mace-material: MACE
+    mace-display-name: "&e&l⚒ Masse Céleste"
+    mace-lore:
+      - "&7La puissance du ciel concentrée."
+      - ""
+      - "&e✦ Touche un joueur → One-shot + re-propulsion"
+      - "&e✦ Rate → Aucun dégât de chute"
+    mace-custom-model-data: 3002
+    messages:
+      launch:       "&e⬆ Tu t'élèves vers les cieux !"
+      mace-form:    "&e⚒ La masse est prête. Frappe !"
+      kill-slam:    "&e💥 Impact céleste ! La cible est anéantie."
+      miss-landing: "&e✓ Atterrissage sans dégât."
+
+  # ── Arc Explosif ─────────────────────────────────────────
+  explosive-bow:
+    enabled: true
+    display-name: "&c&l💥 Arc Explosif"
+    lore:
+      - "&7L'artillerie du pauvre... mais efficace."
+      - ""
+      - "&c✦ Touche un joueur → Explosion de zone (AoE)"
+      - "&c✦ Dégâts: &e{damage} &caux entités proches"
+      - "&c✦ Rayon: &e{radius} &cblocs"
+      - ""
+      - "&8ID: explosive_bow"
+    material: BOW
+    custom-model-data: 3011
+    enchantments:
+      ARROW_DAMAGE: 3
+      DURABILITY: 3
+    # Rayon de l'explosion AoE (blocs)
+    explosion-radius: 4.0
+    # Dégâts de l'explosion aux entités dans le rayon (en demi-cœurs)
+    explosion-damage: 6.0
+    # Créer une vraie explosion Minecraft (true) ou seulement des dégâts+particules (false)
+    # false = pas de destruction de blocs
+    real-explosion: false
+    # Particule affichée à l'impact
+    explosion-particle: EXPLOSION_LARGE
+    messages:
+      explosion: "&c💥 Explosion ! &e{hits} &ccibles touchées."
+
+  # ── Arc Téléporteur (Ender Bow) ──────────────────────────
+  ender-bow:
+    enabled: true
+    display-name: "&d&l🌀 Arc Ender"
+    lore:
+      - "&7La flèche qui dévore l'espace..."
+      - ""
+      - "&d✦ Touche un joueur → Téléportation derrière la cible"
+      - "&d✦ Distance de téléportation: &e2 blocs derrière"
+      - ""
+      - "&8ID: ender_bow"
+    material: BOW
+    custom-model-data: 3021
+    enchantments:
+      ARROW_DAMAGE: 2
+      DURABILITY: 3
+    # Blocs derrière la cible pour la téléportation
+    teleport-offset: 2.0
+    # Particules à l'arrivée
+    teleport-particle: PORTAL
+    messages:
+      teleported: "&d🌀 Téléporté derrière &e{target}&d !"
+
+  # ── Épée Mode Berserk ────────────────────────────────────
+  berserk-sword:
+    enabled: true
+    display-name: "&4&l⚡ Épée Berserk"
+    lore:
+      - "&7La rage distillée en acier..."
+      - ""
+      - "&4✦ Clic-droit → Mode Berserk &e10s"
+      - "&7  ✦ Suppression du cooldown d'attaque (style 1.8)"
+      - "&7  ✦ Buff pour les membres de faction à &e10 blocs"
+      - "&7(Cooldown: &e5 minutes&7)"
+      - ""
+      - "&8ID: berserk_sword"
+    material: NETHERITE_SWORD
+    custom-model-data: 3031
+    enchantments:
+      DAMAGE_ALL: 5
+      DURABILITY: 3
+      LOOTING: 3
+    # Durée du mode berserk (secondes)
+    berserk-duration-seconds: 10
+    # Cooldown entre deux activations (secondes)
+    cooldown-seconds: 300
+    # Rayon du buff faction (blocs)
+    faction-buff-radius: 10.0
+    # Vitesse d'attaque pendant le berserk (100 = pas de cooldown)
+    attack-speed-value: 1024.0
+    messages:
+      activated:       "&4⚡ MODE BERSERK ! &e{duration}s &4de fureur !"
+      faction-buffed:  "&4⚡ &e{player} &4active le Berserk ! Tu es aussi en rage !"
+      ended:           "&7Berserk terminé."
+      cooldown:        "&cCooldown actif: &e{remaining}s &crestant(e)s."
+
+# ─────────────────────────────────────────────────────────
+#  PARAMÈTRES GÉNÉRAUX
+# ─────────────────────────────────────────────────────────
+
+general:
+  prefix: "&8[&6Items&8] &7"
+  # Empêche les items custom d'être déposés dans des coffres/conteneurs
+  block-container-storage: false
+  # Affiche les particules lors des effets actifs
+  show-particles: true
+
+messages:
+  no-permission:    "&cTu n'as pas la permission."
+  player-not-found: "&cJoueur introuvable: &e{player}"
+  item-not-found:   "&cItem inconnu: &e{item}"
+  give-success:     "&aItem &e{item} &adonné à &e{player}&a."
+  give-received:    "&aTu as reçu: &e{item}&a."

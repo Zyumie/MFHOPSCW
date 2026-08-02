@@ -1,0 +1,18 @@
+# =========================================
+#   Home - Configuration
+# =========================================
+
+home:
+  # Cooldown (en secondes) pendant lequel /home et /tpa sont bloqués après une mort
+  death-cooldown-seconds: 300
+
+messages:
+  prefix: "&8[&bHome&8] &7"
+  set-success: "&aHome défini !"
+  set-requires-death: "&cTu dois mourir au moins une fois avant de pouvoir définir un home."
+  del-success: "&aHome supprimé."
+  del-none: "&cTu n'as pas de home défini."
+  tp-success: "&aTéléportation au home..."
+  tp-none: "&cAucun home défini. Utilise /sethome après ta prochaine mort."
+  tp-cooldown: "&cTu dois attendre &e{remaining}s &cavant de pouvoir te téléporter (après ta mort)."
+  no-permission: "&cTu n'as pas la permission."

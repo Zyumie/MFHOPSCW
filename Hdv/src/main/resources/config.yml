@@ -1,0 +1,40 @@
+# =========================================
+#   HDV - Configuration Principale
+# =========================================
+
+hdv:
+  # Taxe prélevée sur chaque vente réussie (%)
+  tax-percent: 5.0
+  # Nombre max d'annonces actives par joueur
+  max-listings-per-player: 10
+  # Durée max d'une annonce (en heures)
+  max-duration-hours: 168
+  # Durée par défaut si non spécifiée (en heures)
+  default-duration-hours: 48
+  # Prix minimum d'une annonce
+  min-price: 1.0
+  # Prix maximum d'une annonce
+  max-price: 999999999.0
+  # Frais de mise en vente (fixe, prélevé à la création de l'annonce)
+  listing-fee: 10.0
+  # Délai avant expiration après notification (en minutes)
+  expired-claim-delay-minutes: 1440
+
+messages:
+  prefix: "&8[&5HDV&8] &7"
+  listing-created: "&aAnnonce créée ! &e{item} &apour &e{price} &a({duration}h)"
+  listing-fee-charged: "&7Frais de mise en vente: &c-{fee}"
+  listing-sold: "&aVotre annonce a été vendue ! &e{item} &apour &e{price}&a. (taxe: &c{tax}&a)"
+  listing-expired: "&cVotre annonce pour &e{item} &ca expiré. Récupérez vos items avec /hdv claim."
+  buy-success: "&aAchat effectué: &e{item} &apour &e{price}&a."
+  buy-fail-funds: "&cSolde insuffisant. Il te faut &e{price}&c."
+  no-listings: "&7Aucune annonce disponible."
+  not-your-listing: "&cCette annonce ne t'appartient pas."
+  listing-not-found: "&cAnnonce introuvable."
+  max-listings: "&cTu as atteint ta limite d'annonces (&e{max}&c)."
+  inventory-full: "&cTon inventaire est plein. Libère de la place et réessaie."
+  invalid-price: "&cPrix invalide. Min: &e{min}&c, Max: &e{max}&c."
+  claim-success: "&aItems récupérés !"
+  claim-nothing: "&7Aucun item à récupérer."
+  listing-cancelled: "&aAnnonce annulée. Tes items ont été restitués."
+  no-permission: "&cTu n'as pas la permission."

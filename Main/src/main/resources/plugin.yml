@@ -1,0 +1,13 @@
+name: Main
+version: '${version}'
+main: fr.zyumie.main.Main
+api-version: '1.21'
+author: Zyumie
+softdepend: [Vault, NewV5]
+load: STARTUP
+
+commands:
+  mainadmin:
+    description: Commande d'administration du système de modules
+    usage: /mainadmin <reload|modules|list>
+    permission: main.admin

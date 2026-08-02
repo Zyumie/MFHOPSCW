@@ -1,0 +1,11 @@
+name: Hdv
+version: '${version}'
+main: fr.zyumie.hdv.Hdv
+api-version: '1.21'
+author: Zyumie
+depend: [Main, Vault, Money]
+
+commands:
+  hdv:
+    description: Hôtel des Ventes
+    usage: /hdv [claim|reload]

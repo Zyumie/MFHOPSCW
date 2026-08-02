@@ -1,0 +1,23 @@
+name: Money
+version: '${version}'
+main: fr.zyumie.money.Money
+api-version: '1.21'
+author: Zyumie
+depend: [Main, Vault]
+
+commands:
+  money:
+    description: Voir ton solde
+    usage: /money
+    aliases: [balance, bal]
+  pay:
+    description: Payer un joueur
+    usage: /pay <joueur> <montant>
+  moneytop:
+    description: Classement des joueurs les plus riches
+    usage: /moneytop [page]
+    aliases: [baltop]
+  eco:
+    description: Commandes administrateur d'économie
+    usage: /eco <give|set|take> <joueur> <montant>
+    permission: money.admin

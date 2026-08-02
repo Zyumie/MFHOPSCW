@@ -1,0 +1,38 @@
+# =========================================
+#   OxygenArmor - Configuration
+# =========================================
+
+armor:
+  recharge:
+    # Durée de recharge complète en secondes (défaut: 2h = 7200s)
+    duration-seconds: 7200
+    # Fréquence de tick de la tâche de recharge (en ticks serveur, 100 = 5s)
+    tick-interval-ticks: 100
+    # Rayon (en chunks) autour de l'armor stand pour considérer qu'un joueur est présent
+    # 0 = seulement le chunk de l'armor stand lui-même
+    player-detection-radius-chunks: 0
+
+# Craft custom: poser des items AU SOL sur le bloc trigger,
+# puis faire CLIC DROIT sur le bloc pour lancer le craft.
+craft:
+  # Bloc sur lequel le joueur fait clic droit pour déclencher le craft
+  trigger-block: CRAFTING_TABLE
+  # Items à poser au sol près du bloc (rayon 1.5 bloc)
+  ingredients:
+    - material: IRON_INGOT
+      amount: 8
+    - material: GLASS
+      amount: 4
+  effect:
+    sound: ENTITY_PLAYER_LEVELUP
+    particle: VILLAGER_HAPPY
+
+messages:
+  prefix: "&8[&bO₂&8] &7"
+  armor-equipped: "&aArmure enfilée &7(&e{percent}%&7)"
+  armor-removed: "&7Armure retirée."
+  recharge-complete: "&aArmure à oxygène rechargée à 100% !"
+  craft-success: "&aArmure à oxygène craftée !"
+  craft-missing: "&cIngrédients manquants. Pose les items au sol sur le bloc, puis fais clic droit."
+  give-success: "&aArmure donnée à &e{player}&a."
+  no-permission: "&cTu n'as pas la permission."

@@ -1,0 +1,12 @@
+name: WeeklyQuest
+version: '${version}'
+main: fr.zyumie.quest.WeeklyQuest
+api-version: '1.21'
+author: Zyumie
+depend: [Main]
+softdepend: [Faction, Vault]
+
+commands:
+  quests:
+    description: Affiche les quêtes de ta faction cette semaine
+    usage: /quests [faction]

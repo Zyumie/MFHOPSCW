@@ -1,0 +1,17 @@
+name: Home
+version: '${version}'
+main: fr.zyumie.home.Home
+api-version: '1.21'
+author: Zyumie
+depend: [Main]
+
+commands:
+  sethome:
+    description: Définit ton home (utilisable uniquement après une mort)
+    usage: /sethome
+  home:
+    description: Téléporte au home (cooldown 5min après mort)
+    usage: /home
+  delhome:
+    description: Supprime ton home
+    usage: /delhome

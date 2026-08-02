@@ -1,0 +1,11 @@
+name: Faction
+version: '${version}'
+main: fr.zyumie.faction.Faction
+api-version: '1.21'
+author: Zyumie
+depend: [Main, Vault]
+
+commands:
+  f:
+    description: Commandes de faction
+    usage: /f <create|delete|invite|kick|join|leave|promote|demote|info|list|deposit|withdraw|bank>

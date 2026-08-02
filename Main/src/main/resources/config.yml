@@ -1,0 +1,40 @@
+# =========================================
+#   Main - Configuration Globale
+# =========================================
+
+storage:
+  # Type: YAML ou MYSQL
+  type: YAML
+  mysql:
+    host: localhost
+    port: 3306
+    database: main
+    user: root
+    password: ""
+    useSSL: false
+    poolSize: 10
+
+# Active/désactive les modules au chargement (chaque module reste un jar séparé,
+# mais on peut le couper ici sans le retirer du serveur).
+modules:
+  oxygen: true
+  oxygen-armor: true
+  shop-admin: true
+  money: true
+  hdv: true
+  faction: true
+  weekly-quest: true
+  profile: true
+  home: true
+  Storm: true
+
+# Intégration avec le plugin de Misane (softdepend, optionnel)
+integration:
+  misane:
+    enabled: true
+    plugin-name: "NewV5"
+
+messages:
+  prefix: "&8[&bMain&8] &7"
+  no-permission: "&cTu n'as pas la permission d'utiliser cette commande."
+  reload-success: "&aLa configuration a été rechargée."

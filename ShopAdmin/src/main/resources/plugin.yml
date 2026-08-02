@@ -1,0 +1,11 @@
+name: ShopAdmin
+version: '${version}'
+main: fr.zyumie.shopadmin.ShopAdmin
+api-version: '1.21'
+author: Zyumie
+depend: [Main, Vault, Money]
+
+commands:
+  shop:
+    description: Ouvrir la boutique admin
+    usage: /shop [reload]

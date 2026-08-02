@@ -1,0 +1,158 @@
+# =========================================
+#   ShopAdmin - Configuration des Items
+# =========================================
+# Chaque catégorie a un id unique, un nom affiché, une icône et une liste d'items.
+# buy-price: prix pour acheter 1 unité (-1 = achat désactivé)
+# sell-price: prix pour vendre 1 unité (-1 = vente désactivée)
+# stock: stock disponible (-1 = illimité)
+# slot: position dans le GUI de catégorie (0-based dans la zone items, définie dans Gui.yml)
+# custom-model-data: optionnel, pour les resource packs
+
+categories:
+
+  minerais:
+    name: "&6Minéraux"
+    icon: GOLD_INGOT
+    icon-name: "&6Minéraux"
+    icon-lore:
+      - "&7Cliquer pour voir les minéraux"
+    items:
+      diamond:
+        material: DIAMOND
+        name: "&bDiamant"
+        lore:
+          - "&7Acheter: &e{buy_price}"
+          - "&7Vendre: &e{sell_price}"
+          - ""
+          - "&eClique gauche &7pour acheter"
+          - "&eClique droit &7pour vendre"
+        buy-price: 500.0
+        sell-price: 250.0
+        stock: -1
+        slot: 0
+
+      emerald:
+        material: EMERALD
+        name: "&aÉmeraude"
+        lore:
+          - "&7Acheter: &e{buy_price}"
+          - "&7Vendre: &e{sell_price}"
+          - ""
+          - "&eClique gauche &7pour acheter"
+          - "&eClique droit &7pour vendre"
+        buy-price: 300.0
+        sell-price: 150.0
+        stock: -1
+        slot: 1
+
+      iron_ingot:
+        material: IRON_INGOT
+        name: "&7Lingot de Fer"
+        lore:
+          - "&7Acheter: &e{buy_price}"
+          - "&7Vendre: &e{sell_price}"
+          - ""
+          - "&eClique gauche &7pour acheter"
+          - "&eClique droit &7pour vendre"
+        buy-price: 50.0
+        sell-price: 25.0
+        stock: -1
+        slot: 2
+
+      gold_ingot:
+        material: GOLD_INGOT
+        name: "&6Lingot d'Or"
+        lore:
+          - "&7Acheter: &e{buy_price}"
+          - "&7Vendre: &e{sell_price}"
+          - ""
+          - "&eClique gauche &7pour acheter"
+          - "&eClique droit &7pour vendre"
+        buy-price: 80.0
+        sell-price: 40.0
+        stock: -1
+        slot: 3
+
+      coal:
+        material: COAL
+        name: "&8Charbon"
+        lore:
+          - "&7Acheter: &e{buy_price}"
+          - "&7Vendre: &e{sell_price}"
+          - ""
+          - "&eClique gauche &7pour acheter"
+          - "&eClique droit &7pour vendre"
+        buy-price: 10.0
+        sell-price: 5.0
+        stock: -1
+        slot: 4
+
+  nourriture:
+    name: "&aNourriture"
+    icon: BREAD
+    icon-name: "&aNourriture"
+    icon-lore:
+      - "&7Cliquer pour voir la nourriture"
+    items:
+      bread:
+        material: BREAD
+        name: "&6Pain"
+        lore:
+          - "&7Acheter: &e{buy_price}"
+          - "&7Vendre: &e{sell_price}"
+          - ""
+          - "&eClique gauche &7pour acheter"
+          - "&eClique droit &7pour vendre"
+        buy-price: 5.0
+        sell-price: 2.0
+        stock: -1
+        slot: 0
+
+      cooked_beef:
+        material: COOKED_BEEF
+        name: "&cBifteck"
+        lore:
+          - "&7Acheter: &e{buy_price}"
+          - "&7Vendre: &e{sell_price}"
+          - ""
+          - "&eClique gauche &7pour acheter"
+          - "&eClique droit &7pour vendre"
+        buy-price: 15.0
+        sell-price: 8.0
+        stock: -1
+        slot: 1
+
+  outils:
+    name: "&bOutils"
+    icon: DIAMOND_PICKAXE
+    icon-name: "&bOutils"
+    icon-lore:
+      - "&7Cliquer pour voir les outils"
+    items:
+      diamond_pickaxe:
+        material: DIAMOND_PICKAXE
+        name: "&bPioche en Diamant"
+        lore:
+          - "&7Acheter: &e{buy_price}"
+          - "&7Vendre: &e{sell_price}"
+          - ""
+          - "&eClique gauche &7pour acheter"
+          - "&eClique droit &7pour vendre"
+        buy-price: 1500.0
+        sell-price: -1
+        stock: -1
+        slot: 0
+
+      iron_pickaxe:
+        material: IRON_PICKAXE
+        name: "&7Pioche en Fer"
+        lore:
+          - "&7Acheter: &e{buy_price}"
+          - "&7Vendre: &e{sell_price}"
+          - ""
+          - "&eClique gauche &7pour acheter"
+          - "&eClique droit &7pour vendre"
+        buy-price: 200.0
+        sell-price: 80.0
+        stock: -1
+        slot: 1

@@ -1,0 +1,12 @@
+name: OxygenArmor
+version: '${version}'
+main: fr.zyumie.oxygenArmor.OxygenArmor
+api-version: '1.21'
+author: Zyumie
+depend: [Main, Oxygen]
+
+commands:
+  oxygenarmor:
+    description: Commandes admin de l'armure à oxygène
+    usage: /oxygenarmor give [joueur]
+    permission: oxygenarmor.admin

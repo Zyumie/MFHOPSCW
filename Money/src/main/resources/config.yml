@@ -1,0 +1,48 @@
+# =========================================
+#   Money - Configuration
+# =========================================
+
+economy:
+  # Nom de la devise (singulier / pluriel)
+  currency-singular: "Crédit"
+  currency-plural: "Crédits"
+  # Solde de départ pour un nouveau joueur
+  starting-balance: 500.0
+  # Montant minimum par transaction (/pay)
+  min-transaction: 0.5
+  # Montant maximum qu'un joueur peut détenir
+  max-balance: 999999999.0
+
+# Item physique (optionnel) — si enabled: true, les joueurs peuvent
+# convertir leur solde virtuel en item et vice-versa via /money withdraw et /money deposit
+physical-item:
+  enabled: false
+  material: GOLD_NUGGET
+  name: "&6Crédit"
+  lore:
+    - "&7Valeur: &e1 Crédit"
+  # Valeur de 1 item en Crédits
+  item-value: 1.0
+
+# Classement
+moneytop:
+  entries-per-page: 10
+
+messages:
+  prefix: "&8[&6Money&8] &7"
+  balance: "&7Ton solde: &e{amount} {currency}"
+  balance-other: "&7Solde de &e{player}&7: &e{amount} {currency}"
+  pay-success: "&aTu as payé &e{amount} {currency} &aà &e{player}&a."
+  pay-received: "&e{player} &at'a envoyé &e{amount} {currency}&a."
+  pay-self: "&cTu ne peux pas te payer toi-même."
+  pay-insufficient: "&cSolde insuffisant. Tu as &e{balance} {currency}&c."
+  pay-min: "&cMontant minimum: &e{min} {currency}&c."
+  pay-max-balance: "&cCe paiement dépasserait la limite de solde de &e{max} {currency}&c."
+  eco-give: "&a+{amount} {currency} &7donnés à &e{player}&7."
+  eco-take: "&c-{amount} {currency} &7retirés à &e{player}&7."
+  eco-set: "&7Solde de &e{player} &7fixé à &e{amount} {currency}&7."
+  player-not-found: "&cJoueur introuvable: &e{player}"
+  invalid-amount: "&cMontant invalide."
+  no-permission: "&cTu n'as pas la permission."
+  moneytop-header: "&8─── &6Classement des richesses &8(page {page}/{max}) ───"
+  moneytop-entry: "  &7{rank}. &e{player} &7— &e{amount} {currency}"
