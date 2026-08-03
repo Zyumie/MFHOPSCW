@@ -1,0 +1,75 @@
+# =========================================
+#   Storm - Configuration de la Tempête
+# =========================================
+
+# Mondes affectés par la tempête (noms exacts des mondes du serveur)
+worlds:
+  - world
+
+# ── Cycle hebdomadaire ────────────────────────────────────────────────
+cycle:
+  # Durées possibles en jours (tirage aléatoire parmi cette liste)
+  possible-durations: [1, 2, 3, 4, 5]
+  # Heure de déclenchement de la tempête (format 24h: "HH:mm")
+  trigger-time: "20:00"
+  # Fuseau horaire pour le cycle hebdomadaire (ex: Europe/Paris, UTC)
+  timezone: "Europe/Paris"
+
+# ── Effets environnementaux ───────────────────────────────────────────
+environment:
+  # Verrouiller le temps en nuit éternelle pendant la tempête
+  eternal-night: true
+  # Heure du monde pendant la tempête (18000 = minuit)
+  night-time: 18000
+  # Activer l'orage (pluie + éclairs)
+  thunderstorm: true
+
+# ── Effets sur les joueurs exposés ───────────────────────────────────
+exposure:
+  # Intervalle de vérification des joueurs (en ticks, 20 = 1 seconde)
+  check-interval-ticks: 20
+  # Intervalle entre chaque infligement de dégâts (en ticks)
+  damage-interval-ticks: 40
+  # Dégâts infligés à chaque intervalle (en demi-cœurs)
+  damage-amount: 2.0
+  # Amplificateur de Nausée (0 = niveau 1)
+  nausea-amplifier: 0
+  # Amplificateur de Lenteur (0 = niveau 1, 2 = niveau 3)
+  slowness-amplifier: 2
+  # Amplificateur de Wither (0 = niveau 1, -1 = désactivé)
+  wither-amplifier: -1
+  # Cécité (true/false)
+  blindness: true
+  # Durée des effets de potion (en ticks, doit être > check-interval)
+  effect-duration-ticks: 60
+  # Ignorer les joueurs en mode créatif / spectateur
+  ignore-creative: true
+  # Ignorer les joueurs avec la permission storm.bypass
+  use-bypass-permission: true
+
+# ── Sbires & éclairs ─────────────────────────────────────────────────
+hazards:
+  # Frapper les joueurs exposés avec des éclairs ?
+  lightning-strikes: true
+  # Probabilité d'éclair par joueur par vérification (0.0 à 1.0)
+  lightning-chance: 0.05
+
+# ── Messages ──────────────────────────────────────────────────────────
+messages:
+  prefix: "&8[&9⛈ Tempête&8] &7"
+  storm-start:
+    - "&9&l⛈ UNE TEMPÊTE APOCALYPTIQUE COMMENCE ⛈"
+    - "&7Durée: &e{duration} jour(s) &7| Fin prévue: &e{end-date}"
+    - "&cRentrez à l'abri immédiatement !"
+  storm-end:
+    - "&a&l☀ LA TEMPÊTE EST PASSÉE ☀"
+    - "&7Le soleil renaît. Le monde reprend son souffle."
+  surface-warning: "&c⚠ Tu es exposé à la tempête ! Mets-toi à l'abri !"
+  surface-warning-interval-ticks: 100  # Intervalle d'affichage du warning (ticks)
+  scheduled: "&7Prochaine tempête programmée: &e{start-date} &7({duration} jour(s))"
+  no-storm: "&7Aucune tempête prévue cette semaine."
+  storm-active: "&cTempête en cours &7— Fin: &e{end-date}"
+  admin-start: "&aTempête démarrée manuellement."
+  admin-stop: "&aTempête arrêtée manuellement."
+  admin-reload: "&aConfiguration rechargée."
+  no-permission: "&cTu n'as pas la permission."

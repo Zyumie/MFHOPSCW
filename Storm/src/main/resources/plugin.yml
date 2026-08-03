@@ -1,0 +1,18 @@
+name: Storm
+version: '${version}'
+main: fr.zyumie.storm.Storm
+api-version: '1.21'
+author: Zyumie
+depend: [Main]
+
+commands:
+  storm:
+    description: Commandes de gestion de la tempête apocalyptique
+    usage: /storm <start|stop|status|schedule|reload>
+    aliases: [tempete, gon-storm]
+    permission: storm.admin
+
+permissions:
+  storm.admin:
+    description: Accès aux commandes de tempête
+    default: op
