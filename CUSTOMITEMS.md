@@ -645,27 +645,27 @@ Si tu cibles des versions antérieures à 1.21.4, `setCustomModelData(int)` rest
 
 | Item | `custom-model-data` | `ToolTips` | `item-model` |
 |------|---------------------|------------|--------------|
-| Storm Helmet | 2001 | None | `storm_armor_helmet` |
-| Storm Chest | 2002 | None | `storm_armor_chest` |
-| Storm Legs | 2003 | None | `storm_armor_legs` |
-| Storm Boots | 2004 | None | `storm_armor_boots` |
-| Ghost Helmet | 2011 | None | `ghost_armor_helmet` |
-| Ghost Chest | 2012 | None | `ghost_armor_chest` |
-| Ghost Legs | 2013 | None | `ghost_armor_legs` |
-| Ghost Boots | 2014 | None | `ghost_armor_boots` |
-| Rescue Helmet | 2021 | None | `rescue_armor_helmet` |
-| Rescue Chest | 2022 | None | `rescue_armor_chest` |
-| Rescue Legs | 2023 | None | `rescue_armor_legs` |
-| Rescue Boots | 2024 | None | `rescue_armor_boots` |
-| Soul Helmet | 2031 | None | `soul_armor_helmet` |
-| Soul Chest | 2032 | None | `soul_armor_chest` |
-| Soul Legs | 2033 | None | `soul_armor_legs` |
-| Soul Boots | 2034 | None | `soul_armor_boots` |
-| **Épée Céleste** | **3001** | celestialSword | **`celestialSword`** |
-| **Masse Céleste** | **3002** | celestialMace | **`celestialMace`** |
-| **Arc Explosif** | **3011** | ExplosiveBow | **`ExplosiveBow`** |
+| Storm Helmet | 2001 | storm | `storm_armor_helmet` |
+| Storm Chest | 2002 | storm | `storm_armor_chest` |
+| Storm Legs | 2003 | storm | `storm_armor_legs` |
+| Storm Boots | 2004 | storm | `storm_armor_boots` |
+| Ghost Helmet | 2011 | ghost | `ghost_armor_helmet` |
+| Ghost Chest | 2012 | ghost | `ghost_armor_chest` |
+| Ghost Legs | 2013 | ghost | `ghost_armor_legs` |
+| Ghost Boots | 2014 | ghost | `ghost_armor_boots` |
+| Rescue Helmet | 2021 | rescue | `rescue_armor_helmet` |
+| Rescue Chest | 2022 | rescue | `rescue_armor_chest` |
+| Rescue Legs | 2023 | rescue | `rescue_armor_legs` |
+| Rescue Boots | 2024 | rescue | `rescue_armor_boots` |
+| Soul Helmet | 2031 | soul | `soul_armor_helmet` |
+| Soul Chest | 2032 | soul | `soul_armor_chest` |
+| Soul Legs | 2033 | soul | `soul_armor_legs` |
+| Soul Boots | 2034 | soul | `soul_armor_boots` |
+| **Épée Céleste** | **3001** | celestialsword | **`celestialSword`** |
+| **Masse Céleste** | **3002** | celestialmace | **`celestialMace`** |
+| **Arc Explosif** | **3011** | Explosivebow | **`ExplosiveBow`** |
 | **Arc Ender** | **3021** | EnderBow | **`EnderBow`** |
-| **Épée Berserk** | **3031** | BerserkSword | **`BerserkSword`** |
+| **Épée Berserk** | **3031** | Berserksword | **`BerserkSword`** |
 
 ---
 
