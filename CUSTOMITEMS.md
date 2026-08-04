@@ -441,15 +441,15 @@ Les styles personnalisés sont stockés dans :
 | Arc Ender | `zyumie` | `enderbow` |
 | Épée Berserk | `zyumie` | `berserksword` |
 
+
 - ⛑️ Voici les identifiants `item_model` actuellement assignés aux armures :
 
-| Armure | Namespace modèle | Identifiant `item_model` |
-|--------|------------------|--------------------------|
-| Armure Storm | `customitems` | `stormarmor` |
-| Armure Ghost | `customitems` | `ghostarmor` |
-| Armure Rescue | `customitems` | `rescuearmor` |
-| Armure Soul | `customitems` | `soularmor` |
-
+| Armure | Namespace modèle | Identifiant `item_model` | Chemin des fichiers |
+|--------|------------------|--------------------------|----------------------|
+| Armure Storm | `customitems` | `storm` | `assets/customitems/textures/gui/sprites/tooltip/storm/` |
+| Armure Ghost | `customitems` | `ghost` | `assets/customitems/textures/gui/sprites/tooltip/ghost/` |
+| Armure Rescue | `customitems` | `rescue` | `assets/customitems/textures/gui/sprites/tooltip/rescue/` |
+| Armure Soul | `customitems` | `soul` | `assets/customitems/textures/gui/sprites/tooltip/soul/` |
 ---
 
 ### Structure des fichiers
