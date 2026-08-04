@@ -27,8 +27,8 @@
 
 ## 📁 Documentation
 
-- 📖 [README](README.md)
-- 🛠️ [CUSTOMITEMS](CUSTOMITEMS.md)
+- 📖 [Readme](README.md)
+- 🛠️ [CustomItems](CUSTOMITEMS.md)
 
 ---
 
