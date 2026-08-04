@@ -25,6 +25,13 @@
 
 ---
 
+## 📁 Documentation
+
+- 📖 [README](README.md)
+- 🛠️ [CUSTOMITEMS](CUSTOMITEMS.md)
+
+---
+
 ## 📦 Vue d'ensemble
 
 | Couche | Plugin | Package | Rôle |
