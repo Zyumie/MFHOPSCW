@@ -1,4 +1,4 @@
-# ✦ CustomItems — Wiki Complet
+# ✦ CustomItems — Wiki Complet 
 
 > **Plugin :** `fr.zyumie.customitems` | **Version :** 0.5 | **Paper 1.21.11+**
 
