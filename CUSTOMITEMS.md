@@ -4,31 +4,6 @@
 
 ---
 
-## 📑 Table des matières
-
-1. [Système d'identification (PDC)](#-système-didentification-pdc)
-2. [Armures Custom](#-armures-custom)
-   - [Anti-Tempête](#-armure-anti-tempête)
-   - [Fantôme](#-armure-fantôme)
-   - [Sauvetage](#-armure-de-sauvetage)
-   - [Âmes](#-armure-voleuse-dâmes)
-3. [Armes Custom](#-armes-custom)
-   - [Épée Céleste](#️-épée--masse-céleste)
-   - [Arc Explosif](#-arc-explosif)
-   - [Arc Ender](#-arc-ender-ender-bow)
-   - [Épée Berserk](#️-épée-berserk)
-4. [Resource Pack & Texture Customization](#-resource-pack--texture-customization)
-   - [Système item_model (1.21.4+)](#système-item_model-1214)
-   - [Structure des fichiers](#structure-des-fichiers)
-   - [Modèles JSON par item](#modèles-json-par-item)
-   - [Tooltips & identifiants](#tooltips--identifiants)
-   - [Intégration dans le code](#intégration-dans-le-code)
-5. [Commandes & Permissions](#-commandes--permissions)
-6. [Configuration complète](#-configuration-complète)
-7. [Événements & API](#-événements--api)
-
----
-
 ## 🔑 Système d'identification (PDC)
 
 Chaque item custom est identifié via un **tag PDC** (`PersistentDataContainer`) invisible pour les joueurs, unique et résistant aux redémarrages.
@@ -451,19 +426,29 @@ meta.itemModel(new NamespacedKey("zyumie", "celestialSword"));
 
 ---
 
-### Tooltips — Identifiants configurés
+## 🖍️ Tooltips — Identifiants configurés
 
-Voici les identifiants `item_model` actuellement assignés aux armes :
+Le plugin utilise le système `TOOLTIP_STYLE` de Minecraft 1.21.x.
+Les styles personnalisés sont stockés dans :
 
-| Item | Namespace | Identifiant | Chemin modèle |
-|------|-----------|-------------|---------------|
-| Épée Céleste | `zyumie` | `celestialSword` | `assets/zyumie/models/item/celestialSword.json` |
-| Masse Céleste | `zyumie` | `celestialMace` | `assets/zyumie/models/item/celestialMace.json` |
-| Arc Explosif | `zyumie` | `ExplosiveBow` | `assets/zyumie/models/item/ExplosiveBow.json` |
-| Arc Ender | `zyumie` | `EnderBow` | `assets/zyumie/models/item/EnderBow.json` |
-| Épée Berserk | `zyumie` | `BerserkSword` | `assets/zyumie/models/item/BerserkSword.json` |
+- ⚔️ Voici les identifiants `item_model` actuellement assignés aux armes :
 
-> **Convention :** Le namespace `zyumie` correspond au dossier `assets/zyumie/` dans le resource pack.
+| Item | Namespace modèle | Identifiant `item_model` |
+|------|------------------|--------------------------|
+| Épée Céleste | `zyumie` | `celestialsword` |
+| Masse Céleste | `zyumie` | `celestialmace` |
+| Arc Explosif | `zyumie` | `explosivebow` |
+| Arc Ender | `zyumie` | `enderbow` |
+| Épée Berserk | `zyumie` | `berserksword` |
+
+- ⛑️ Voici les identifiants `item_model` actuellement assignés aux armures :
+
+| Armure | Namespace modèle | Identifiant `item_model` |
+|--------|------------------|--------------------------|
+| Armure Storm | `customitems` | `stormarmor` |
+| Armure Ghost | `customitems` | `ghostarmor` |
+| Armure Rescue | `customitems` | `rescuearmor` |
+| Armure Soul | `customitems` | `soularmor` |
 
 ---
 
@@ -645,22 +630,22 @@ Si tu cibles des versions antérieures à 1.21.4, `setCustomModelData(int)` rest
 
 | Item | `custom-model-data` | `ToolTips` | `item-model` |
 |------|---------------------|------------|--------------|
-| Storm Helmet | 2001 | storm | `storm_armor_helmet` |
-| Storm Chest | 2002 | storm | `storm_armor_chest` |
-| Storm Legs | 2003 | storm | `storm_armor_legs` |
-| Storm Boots | 2004 | storm | `storm_armor_boots` |
-| Ghost Helmet | 2011 | ghost | `ghost_armor_helmet` |
-| Ghost Chest | 2012 | ghost | `ghost_armor_chest` |
-| Ghost Legs | 2013 | ghost | `ghost_armor_legs` |
-| Ghost Boots | 2014 | ghost | `ghost_armor_boots` |
-| Rescue Helmet | 2021 | rescue | `rescue_armor_helmet` |
-| Rescue Chest | 2022 | rescue | `rescue_armor_chest` |
-| Rescue Legs | 2023 | rescue | `rescue_armor_legs` |
-| Rescue Boots | 2024 | rescue | `rescue_armor_boots` |
-| Soul Helmet | 2031 | soul | `soul_armor_helmet` |
-| Soul Chest | 2032 | soul | `soul_armor_chest` |
-| Soul Legs | 2033 | soul | `soul_armor_legs` |
-| Soul Boots | 2034 | soul | `soul_armor_boots` |
+| **Storm Helmet** | 2001 | stormarmor | `storm_armor_helmet` |
+| **Storm Chest** | 2002 | stormarmor | `storm_armor_chest` |
+| **Storm Legs** | 2003 | stormarmor | `storm_armor_legs` |
+| **Storm Boots** | 2004 | stormarmor | `storm_armor_boots` |
+| **Ghost Helmet** | 2011 | ghostarmor | `ghost_armor_helmet` |
+| **Ghost Chest** | 2012 | ghostarmor | `ghost_armor_chest` |
+| **Ghost Legs** | 2013 | ghostarmor | `ghost_armor_legs` |
+| **Ghost Boots** | 2014 | ghostarmor | `ghost_armor_boots` |
+| **Rescue Helmet** | 2021 | rescuearmor | `rescue_armor_helmet` |
+| **Rescue Chest** | 2022 | rescuearmor | `rescue_armor_chest` |
+| **Rescue Legs** | 2023 | rescuearmor | `rescue_armor_legs` |
+| **Rescue Boots** | 2024 | rescuearmor | `rescue_armor_boots` |
+| **Soul Helmet** | 2031 | soularmor | `soul_armor_helmet` |
+| **Soul Chest** | 2032 | soularmor | `soul_armor_chest` |
+| **Soul Legs** | 2033 | soularmor | `soul_armor_legs` |
+| **Soul Boots** | 2034 | soularmor | `soul_armor_boots` |
 | **Épée Céleste** | **3001** | celestialsword | **`celestialSword`** |
 | **Masse Céleste** | **3002** | celestialmace | **`celestialMace`** |
 | **Arc Explosif** | **3011** | Explosivebow | **`ExplosiveBow`** |
