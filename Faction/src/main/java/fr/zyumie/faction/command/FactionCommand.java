@@ -278,13 +278,68 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
     }
 
     private void send(Player p, String text) {
-        p.sendMessage(mm(text
-                .replace("&8","<dark_gray>").replace("&6","<gold>").replace("&e","<yellow>")
-                .replace("&a","<green>").replace("&c","<red>").replace("&b","<aqua>")
-                .replace("&7","<gray>").replace("&f","<white>").replace("&r","<reset>")));
+        p.sendMessage(mm(text));
     }
 
-    private Component mm(String s)   { return MiniMessage.miniMessage().deserialize(s); }
+    private Component mm(String s) {
+        if (s == null) {
+            return Component.empty();
+        }
+
+        s = s
+                // Couleurs Minecraft & / §
+                .replace("&0", "<black>")
+                .replace("&1", "<dark_blue>")
+                .replace("&2", "<dark_green>")
+                .replace("&3", "<dark_aqua>")
+                .replace("&4", "<dark_red>")
+                .replace("&5", "<dark_purple>")
+                .replace("&6", "<gold>")
+                .replace("&7", "<gray>")
+                .replace("&8", "<dark_gray>")
+                .replace("&9", "<blue>")
+                .replace("&a", "<green>")
+                .replace("&b", "<aqua>")
+                .replace("&c", "<red>")
+                .replace("&d", "<light_purple>")
+                .replace("&e", "<yellow>")
+                .replace("&f", "<white>")
+
+                // Formats
+                .replace("&k", "<obfuscated>")
+                .replace("&l", "<bold>")
+                .replace("&m", "<strikethrough>")
+                .replace("&n", "<underlined>")
+                .replace("&o", "<italic>")
+                .replace("&r", "<reset>")
+
+                // Support des codes § également
+                .replace("§0", "<black>")
+                .replace("§1", "<dark_blue>")
+                .replace("§2", "<dark_green>")
+                .replace("§3", "<dark_aqua>")
+                .replace("§4", "<dark_red>")
+                .replace("§5", "<dark_purple>")
+                .replace("§6", "<gold>")
+                .replace("§7", "<gray>")
+                .replace("§8", "<dark_gray>")
+                .replace("§9", "<blue>")
+                .replace("§a", "<green>")
+                .replace("§b", "<aqua>")
+                .replace("§c", "<red>")
+                .replace("§d", "<light_purple>")
+                .replace("§e", "<yellow>")
+                .replace("§f", "<white>")
+                .replace("§k", "<obfuscated>")
+                .replace("§l", "<bold>")
+                .replace("§m", "<strikethrough>")
+                .replace("§n", "<underlined>")
+                .replace("§o", "<italic>")
+                .replace("§r", "<reset>");
+
+        return MiniMessage.miniMessage().deserialize(s);
+    }
+
     private void sendUsage(Player p) {
         send(p, "<gold>/f <gray>create|delete|invite|join|leave|kick|promote|demote|info|list|deposit|withdraw|bank");
     }
