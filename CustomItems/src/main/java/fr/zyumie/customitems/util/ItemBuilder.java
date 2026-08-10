@@ -5,43 +5,31 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.trim.ArmorTrim;
+import org.bukkit.inventory.meta.trim.TrimMaterial;
+import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Utilitaire de construction d'items custom.
- * Chaque item est tagué via PDC : key "custom_item" → identifiant string unique.
- */
 public final class ItemBuilder {
 
-    /** Clé PDC commune à tous les items custom du plugin */
     public static final String PDC_KEY = "custom_item";
 
     private ItemBuilder() {}
 
-    /**
-     * Construit un ItemStack custom depuis une section de config.
-     *
-     * @param plugin    plugin propriétaire (pour la NamespacedKey)
-     * @param section   section YAML de l'item (ex: config.getConfigurationSection("armors.storm"))
-     * @param slot      "helmet" | "chestplate" | "leggings" | "boots" | null (pour les armes)
-     * @param itemId    identifiant unique PDC (ex: "storm_armor", "celestial_sword")
-     * @param nameOverride  nom affiché — null = utilise section.display-name
-     * @param loreOverride  lore — null = utilise section.lore
-     */
     public static ItemStack build(Plugin plugin, ConfigurationSection section,
                                   String slot, String itemId,
                                   String nameOverride, List<String> loreOverride) {
-        // Matériau
         String matKey = slot != null
                 ? section.getString(slot + ".material", "STONE")
                 : section.getString("material", "STONE");
@@ -58,70 +46,66 @@ public final class ItemBuilder {
 
         // Lore
         List<String> rawLore = loreOverride != null ? loreOverride : section.getStringList("lore");
-        if (!rawLore.isEmpty()) {
-            meta.lore(rawLore.stream().map(ItemBuilder::mm).toList());
-        }
+        if (!rawLore.isEmpty()) meta.lore(rawLore.stream().map(ItemBuilder::mm).toList());
 
-        // Custom Model Data
-        int cmdKey = slot != null
-                ? section.getInt(slot + ".custom-model-data", 0)
-                : section.getInt("custom-model-data", 0);
-        if (cmdKey > 0) meta.setCustomModelData(cmdKey);
+        // CMD
+        int cmd = slot != null ? section.getInt(slot + ".custom-model-data", 0)
+                               : section.getInt("custom-model-data", 0);
+        if (cmd > 0) meta.setCustomModelData(cmd);
 
-        // Couleur pour leather armor
+        // Couleur leather
         if (slot != null && meta instanceof LeatherArmorMeta leatherMeta) {
             String colorHex = section.getString(slot + ".color");
             if (colorHex != null && !colorHex.equalsIgnoreCase("null")) {
                 try {
-                    int colorInt = (int) Long.parseLong(colorHex.replace("0x", "").replace("#", ""), 16);
-                    leatherMeta.setColor(Color.fromRGB(colorInt));
+                    int c = (int) Long.parseLong(colorHex.replace("0x","").replace("#",""), 16);
+                    leatherMeta.setColor(Color.fromRGB(c));
                 } catch (NumberFormatException ignored) {}
+            }
+        }
+
+        // ── Armor Trim ────────────────────────────────────────────────────
+        // Priorité : trim par slot > trim global du set
+        if (slot != null && meta instanceof ArmorMeta armorMeta) {
+            ConfigurationSection trimSec = section.getConfigurationSection(slot + ".trim");
+            if (trimSec == null) trimSec = section.getConfigurationSection("trim");
+            if (trimSec != null && trimSec.getBoolean("enabled", false)) {
+                applyTrim(armorMeta, trimSec);
             }
         }
 
         // Enchantements
         ConfigurationSection enchSec = section.getConfigurationSection("enchantments");
         if (enchSec != null) {
-            for (String enchName : enchSec.getKeys(false)) {
+            for (String name : enchSec.getKeys(false)) {
                 try {
-                    Enchantment ench = org.bukkit.Registry.ENCHANTMENT.get(
-                            NamespacedKey.minecraft(enchName.toLowerCase()));
-                    if (ench != null) {
-                        meta.addEnchant(ench, enchSec.getInt(enchName), true);
-                    }
+                    Enchantment ench = Registry.ENCHANTMENT.get(NamespacedKey.minecraft(name.toLowerCase()));
+                    if (ench != null) meta.addEnchant(ench, enchSec.getInt(name), true);
                 } catch (Exception ignored) {}
             }
         }
 
-        // Flags d'affichage
+        // Flags
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS,
-                          ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+                          ItemFlag.HIDE_ADDITIONAL_TOOLTIP, ItemFlag.HIDE_ARMOR_TRIM);
 
-        // Tag PDC — identifiant unique de l'item
+        // PDC
         meta.getPersistentDataContainer().set(
-                new NamespacedKey(plugin, PDC_KEY),
-                PersistentDataType.STRING,
-                itemId);
+                new NamespacedKey(plugin, PDC_KEY), PersistentDataType.STRING, itemId);
 
         stack.setItemMeta(meta);
         return stack;
     }
 
-    /** Version simplifiée pour les armes (pas de slot) */
     public static ItemStack buildWeapon(Plugin plugin, ConfigurationSection section, String itemId) {
         return build(plugin, section, null, itemId, null, null);
     }
 
-    /** Version pour une pièce d'armure */
     public static ItemStack buildArmorPiece(Plugin plugin, ConfigurationSection section,
                                             String slot, String itemId) {
         return build(plugin, section, slot, itemId, null, null);
     }
 
-    /**
-     * Lit l'identifiant PDC d'un item.
-     * @return l'identifiant, ou null si ce n'est pas un item custom
-     */
     public static String getItemId(Plugin plugin, ItemStack item) {
         if (item == null || !item.hasItemMeta()) return null;
         return item.getItemMeta().getPersistentDataContainer()
@@ -136,7 +120,19 @@ public final class ItemBuilder {
         return getItemId(plugin, item) != null;
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────
+    // ── Armor Trim ────────────────────────────────────────────────────────
+
+    private static void applyTrim(ArmorMeta meta, ConfigurationSection trimSec) {
+        String rawMat = trimSec.getString("material", "").toLowerCase().replace("minecraft:", "");
+        String rawPat = trimSec.getString("pattern",  "").toLowerCase().replace("minecraft:", "");
+        if (rawMat.isEmpty() || rawPat.isEmpty()) return;
+
+        TrimMaterial trimMaterial = Registry.TRIM_MATERIAL.get(NamespacedKey.minecraft(rawMat));
+        TrimPattern  trimPattern  = Registry.TRIM_PATTERN .get(NamespacedKey.minecraft(rawPat));
+        if (trimMaterial == null || trimPattern == null) return;
+
+        meta.setTrim(new ArmorTrim(trimMaterial, trimPattern));
+    }
 
     private static Component mm(String legacy) {
         return MiniMessage.miniMessage().deserialize(

@@ -11,30 +11,24 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class CustomItems extends JavaPlugin implements Module {
 
-    // ── Handlers armures ──────────────────────────────────────────────
     private StormArmorHandler  stormHandler;
     private GhostArmorHandler  ghostHandler;
     private RescueArmorHandler rescueHandler;
     private SoulArmorHandler   soulHandler;
 
-    // ── Handlers armes ────────────────────────────────────────────────
     private CelestialSwordHandler celestialHandler;
     private ExplosiveBowHandler   explosiveBowHandler;
     private EnderBowHandler       enderBowHandler;
     private BerserkSwordHandler   berserkHandler;
 
-    // ── Registry & listener ───────────────────────────────────────────
     private ItemRegistry  itemRegistry;
     private ArmorListener armorListener;
-
-    // ── JavaPlugin ────────────────────────────────────────────────────
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         initHandlers();
         itemRegistry = new ItemRegistry(this);
-
         getServer().getScheduler().runTaskLater(this,
                 () -> MainAPI.get().getModuleManager().register(this), 1L);
     }
@@ -42,7 +36,6 @@ public class CustomItems extends JavaPlugin implements Module {
     @Override
     public void onDisable() {
         if (armorListener != null) armorListener.stopTask();
-        // Nettoyage global de tous les joueurs en ligne
         Bukkit.getOnlinePlayers().forEach(p -> {
             ghostHandler.cleanup(p);
             berserkHandler.cleanup(p);
@@ -50,34 +43,37 @@ public class CustomItems extends JavaPlugin implements Module {
         });
     }
 
-    // ── Module ────────────────────────────────────────────────────────
-
     @Override public String getId()          { return "custom-items"; }
     @Override public String getDisplayName() { return "Items & Armures Custom"; }
 
     @Override
     public void onModuleEnable() {
-        // Enregistrement des listeners
+        // ── Listeners ───────────────────────────────────────────────────
         armorListener = new ArmorListener(this);
-        getServer().getPluginManager().registerEvents(armorListener,   this);
+        getServer().getPluginManager().registerEvents(armorListener,              this);
         getServer().getPluginManager().registerEvents(new DamageListener(this),   this);
         getServer().getPluginManager().registerEvents(new KillListener(this),     this);
         getServer().getPluginManager().registerEvents(new ProjectileListener(this),this);
         getServer().getPluginManager().registerEvents(new InteractListener(this),  this);
 
-        // Tâche périodique de vérification d'armure
+        // CelestialSwordHandler est aussi un Listener (PlayerDropItemEvent)
+        getServer().getPluginManager().registerEvents(celestialHandler, this);
+
+        // Bloque toute modification des items custom (enclume, forge, meule, etc.)
+        getServer().getPluginManager().registerEvents(new ItemProtectionListener(this), this);
+
+        // ── Tâche armures ────────────────────────────────────────────────
         armorListener.startTask();
 
-        // Commande /items give
+        // ── Commandes ────────────────────────────────────────────────────
         GiveItemCommand giveCmd = new GiveItemCommand(this);
         getCommand("items").setExecutor(giveCmd);
         getCommand("items").setTabCompleter(giveCmd);
 
-        // Intégration Storm : injecte le checker d'immunité
+        // ── Hook Storm ───────────────────────────────────────────────────
         hookStorm();
 
-        getLogger().info("CustomItemsModule activé — "
-                + itemRegistry.getGiveNames().size() / 2 + " items disponibles.");
+        getLogger().info("CustomItemsModule activé.");
     }
 
     @Override
@@ -86,12 +82,8 @@ public class CustomItems extends JavaPlugin implements Module {
         getLogger().info("CustomItemsModule désactivé.");
     }
 
-    // ── Hook Storm ────────────────────────────────────────────────────
+    // ── Hook Storm ────────────────────────────────────────────────────────
 
-    /**
-     * Injecte un Predicate<Player> dans StormManager via réflexion.
-     * Si Storm n'est pas chargé → silencieux.
-     */
     private void hookStorm() {
         var stormPlugin = Bukkit.getPluginManager().getPlugin("Storm");
         if (stormPlugin == null) return;
@@ -103,34 +95,34 @@ public class CustomItems extends JavaPlugin implements Module {
             manager.getClass()
                     .getMethod("setImmunityChecker", java.util.function.Predicate.class)
                     .invoke(manager, checker);
-            getLogger().info("Intégration Storm ✔ — Armure Anti-Tempête active.");
+            getLogger().info("Intégration Storm ✔");
         } catch (Exception e) {
-            getLogger().warning("Impossible de hooker StormManager : " + e.getMessage());
+            getLogger().warning("Hook Storm échoué : " + e.getMessage());
         }
     }
 
-    // ── Init ──────────────────────────────────────────────────────────
+    // ── Init ──────────────────────────────────────────────────────────────
 
     private void initHandlers() {
-        stormHandler       = new StormArmorHandler(this);
-        ghostHandler       = new GhostArmorHandler(this);
-        rescueHandler      = new RescueArmorHandler(this);
-        soulHandler        = new SoulArmorHandler(this);
-        celestialHandler   = new CelestialSwordHandler(this);
-        explosiveBowHandler= new ExplosiveBowHandler(this);
-        enderBowHandler    = new EnderBowHandler(this);
-        berserkHandler     = new BerserkSwordHandler(this);
+        stormHandler        = new StormArmorHandler(this);
+        ghostHandler        = new GhostArmorHandler(this);
+        rescueHandler       = new RescueArmorHandler(this);
+        soulHandler         = new SoulArmorHandler(this);
+        celestialHandler    = new CelestialSwordHandler(this);
+        explosiveBowHandler = new ExplosiveBowHandler(this);
+        enderBowHandler     = new EnderBowHandler(this);
+        berserkHandler      = new BerserkSwordHandler(this);
     }
 
-    // ── Accesseurs ────────────────────────────────────────────────────
+    // ── Accesseurs ────────────────────────────────────────────────────────
 
-    public StormArmorHandler  getStormHandler()       { return stormHandler; }
-    public GhostArmorHandler  getGhostHandler()       { return ghostHandler; }
-    public RescueArmorHandler getRescueHandler()      { return rescueHandler; }
-    public SoulArmorHandler   getSoulHandler()        { return soulHandler; }
-    public CelestialSwordHandler getCelestialHandler(){ return celestialHandler; }
+    public StormArmorHandler     getStormHandler()       { return stormHandler; }
+    public GhostArmorHandler     getGhostHandler()       { return ghostHandler; }
+    public RescueArmorHandler    getRescueHandler()      { return rescueHandler; }
+    public SoulArmorHandler      getSoulHandler()        { return soulHandler; }
+    public CelestialSwordHandler getCelestialHandler()   { return celestialHandler; }
     public ExplosiveBowHandler   getExplosiveBowHandler(){ return explosiveBowHandler; }
-    public EnderBowHandler       getEnderBowHandler() { return enderBowHandler; }
-    public BerserkSwordHandler   getBerserkHandler()  { return berserkHandler; }
-    public ItemRegistry          getItemRegistry()    { return itemRegistry; }
+    public EnderBowHandler       getEnderBowHandler()    { return enderBowHandler; }
+    public BerserkSwordHandler   getBerserkHandler()     { return berserkHandler; }
+    public ItemRegistry          getItemRegistry()       { return itemRegistry; }
 }

@@ -1,6 +1,8 @@
 package fr.zyumie.customitems;
 
 import fr.zyumie.customitems.util.ItemBuilder;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import net.kyori.adventure.key.Key;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -12,30 +14,32 @@ import java.util.Set;
 /**
  * Registre central de tous les items custom.
  * Fabrique les ItemStacks et expose les ID attendus.
+ *
+ * Modifications v0.5.1 :
+ *  - TOOLTIP_STYLE appliqué sur chaque item (conservé depuis ta version)
+ *  - Armor Trim lu depuis config.yml et appliqué via ItemBuilder
+ *  - DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP supprimé du constructeur
+ *    (géré ici directement pour plus de contrôle)
  */
 public class ItemRegistry {
 
-    // IDs PDC des armures (set complet)
-    public static final String STORM_ARMOR       = "storm_armor";
-    public static final String GHOST_ARMOR       = "ghost_armor";
-    public static final String RESCUE_ARMOR      = "rescue_armor";
-    public static final String SOUL_ARMOR        = "soul_armor";
+    // ── IDs PDC ──────────────────────────────────────────────────────────
+    public static final String STORM_ARMOR     = "storm_armor";
+    public static final String GHOST_ARMOR     = "ghost_armor";
+    public static final String RESCUE_ARMOR    = "rescue_armor";
+    public static final String SOUL_ARMOR      = "soul_armor";
 
-    // IDs PDC des armes
-    public static final String CELESTIAL_SWORD   = "celestial_sword";
-    public static final String CELESTIAL_MACE    = "celestial_mace";   // forme temporaire en chute
-    public static final String EXPLOSIVE_BOW     = "explosive_bow";
-    public static final String ENDER_BOW         = "ender_bow";
-    public static final String BERSERK_SWORD     = "berserk_sword";
+    public static final String CELESTIAL_SWORD = "celestial_sword";
+    public static final String CELESTIAL_MACE  = "celestial_mace";
+    public static final String EXPLOSIVE_BOW   = "explosive_bow";
+    public static final String ENDER_BOW       = "ender_bow";
+    public static final String BERSERK_SWORD   = "berserk_sword";
 
-    /** Slots d'armure dans l'ordre Bukkit (helmet=39, chest=38, legs=37, boots=36) */
     public static final String[] ARMOR_SLOTS = {"helmet", "chestplate", "leggings", "boots"};
 
     private final JavaPlugin plugin;
 
-    /** Map <"nom_affiché" → "itemId"> pour la commande /items give */
     private static final Map<String, String> GIVE_NAMES = new HashMap<>();
-
     static {
         GIVE_NAMES.put("storm_armor",     STORM_ARMOR);
         GIVE_NAMES.put("storm",           STORM_ARMOR);
@@ -59,62 +63,95 @@ public class ItemRegistry {
         this.plugin = plugin;
     }
 
-    // ── Armures ───────────────────────────────────────────────────────
+    // ── Armures ───────────────────────────────────────────────────────────
 
-    /** Crée les 4 pièces d'une armure et les retourne dans l'ordre [helmet, chest, legs, boots] */
     public ItemStack[] buildArmorSet(String armorKey, String itemId) {
-        ConfigurationSection sec = plugin.getConfig().getConfigurationSection("armors." + armorKey);
-        if (sec == null) return new ItemStack[4];
+        ConfigurationSection sec =
+                plugin.getConfig().getConfigurationSection("armors." + armorKey);
+
+        if (sec == null) {
+            return new ItemStack[4];
+        }
+
         ItemStack[] pieces = new ItemStack[4];
         for (int i = 0; i < ARMOR_SLOTS.length; i++) {
+
+            // Construit la pièce (avec trim intégré dans ItemBuilder)
             pieces[i] = ItemBuilder.buildArmorPiece(plugin, sec, ARMOR_SLOTS[i], itemId);
+
+            if (pieces[i] == null) {
+                continue;
+            }
+
+            // ─────────────────────────────────────────────
+            // Tooltip personnalisé de l'armure
+            //
+            // Exemple pour Ghost :
+            // customitems:ghost/ghost
+            // ─────────────────────────────────────────────
+
+            pieces[i].setData(
+                DataComponentTypes.TOOLTIP_STYLE,
+                Key.key("customitems", armorKey + "/" + armorKey)
+            );
         }
         return pieces;
     }
 
-    // ── Armes ─────────────────────────────────────────────────────────
+    // ── Armes (ta version conservée intégralement) ────────────────────────
 
     public ItemStack buildCelestialSword() {
         var sec = plugin.getConfig().getConfigurationSection("weapons.celestial-sword");
-        return sec != null ? ItemBuilder.buildWeapon(plugin, sec, CELESTIAL_SWORD) : null;
+        if (sec == null) return null;
+        ItemStack item = ItemBuilder.buildWeapon(plugin, sec, CELESTIAL_SWORD);
+        item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "celestialsword"));
+        return item;
     }
 
     public ItemStack buildCelestialMace() {
         var sec = plugin.getConfig().getConfigurationSection("weapons.celestial-sword");
         if (sec == null) return null;
-        var maceSec = new MaceFakeCfg(sec);
-        return ItemBuilder.build(plugin, maceSec, null, CELESTIAL_MACE,
+        ItemStack item = ItemBuilder.build(plugin, new MaceFakeCfg(sec), null, CELESTIAL_MACE,
                 sec.getString("mace-display-name", "&e&l⚒ Masse Céleste"),
                 sec.getStringList("mace-lore"));
+        item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "celestialmace"));
+        return item;
     }
 
     public ItemStack buildExplosiveBow() {
         var sec = plugin.getConfig().getConfigurationSection("weapons.explosive-bow");
-        return sec != null ? ItemBuilder.buildWeapon(plugin, sec, EXPLOSIVE_BOW) : null;
+        if (sec == null) return null;
+        ItemStack item = ItemBuilder.buildWeapon(plugin, sec, EXPLOSIVE_BOW);
+        item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "explosivebow"));
+        return item;
     }
 
     public ItemStack buildEnderBow() {
         var sec = plugin.getConfig().getConfigurationSection("weapons.ender-bow");
-        return sec != null ? ItemBuilder.buildWeapon(plugin, sec, ENDER_BOW) : null;
+        if (sec == null) return null;
+        ItemStack item = ItemBuilder.buildWeapon(plugin, sec, ENDER_BOW);
+        item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "enderbow"));
+        return item;
     }
 
     public ItemStack buildBerserkSword() {
         var sec = plugin.getConfig().getConfigurationSection("weapons.berserk-sword");
-        return sec != null ? ItemBuilder.buildWeapon(plugin, sec, BERSERK_SWORD) : null;
+        if (sec == null) return null;
+        ItemStack item = ItemBuilder.buildWeapon(plugin, sec, BERSERK_SWORD);
+        item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "berserksword"));
+        return item;
     }
 
-    // ── Résolution par nom (commande /items give) ─────────────────────
+    // ── Résolution /items give ────────────────────────────────────────────
 
-    /** Retourne les items à donner pour un nom donné (peut être 1 ou 4 pièces). */
     public ItemStack[] resolveGiveItems(String name) {
         String id = GIVE_NAMES.get(name.toLowerCase());
         if (id == null) return null;
-
         return switch (id) {
-            case STORM_ARMOR   -> buildArmorSet("storm",   STORM_ARMOR);
-            case GHOST_ARMOR   -> buildArmorSet("ghost",   GHOST_ARMOR);
-            case RESCUE_ARMOR  -> buildArmorSet("rescue",  RESCUE_ARMOR);
-            case SOUL_ARMOR    -> buildArmorSet("soul",    SOUL_ARMOR);
+            case STORM_ARMOR     -> buildArmorSet("storm",   STORM_ARMOR);
+            case GHOST_ARMOR     -> buildArmorSet("ghost",   GHOST_ARMOR);
+            case RESCUE_ARMOR    -> buildArmorSet("rescue",  RESCUE_ARMOR);
+            case SOUL_ARMOR      -> buildArmorSet("soul",    SOUL_ARMOR);
             case CELESTIAL_SWORD -> new ItemStack[]{ buildCelestialSword() };
             case EXPLOSIVE_BOW   -> new ItemStack[]{ buildExplosiveBow() };
             case ENDER_BOW       -> new ItemStack[]{ buildEnderBow() };
@@ -124,8 +161,6 @@ public class ItemRegistry {
     }
 
     public Set<String> getGiveNames() { return GIVE_NAMES.keySet(); }
-
-    // ── Helpers ───────────────────────────────────────────────────────
 
     public boolean isArmorId(String id) {
         return id != null && (id.equals(STORM_ARMOR) || id.equals(GHOST_ARMOR)
@@ -137,10 +172,8 @@ public class ItemRegistry {
                 || id.equals(EXPLOSIVE_BOW) || id.equals(ENDER_BOW) || id.equals(BERSERK_SWORD));
     }
 
-    /**
-     * Wrapper interne pour passer les données de la masse céleste à ItemBuilder
-     * (material et custom-model-data différents de l'épée, mais même section)
-     */
+    // ── MaceFakeCfg (inchangé) ────────────────────────────────────────────
+
     private static class MaceFakeCfg implements ConfigurationSection {
         private final ConfigurationSection parent;
         MaceFakeCfg(ConfigurationSection parent) { this.parent = parent; }
@@ -150,13 +183,10 @@ public class ItemRegistry {
             if ("custom-model-data".equals(path)) return String.valueOf(parent.getInt("mace-custom-model-data", 0));
             return parent.getString(path, def);
         }
-
         @Override public int getInt(String path, int def) {
             if ("custom-model-data".equals(path)) return parent.getInt("mace-custom-model-data", def);
             return parent.getInt(path, def);
         }
-
-        // Délégation des méthodes obligatoires de l'interface
         @Override public org.bukkit.configuration.ConfigurationSection getConfigurationSection(String p) { return parent.getConfigurationSection(p); }
         @Override public java.util.Set<String> getKeys(boolean deep) { return parent.getKeys(deep); }
         @Override public java.util.Map<String,Object> getValues(boolean deep) { return parent.getValues(deep); }

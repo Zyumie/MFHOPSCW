@@ -1,9 +1,6 @@
 # =========================================================
 #   CustomItems — Configuration Complète
 # =========================================================
-# Chaque item est identifié par une clé PDC (PersistentDataContainer)
-# invisible pour les joueurs et unique par item.
-# custom-model-data : référence aux textures de votre resource pack (0 = désactivé)
 
 # ─────────────────────────────────────────────────────────
 #  ARMURES CUSTOM
@@ -14,7 +11,6 @@ armors:
   # ── Armure Anti-Tempête ──────────────────────────────────
   storm:
     enabled: true
-    # Nécessite les 4 pièces pour l'immunité (true) ou une seule suffit (false)
     require-full-set: true
     display-name: "&9&lArmure Anti-Tempête"
     lore:
@@ -24,11 +20,20 @@ armors:
       - "&9✦ Effets et dégâts de tempête annulés"
       - ""
       - "&8ID: storm_armor"
-    # Matériaux de chaque pièce (DIAMOND, NETHERITE, IRON, GOLD, CHAINMAIL, LEATHER)
+    # Trim appliqué à toutes les pièces du set (peut être surchargé par pièce)
+    trim:
+      enabled: true
+      material: diamond   # minecraft:diamond
+      pattern: bolt       # minecraft:bolt
     helmet:
       material: DIAMOND_HELMET
       custom-model-data: 2001
-      color: null   # null = couleur par défaut (pour LEATHER uniquement)
+      color: null
+      # trim optionnel par pièce — surcharge le trim global si défini
+      # trim:
+      #   enabled: true
+      #   material: diamond
+      #   pattern: bolt
     chestplate:
       material: DIAMOND_CHESTPLATE
       custom-model-data: 2002
@@ -41,7 +46,6 @@ armors:
       material: DIAMOND_BOOTS
       custom-model-data: 2004
       color: null
-    # Enchantements appliqués à chaque pièce (nom Bukkit : niveau)
     enchantments:
       PROTECTION_ENVIRONMENTAL: 4
       DURABILITY: 3
@@ -49,7 +53,7 @@ armors:
       equipped:   "&9⛈ Armure anti-tempête enfilée. Tu es protégé."
       unequipped: "&7L'armure anti-tempête a été retirée."
 
-  # ── Armure d'Invisibilité Fantôme ───────────────────────
+  # ── Armure Fantôme ───────────────────────────────────────
   ghost:
     enabled: true
     require-full-set: true
@@ -61,10 +65,14 @@ armors:
       - "&c✦ Un seul coup brise l'invisibilité 5 secondes"
       - ""
       - "&8ID: ghost_armor"
+    trim:
+      enabled: false      # Désactivé : le trim rendrait l'armure visible
+      material: quartz
+      pattern: silence
     helmet:
       material: LEATHER_HELMET
       custom-model-data: 2011
-      color: "0x000000"   # Noir — minimise la visibilité
+      color: "0x000000"
     chestplate:
       material: LEATHER_CHESTPLATE
       custom-model-data: 2012
@@ -79,7 +87,6 @@ armors:
       color: "0x000000"
     enchantments:
       PROTECTION_ENVIRONMENTAL: 2
-    # Durée de visibilité forcée après réception d'un coup (secondes)
     reveal-duration-seconds: 5
     messages:
       invisible:  "&f👻 Tu es invisible."
@@ -89,7 +96,7 @@ armors:
   # ── Armure de Sauvetage ──────────────────────────────────
   rescue:
     enabled: true
-    require-full-set: false   # Une seule pièce suffit
+    require-full-set: false
     display-name: "&a&lArmure de Sauvetage"
     lore:
       - "&7Conçue pour les situations désespérées."
@@ -99,6 +106,10 @@ armors:
       - "&7(Cooldown: &e{cooldown}s&7)"
       - ""
       - "&8ID: rescue_armor"
+    trim:
+      enabled: true
+      material: emerald   # minecraft:emerald
+      pattern: eye        # minecraft:eye
     helmet:
       material: IRON_HELMET
       custom-model-data: 2021
@@ -118,17 +129,14 @@ armors:
     enchantments:
       PROTECTION_ENVIRONMENTAL: 3
       DURABILITY: 2
-    # Rayon de téléportation aléatoire (en blocs)
     teleport-radius: 15
-    # HP seuil de déclenchement (en demi-cœurs, 2 = 1 cœur)
     trigger-health: 2.0
-    # Cooldown entre deux téléportations d'urgence (secondes)
     cooldown-seconds: 30
     messages:
       triggered: "&a⚡ Téléportation d'urgence ! Tu as été sauvé."
       cooldown:  "&cCooldown actif encore &e{remaining}s&c."
 
-  # ── Armure Voleuse d'Âmes ───────────────────────────────
+  # ── Armure Voleuse d'Âmes ────────────────────────────────
   soul:
     enabled: true
     require-full-set: true
@@ -140,6 +148,10 @@ armors:
       - "&c✦ Perte totale si pièce retirée ou mort"
       - ""
       - "&8ID: soul_armor"
+    trim:
+      enabled: true
+      material: amethyst  # minecraft:amethyst
+      pattern: ward       # minecraft:ward
     helmet:
       material: NETHERITE_HELMET
       custom-model-data: 2031
@@ -159,13 +171,11 @@ armors:
     enchantments:
       PROTECTION_ENVIRONMENTAL: 4
       DURABILITY: 3
-    # HP bonus par kill (en demi-cœurs, 4 = 2 cœurs)
     hp-per-kill: 4.0
-    # Limite max de cœurs bonus (0 = illimité)
     max-bonus-hp: 0
     messages:
-      kill-bonus:  "&5+2 cœurs ! &8[&5{total}&8 bonus actif(s)]"
-      reset-death: "&5💀 Âmes perdues à la mort."
+      kill-bonus:    "&5+2 cœurs ! &8[&5{total}&8 bonus actif(s)]"
+      reset-death:   "&5💀 Âmes perdues à la mort."
       reset-unequip: "&5💔 Âmes libérées en retirant l'armure."
 
 # ─────────────────────────────────────────────────────────
@@ -174,7 +184,6 @@ armors:
 
 weapons:
 
-  # ── Épée / Masse Céleste ─────────────────────────────────
   celestial-sword:
     enabled: true
     display-name: "&e&l✦ Épée Céleste"
@@ -189,13 +198,12 @@ weapons:
       - "&8ID: celestial_sword"
     material: DIAMOND_SWORD
     custom-model-data: 3001
+    item-model: "celestialSword"
     enchantments:
       DAMAGE_ALL: 5
       DURABILITY: 3
       FIRE_ASPECT: 2
-    # Hauteur de propulsion (blocs/seconde → vitesse verticale)
-    launch-velocity: 2.5    # ~30 blocs de hauteur
-    # Material de la forme "Masse" pendant la chute
+    launch-velocity: 2.5
     mace-material: MACE
     mace-display-name: "&e&l⚒ Masse Céleste"
     mace-lore:
@@ -204,13 +212,13 @@ weapons:
       - "&e✦ Touche un joueur → One-shot + re-propulsion"
       - "&e✦ Rate → Aucun dégât de chute"
     mace-custom-model-data: 3002
+    mace-item-model: "celestialMace"
     messages:
       launch:       "&e⬆ Tu t'élèves vers les cieux !"
       mace-form:    "&e⚒ La masse est prête. Frappe !"
       kill-slam:    "&e💥 Impact céleste ! La cible est anéantie."
       miss-landing: "&e✓ Atterrissage sans dégât."
 
-  # ── Arc Explosif ─────────────────────────────────────────
   explosive-bow:
     enabled: true
     display-name: "&c&l💥 Arc Explosif"
@@ -218,28 +226,22 @@ weapons:
       - "&7L'artillerie du pauvre... mais efficace."
       - ""
       - "&c✦ Touche un joueur → Explosion de zone (AoE)"
-      - "&c✦ Dégâts: &e{damage} &caux entités proches"
       - "&c✦ Rayon: &e{radius} &cblocs"
       - ""
       - "&8ID: explosive_bow"
     material: BOW
     custom-model-data: 3011
+    item-model: "ExplosiveBow"
     enchantments:
       ARROW_DAMAGE: 3
       DURABILITY: 3
-    # Rayon de l'explosion AoE (blocs)
     explosion-radius: 4.0
-    # Dégâts de l'explosion aux entités dans le rayon (en demi-cœurs)
     explosion-damage: 6.0
-    # Créer une vraie explosion Minecraft (true) ou seulement des dégâts+particules (false)
-    # false = pas de destruction de blocs
     real-explosion: false
-    # Particule affichée à l'impact
     explosion-particle: EXPLOSION_LARGE
     messages:
       explosion: "&c💥 Explosion ! &e{hits} &ccibles touchées."
 
-  # ── Arc Téléporteur (Ender Bow) ──────────────────────────
   ender-bow:
     enabled: true
     display-name: "&d&l🌀 Arc Ender"
@@ -247,22 +249,19 @@ weapons:
       - "&7La flèche qui dévore l'espace..."
       - ""
       - "&d✦ Touche un joueur → Téléportation derrière la cible"
-      - "&d✦ Distance de téléportation: &e2 blocs derrière"
       - ""
       - "&8ID: ender_bow"
     material: BOW
     custom-model-data: 3021
+    item-model: "EnderBow"
     enchantments:
       ARROW_DAMAGE: 2
       DURABILITY: 3
-    # Blocs derrière la cible pour la téléportation
     teleport-offset: 2.0
-    # Particules à l'arrivée
     teleport-particle: PORTAL
     messages:
       teleported: "&d🌀 Téléporté derrière &e{target}&d !"
 
-  # ── Épée Mode Berserk ────────────────────────────────────
   berserk-sword:
     enabled: true
     display-name: "&4&l⚡ Épée Berserk"
@@ -277,23 +276,20 @@ weapons:
       - "&8ID: berserk_sword"
     material: NETHERITE_SWORD
     custom-model-data: 3031
+    item-model: "BerserkSword"
     enchantments:
       DAMAGE_ALL: 5
       DURABILITY: 3
       LOOTING: 3
-    # Durée du mode berserk (secondes)
     berserk-duration-seconds: 10
-    # Cooldown entre deux activations (secondes)
     cooldown-seconds: 300
-    # Rayon du buff faction (blocs)
     faction-buff-radius: 10.0
-    # Vitesse d'attaque pendant le berserk (100 = pas de cooldown)
     attack-speed-value: 1024.0
     messages:
-      activated:       "&4⚡ MODE BERSERK ! &e{duration}s &4de fureur !"
-      faction-buffed:  "&4⚡ &e{player} &4active le Berserk ! Tu es aussi en rage !"
-      ended:           "&7Berserk terminé."
-      cooldown:        "&cCooldown actif: &e{remaining}s &crestant(e)s."
+      activated:      "&4⚡ MODE BERSERK ! &e{duration}s &4de fureur !"
+      faction-buffed: "&4⚡ &e{player} &4active le Berserk ! Tu es aussi en rage !"
+      ended:          "&7Berserk terminé."
+      cooldown:       "&cCooldown actif: &e{remaining}s &crestant(e)s."
 
 # ─────────────────────────────────────────────────────────
 #  PARAMÈTRES GÉNÉRAUX
@@ -301,9 +297,6 @@ weapons:
 
 general:
   prefix: "&8[&6Items&8] &7"
-  # Empêche les items custom d'être déposés dans des coffres/conteneurs
-  block-container-storage: false
-  # Affiche les particules lors des effets actifs
   show-particles: true
 
 messages:
