@@ -17,6 +17,7 @@ public class ShopAdmin extends JavaPlugin implements Module {
     public void onEnable() {
         saveDefaultConfig();
         saveResource("Shop.yml", false);
+        saveResource("Gui.yml", false);
         shopManager = new ShopManager(this);
         MainAPI.get().getModuleManager().register(this);
     }
