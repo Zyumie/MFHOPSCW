@@ -65,7 +65,11 @@ public class HdvGui {
         holder.setMyListings(myListings);
         holder.setPage(page);
 
-        Inventory inv = Bukkit.createInventory(holder, 54, mm("&5&l✦ Hôtel des Ventes"));
+        // Lecture dynamique du titre depuis Gui.yml
+        ConfigurationSection mainSec = config.getConfigurationSection("main-gui");
+        String rawTitle = mainSec != null ? mainSec.getString("title", "&5&l✦ Hôtel des Ventes") : "&5&l✦ Hôtel des Ventes";
+
+        Inventory inv = Bukkit.createInventory(holder, 54, mm(rawTitle));
 
         // Remplissage dynamique géré par le YAML
         applyFill(inv, "main-gui");
@@ -144,7 +148,11 @@ public class HdvGui {
         holder.setMyListings(parent.isMyListings());
         holder.setPage(parent.getPage());
 
-        Inventory inv = Bukkit.createInventory(holder, 27, mm("&5&lConfirmer l'achat"));
+        // Lecture dynamique du titre depuis Gui.yml
+        ConfigurationSection confirmSec = config.getConfigurationSection("confirm-gui");
+        String rawTitle = confirmSec != null ? confirmSec.getString("title", "&5&lConfirmer l'achat") : "&5&lConfirmer l'achat";
+
+        Inventory inv = Bukkit.createInventory(holder, 27, mm(rawTitle));
 
         // Remplissage dynamique géré par le YAML
         applyFill(inv, "confirm-gui");
@@ -174,7 +182,11 @@ public class HdvGui {
         holder.setPendingPrice(price);
         holder.setPendingDuration(duration);
 
-        Inventory inv = Bukkit.createInventory(holder, 27, mm("&5&lMise en vente"));
+        // Lecture dynamique du titre depuis Gui.yml
+        ConfigurationSection createSec = config.getConfigurationSection("create-gui");
+        String rawTitle = createSec != null ? createSec.getString("title", "&5&lMise en vente") : "&5&lMise en vente";
+
+        Inventory inv = Bukkit.createInventory(holder, 27, mm(rawTitle));
 
         // Remplissage dynamique géré par le YAML
         applyFill(inv, "create-gui");
