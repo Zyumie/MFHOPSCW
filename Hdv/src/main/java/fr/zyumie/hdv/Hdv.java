@@ -6,16 +6,25 @@ import fr.zyumie.hdv.gui.HdvHolder;
 import fr.zyumie.hdv.listener.HdvGuiListener;
 import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.module.Module;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 public class Hdv extends JavaPlugin implements Module {
 
     private HdvManager hdvManager;
     private HdvGui hdvGui;
+    private FileConfiguration guiConfig;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        saveResource("Gui.yml", false);
+
+        this.guiConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "Gui.yml"));
+
         hdvManager = new HdvManager(this);
         MainAPI.get().getModuleManager().register(this);
     }
@@ -30,7 +39,8 @@ public class Hdv extends JavaPlugin implements Module {
 
     @Override
     public void onModuleEnable() {
-        hdvGui = new HdvGui(this, hdvManager);
+        // CORRECTION : Ajout de guiConfig en troisième argument
+        hdvGui = new HdvGui(this, hdvManager, guiConfig);
         hdvManager.init();
 
         getServer().getPluginManager().registerEvents(
@@ -50,7 +60,12 @@ public class Hdv extends JavaPlugin implements Module {
 
     public void reload() {
         reloadConfig();
-        hdvGui = new HdvGui(this, hdvManager);
+        // Recharger aussi le fichier Gui.yml en cas de reload
+        this.guiConfig = YamlConfiguration.loadConfiguration(new File(getDataFolder(), "Gui.yml"));
+
+        // CORRECTION : Ajout de guiConfig ici aussi
+        hdvGui = new HdvGui(this, hdvManager, guiConfig);
+
         getServer().getOnlinePlayers().forEach(p -> {
             if (p.getOpenInventory().getTopInventory().getHolder() instanceof HdvHolder)
                 p.closeInventory();

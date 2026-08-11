@@ -3,14 +3,13 @@
 # =========================================
 # custom-model-data: référence aux textures de ton resource pack.
 # Mettre 0 pour désactiver et utiliser l'item vanilla.
-# Exemple: 1001 = texture "hdv_fill", 1002 = texture "hdv_button_prev", etc.
 
 main-gui:
   title: "&5&l✦ Hôtel des Ventes"
   rows: 6
 
   fill:
-    enabled: true
+    enabled: true # Mettre 'false' pour enlever le remplissage
     material: PURPLE_STAINED_GLASS_PANE
     name: " "
     custom-model-data: 0
@@ -87,7 +86,6 @@ main-gui:
 
   # Apparence d'une annonce dans le GUI
   listing-item:
-    # Lore ajouté dynamiquement sous le lore original de l'item
     lore-append:
       - ""
       - "&7Vendeur: &e{seller}"
@@ -102,7 +100,7 @@ confirm-gui:
   title: "&5&lConfirmer l'achat"
   rows: 3
   fill:
-    enabled: true
+    enabled: true # Mettre 'false' pour enlever le remplissage
     material: BLACK_STAINED_GLASS_PANE
     name: " "
     custom-model-data: 0
@@ -131,7 +129,7 @@ create-gui:
   title: "&5&lMise en vente"
   rows: 3
   fill:
-    enabled: true
+    enabled: true # Mettre 'false' pour enlever le remplissage
     material: BLACK_STAINED_GLASS_PANE
     name: " "
     custom-model-data: 0
