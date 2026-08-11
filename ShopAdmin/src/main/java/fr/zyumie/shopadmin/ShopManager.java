@@ -22,10 +22,15 @@ import java.util.List;
 import java.util.Map;
 
 public class ShopManager {
-    public enum TransactionResult { SUCCESS, NO_ECONOMY, INSUFFICIENT_FUNDS, INSUFFICIENT_STOCK, INVENTORY_FULL, NOT_ENOUGH_ITEMS, DISABLED }
+    public enum TransactionResult {
+        SUCCESS, NO_ECONOMY, INSUFFICIENT_FUNDS, INSUFFICIENT_STOCK,
+        INVENTORY_FULL, NOT_ENOUGH_ITEMS, DISABLED, DUPLICATE
+    }
+
     private final ShopAdmin plugin;
     private final Map<String, ShopCategory> categories = new LinkedHashMap<>();
     private final Map<String, String> customItemIds = new LinkedHashMap<>();
+    private final Map<String, Long> recentPurchases = new LinkedHashMap<>();
     private Economy economy;
 
     public ShopManager(ShopAdmin plugin) {
@@ -41,7 +46,7 @@ public class ShopManager {
         RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp != null) {
             economy = rsp.getProvider();
-            plugin.getLogger().info("Vault Economy détectée: " + economy.getName());
+            plugin.getLogger().info("Vault Economy détectée : " + economy.getName());
         } else {
             plugin.getLogger().severe("Vault Economy introuvable - les transactions sont désactivées.");
         }
@@ -94,52 +99,141 @@ public class ShopManager {
                         category.addItem(new ShopItem(itemId, catId, mat, name, lore,
                                 buyPrice, sellPrice, stock, slot, cmd));
                     } catch (Exception e) {
-                        plugin.getLogger().warning("Erreur chargement item " + itemId + ": " + e.getMessage());
+                        plugin.getLogger().warning("Erreur chargement item " + itemId + " : " + e.getMessage());
                     }
                 }
             }
             categories.put(catId, category);
         }
+
         plugin.getLogger().info(categories.size() + " catégories chargées.");
         if (!customItemIds.isEmpty()) {
             plugin.getLogger().info(customItemIds.size() + " entrées CustomItems liées au ShopAdmin.");
         }
     }
 
-    public TransactionResult buy(Player player, ShopItem item, int amount) {
+    public boolean isCustomItem(ShopItem item) {
+        return customItemIds.containsKey(key(item.getCategoryId(), item.getId()));
+    }
+
+    public String getCustomItemId(ShopItem item) {
+        return customItemIds.get(key(item.getCategoryId(), item.getId()));
+    }
+
+    /**
+     * Retourne le VRAI item CustomItems à afficher dans le shop.
+     * Pour un set d'armure, on sélectionne réellement son plastron parmi les pièces.
+     * Le clone conserve PDC, trims, enchantements, CustomModelData, etc.
+     */
+    public ItemStack getDisplayItem(ShopItem item) {
+        String customId = getCustomItemId(item);
+        if (customId != null) {
+            ItemStack[] resolved = resolveCustomItems(customId);
+            if (resolved != null && resolved.length > 0) {
+                ItemStack chosen = null;
+
+                // Si c'est une armure, on cherche le plastron
+                if (customId.endsWith("_armor")) {
+                    for (ItemStack stack : resolved) {
+                        if (stack != null && stack.getType().name().endsWith("_CHESTPLATE")) {
+                            chosen = stack;
+                            break;
+                        }
+                    }
+                }
+
+                // Sinon, on prend le premier item valide
+                if (chosen == null) {
+                    for (ItemStack stack : resolved) {
+                        if (stack != null) {
+                            chosen = stack;
+                            break;
+                        }
+                    }
+                }
+
+                if (chosen != null) {
+                    ItemStack copy = chosen.clone();
+                    copy.setAmount(1);
+                    return copy;
+                }
+            }
+        }
+
+        // Fallback si ce n'est pas un custom item ou en cas d'erreur
+        ItemStack fallback = new ItemStack(item.getMaterial(), 1);
+        ItemMeta meta = fallback.getItemMeta();
+        if (meta != null) {
+            meta.displayName(color(item.getName()));
+            if (item.getCustomModelData() > 0) meta.setCustomModelData(item.getCustomModelData());
+            fallback.setItemMeta(meta);
+        }
+        return fallback;
+    }
+
+    public TransactionResult buy(Player player, ShopItem item, int requestedAmount) {
         if (economy == null) return TransactionResult.NO_ECONOMY;
         if (!item.canBuy()) return TransactionResult.DISABLED;
+
+        String customId = getCustomItemId(item);
+
+        // Les CustomItems s'achètent TOUJOURS par 1 :
+        // 1 clic = 1 arme OU 1 set complet, jamais x8/x16/x64.
+        int amount = customId != null ? 1 : Math.max(1, requestedAmount);
+
         if (!item.hasStock(amount)) return TransactionResult.INSUFFICIENT_STOCK;
+
+        // Anti double-clic (Spam/Duplication) : aucun achat identique pendant 650 ms.
+        if (customId != null) {
+            String lockKey = player.getUniqueId() + ":" + key(item.getCategoryId(), item.getId());
+            long now = System.currentTimeMillis();
+            Long last = recentPurchases.get(lockKey);
+            if (last != null && now - last < 650L) {
+                return TransactionResult.DUPLICATE;
+            }
+            recentPurchases.put(lockKey, now);
+        }
 
         double total = item.getBuyPrice() * amount;
         if (!economy.has(player, total)) return TransactionResult.INSUFFICIENT_FUNDS;
 
-        String customId = customItemIds.get(key(item.getCategoryId(), item.getId()));
+        // Logique de don d'objets pour les CustomItems
         if (customId != null) {
-            List<ItemStack> toGive = resolveCustomPurchase(customId, amount);
-            if (toGive == null || toGive.isEmpty()) {
+            ItemStack[] items = resolveCustomItems(customId);
+            if (items == null || items.length == 0) {
                 plugin.getLogger().warning("Impossible de générer l'item CustomItems '" + customId + "'. Achat annulé.");
                 return TransactionResult.DISABLED;
             }
+
+            List<ItemStack> toGive = new ArrayList<>();
+            for (ItemStack stack : items) {
+                if (stack != null) {
+                    ItemStack copy = stack.clone();
+                    copy.setAmount(1);
+                    toGive.add(copy);
+                }
+            }
+
             if (countEmptyStorageSlots(player) < toGive.size()) {
                 return TransactionResult.INVENTORY_FULL;
             }
 
             economy.withdrawPlayer(player, total);
-            item.removeStock(amount);
+            item.removeStock(1);
             player.getInventory().addItem(toGive.toArray(new ItemStack[0]));
             return TransactionResult.SUCCESS;
         }
 
+        // Logique de don d'objets classique (Vanilla)
         if (player.getInventory().firstEmpty() == -1) return TransactionResult.INVENTORY_FULL;
         economy.withdrawPlayer(player, total);
         item.removeStock(amount);
-        ItemStack stack = buildItem(item, amount);
+        ItemStack stack = buildVanillaItem(item, amount);
         player.getInventory().addItem(stack);
         return TransactionResult.SUCCESS;
     }
 
-    private List<ItemStack> resolveCustomPurchase(String customId, int amount) {
+    private ItemStack[] resolveCustomItems(String customId) {
         try {
             Plugin customItemsPlugin = plugin.getServer().getPluginManager().getPlugin("CustomItems");
             if (customItemsPlugin == null) {
@@ -152,18 +246,12 @@ public class ShopManager {
             if (registry == null) return null;
 
             Method resolve = registry.getClass().getMethod("resolveGiveItems", String.class);
-            List<ItemStack> result = new ArrayList<>();
-
-            for (int n = 0; n < amount; n++) {
-                Object raw = resolve.invoke(registry, customId);
-                if (!(raw instanceof ItemStack[] items) || items.length == 0) return null;
-                for (ItemStack stack : items) {
-                    if (stack != null) result.add(stack);
-                }
-            }
-            return result;
+            Object raw = resolve.invoke(registry, customId);
+            if (raw instanceof ItemStack[] items) return items;
+            return null;
         } catch (Exception e) {
-            plugin.getLogger().warning("Erreur liaison CustomItems pour '" + customId + "': " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            plugin.getLogger().warning("Erreur liaison CustomItems pour '" + customId + "' : "
+                    + e.getClass().getSimpleName() + " - " + e.getMessage());
             return null;
         }
     }
@@ -185,8 +273,10 @@ public class ShopManager {
     public TransactionResult sell(Player player, ShopItem item, int amount) {
         if (economy == null) return TransactionResult.NO_ECONOMY;
         if (!item.canSell()) return TransactionResult.DISABLED;
+
         int has = countInInventory(player, item.getMaterial());
         if (has < amount) return TransactionResult.NOT_ENOUGH_ITEMS;
+
         removeFromInventory(player, item.getMaterial(), amount);
         item.addStock(amount);
         economy.depositPlayer(player, item.getSellPrice() * amount);
@@ -197,12 +287,14 @@ public class ShopManager {
     public Economy getEconomy() { return economy; }
     public List<ShopCategory> getCategoryList() { return new ArrayList<>(categories.values()); }
 
-    private ItemStack buildItem(ShopItem item, int amount) {
+    private ItemStack buildVanillaItem(ShopItem item, int amount) {
         ItemStack stack = new ItemStack(item.getMaterial(), amount);
         ItemMeta meta = stack.getItemMeta();
-        meta.displayName(color(item.getName()));
-        if (item.getCustomModelData() > 0) meta.setCustomModelData(item.getCustomModelData());
-        stack.setItemMeta(meta);
+        if (meta != null) {
+            meta.displayName(color(item.getName()));
+            if (item.getCustomModelData() > 0) meta.setCustomModelData(item.getCustomModelData());
+            stack.setItemMeta(meta);
+        }
         return stack;
     }
 
@@ -236,14 +328,23 @@ public class ShopManager {
     }
 
     private Component color(String s) {
+        if (s == null) s = "";
         return MiniMessage.miniMessage().deserialize(s
-                .replace("&8", "<dark_gray>")
+                .replace("&0", "<black>")
+                .replace("&1", "<dark_blue>")
+                .replace("&2", "<dark_green>")
+                .replace("&3", "<dark_aqua>")
+                .replace("&4", "<dark_red>")
+                .replace("&5", "<dark_purple>")
                 .replace("&6", "<gold>")
-                .replace("&e", "<yellow>")
-                .replace("&a", "<green>")
-                .replace("&c", "<red>")
-                .replace("&b", "<aqua>")
                 .replace("&7", "<gray>")
+                .replace("&8", "<dark_gray>")
+                .replace("&9", "<blue>")
+                .replace("&a", "<green>")
+                .replace("&b", "<aqua>")
+                .replace("&c", "<red>")
+                .replace("&d", "<light_purple>")
+                .replace("&e", "<yellow>")
                 .replace("&f", "<white>")
                 .replace("&r", "<reset>")
                 .replace("&l", "<bold>")

@@ -7,6 +7,7 @@ import fr.zyumie.shopadmin.gui.ShopHolder;
 import fr.zyumie.shopadmin.model.ShopCategory;
 import fr.zyumie.shopadmin.model.ShopItem;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,14 +29,13 @@ public class GuiListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent e) {
-        // Identification fiable via InventoryHolder — plus de comparaison de titre
         if (!(e.getInventory().getHolder() instanceof ShopHolder holder)) return;
         if (!(e.getWhoClicked() instanceof Player player)) return;
 
-        e.setCancelled(true); // bloque TOUS les clics dans nos GUIs
+        e.setCancelled(true);
 
         if (e.getClickedInventory() == null) return;
-        if (!e.getClickedInventory().equals(e.getInventory())) return; // ignore clics dans l'inv joueur
+        if (!e.getClickedInventory().equals(e.getInventory())) return;
 
         int slot = e.getRawSlot();
 
@@ -46,13 +46,11 @@ public class GuiListener implements Listener {
         }
     }
 
-    // ── GUI principal ─────────────────────────────────────────────────────
-
     private void handleMain(Player player, int slot, ShopHolder holder,
                             boolean rightClick, boolean shiftClick) {
         List<ShopCategory> cats = manager.getCategoryList();
+        FileConfiguration guiConfig = plugin.getGuiConfig();
 
-        // Rangée 0 : catégories (slots 0-8)
         if (slot < 9 && slot < cats.size()) {
             holder.setCategoryId(cats.get(slot).getId());
             holder.setPage(0);
@@ -60,18 +58,20 @@ public class GuiListener implements Listener {
             return;
         }
 
-        // Navigation rangée 5
-        if (slot == 47) { player.closeInventory(); return; }
-        if (slot == 45 && holder.getPage() > 0) {
+        int prevSlot = guiConfig.getInt("main-gui.navigation.prev-page.slot", 45);
+        int nextSlot = guiConfig.getInt("main-gui.navigation.next-page.slot", 53);
+        int closeSlot = guiConfig.getInt("main-gui.navigation.close.slot", 49);
+
+        if (slot == closeSlot) { player.closeInventory(); return; }
+        if (slot == prevSlot && holder.getPage() > 0) {
             holder.setPage(holder.getPage() - 1);
             gui.open(player, holder.getCategoryId(), holder.getPage()); return;
         }
-        if (slot == 53) {
+        if (slot == nextSlot) {
             holder.setPage(holder.getPage() + 1);
             gui.open(player, holder.getCategoryId(), holder.getPage()); return;
         }
 
-        // Zone items
         int[] itemSlots = ShopGui.getItemSlots();
         for (int i = 0; i < itemSlots.length; i++) {
             if (itemSlots[i] != slot) continue;
@@ -86,21 +86,18 @@ public class GuiListener implements Listener {
             boolean buying = !rightClick;
 
             if (shiftClick) {
-                // Sélecteur de quantité
                 gui.openQuantitySelector(player, item, buying, holder);
             } else {
-                // Achat/vente x1 direct
                 process(player, item, buying, 1, holder);
             }
             return;
         }
     }
 
-    // ── Sélecteur de quantité ─────────────────────────────────────────────
-
     private void handleQty(Player player, int slot, ShopHolder holder) {
-        if (slot == 22) {
-            // Annuler → retour au shop
+        int cancelSlot = plugin.getGuiConfig().getInt("quantity-selector.cancel.slot", 22);
+
+        if (slot == cancelSlot) {
             gui.open(player, holder.getCategoryId(), holder.getPage()); return;
         }
 
@@ -117,16 +114,12 @@ public class GuiListener implements Listener {
         }
     }
 
-    // ── Transaction ───────────────────────────────────────────────────────
-
-    private void process(Player player, ShopItem item, boolean buying,
-                         int amount, ShopHolder holder) {
+    private void process(Player player, ShopItem item, boolean buying, int amount, ShopHolder holder) {
         ShopManager.TransactionResult result = buying
                 ? manager.buy(player, item, amount)
                 : manager.sell(player, item, amount);
 
-        String currency = manager.getEconomy() != null
-                ? manager.getEconomy().currencyNamePlural() : "";
+        String currency = manager.getEconomy() != null ? manager.getEconomy().currencyNamePlural() : "";
         double price = (buying ? item.getBuyPrice() : item.getSellPrice()) * amount;
 
         String msgKey;
@@ -142,19 +135,11 @@ public class GuiListener implements Listener {
                 plugin.getServer().getScheduler().runTaskLater(plugin,
                         () -> gui.open(player, holder.getCategoryId(), holder.getPage()), 1L);
             }
-            case INSUFFICIENT_FUNDS ->
-                send(player, plugin.getConfig().getString("messages.insufficient-funds", "")
-                        .replace("{price}", String.format("%.2f", price) + " " + currency));
-            case INSUFFICIENT_STOCK ->
-                send(player, plugin.getConfig().getString("messages.insufficient-stock", "")
-                        .replace("{stock}", item.isUnlimitedStock() ? "∞" : String.valueOf(item.getStock())));
-            case INVENTORY_FULL ->
-                send(player, plugin.getConfig().getString("messages.inventory-full", ""));
-            case NOT_ENOUGH_ITEMS ->
-                send(player, plugin.getConfig().getString("messages.not-enough-items", "")
-                        .replace("{item}", item.getName()));
-            case DISABLED ->
-                send(player, plugin.getConfig().getString("messages.sell-disabled", ""));
+            case INSUFFICIENT_FUNDS -> send(player, plugin.getConfig().getString("messages.insufficient-funds", "").replace("{price}", String.format("%.2f", price) + " " + currency));
+            case INSUFFICIENT_STOCK -> send(player, plugin.getConfig().getString("messages.insufficient-stock", "").replace("{stock}", item.isUnlimitedStock() ? "∞" : String.valueOf(item.getStock())));
+            case INVENTORY_FULL -> send(player, plugin.getConfig().getString("messages.inventory-full", ""));
+            case NOT_ENOUGH_ITEMS -> send(player, plugin.getConfig().getString("messages.not-enough-items", "").replace("{item}", item.getName()));
+            case DISABLED -> send(player, plugin.getConfig().getString("messages.sell-disabled", ""));
             default -> {}
         }
     }

@@ -3,7 +3,8 @@ version: '${version}'
 main: fr.zyumie.shopadmin.ShopAdmin
 api-version: '1.21'
 author: Zyumie
-depend: [Main, Vault, Money]
+depend: [Main, Vault]
+softdepend: [Money, CustomItems]
 
 commands:
   shop:

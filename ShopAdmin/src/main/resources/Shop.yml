@@ -7,6 +7,22 @@
 # stock: stock disponible (-1 = illimité)
 # slot: position dans le GUI de catégorie (0-based dans la zone items, définie dans Gui.yml)
 # custom-model-data: optionnel, pour les resource packs
+#
+# IMPORTANT :
+# ShopAdmin doit gérer "custom-item-id".
+# Pour les armures, l'icône affichée est un plastron,
+# mais l'achat doit donner le vrai set complet via CustomItems.
+#
+# IDs CustomItems :
+# storm_armor
+# ghost_armor
+# rescue_armor
+# soul_armor
+# celestial_sword
+# explosive_bow
+# ender_bow
+# berserk_sword
+#
 
 categories:
 
@@ -156,3 +172,155 @@ categories:
         sell-price: 80.0
         stock: -1
         slot: 1
+
+  armures_custom:
+    name: "Armures Custom"
+    icon: NETHERITE_CHESTPLATE
+    icon-name: "Armures Custom"
+    icon-lore:
+      - "Les armures spéciales de New SMP"
+      - "Chaque achat donne le set complet"
+
+    items:
+
+      storm_set:
+        material: NETHERITE_CHESTPLATE
+        name: "Armure Anti-Tempête"
+        lore:
+          - "Set complet Anti-Tempête"
+          - "Immunité aux effets de la tempête"
+          - ""
+          - "Prix : {buy_price}"
+          - ""
+          - "Clique gauche pour acheter"
+        custom-item-id: "storm_armor"
+        custom-model-data: 2002
+        buy-price: 39000.0
+        sell-price: -1
+        stock: -1
+        slot: 0
+
+      ghost_set:
+        material: NETHERITE_CHESTPLATE
+        name: "Armure Fantôme"
+        lore:
+          - "Set complet Fantôme"
+          - "Invisibilité spéciale"
+          - ""
+          - "Prix : {buy_price}"
+          - ""
+          - "Clique gauche pour acheter"
+        custom-item-id: "ghost_armor"
+        custom-model-data: 2012
+        buy-price: 41000.0
+        sell-price: -1
+        stock: -1
+        slot: 1
+
+      rescue_set:
+        material: NETHERITE_CHESTPLATE
+        name: "Armure de Sauvetage"
+        lore:
+          - "Set complet de Sauvetage"
+          - "Téléportation d'urgence"
+          - ""
+          - "Prix : {buy_price}"
+          - ""
+          - "Clique gauche pour acheter"
+        custom-item-id: "rescue_armor"
+        custom-model-data: 2022
+        buy-price: 37000.0
+        sell-price: -1
+        stock: -1
+        slot: 2
+
+      soul_set:
+        material: NETHERITE_CHESTPLATE
+        name: "Armure Voleuse d'Âmes"
+        lore:
+          - "Set complet Voleuse d'Âmes"
+          - "Gagne des coeurs avec les éliminations"
+          - ""
+          - "Prix : {buy_price}"
+          - ""
+          - "Clique gauche pour acheter"
+        custom-item-id: "soul_armor"
+        custom-model-data: 2032
+        buy-price: 43000.0
+        sell-price: -1
+        stock: -1
+        slot: 3
+
+  armes_custom:
+    name: "Armes Custom"
+    icon: NETHERITE_SWORD
+    icon-name: "Armes Custom"
+    icon-lore:
+      - "Les armes spéciales de New SMP"
+
+    items:
+
+      celestial_sword:
+        material: NETHERITE_SWORD
+        name: "Épée Céleste"
+        lore:
+          - "Arme custom New SMP"
+          - ""
+          - "Prix : {buy_price}"
+          - ""
+          - "Clique gauche pour acheter"
+        custom-item-id: "celestial_sword"
+        custom-model-data: 3001
+        buy-price: 28000.0
+        sell-price: -1
+        stock: -1
+        slot: 0
+
+      explosive_bow:
+        material: BOW
+        name: "Arc Explosif"
+        lore:
+          - "Arme custom New SMP"
+          - ""
+          - "Prix : {buy_price}"
+          - ""
+          - "Clique gauche pour acheter"
+        custom-item-id: "explosive_bow"
+        custom-model-data: 3011
+        buy-price: 22000.0
+        sell-price: -1
+        stock: -1
+        slot: 1
+
+      ender_bow:
+        material: BOW
+        name: "Arc Ender"
+        lore:
+          - "Arme custom New SMP"
+          - ""
+          - "Prix : {buy_price}"
+          - ""
+          - "Clique gauche pour acheter"
+        custom-item-id: "ender_bow"
+        custom-model-data: 3021
+        buy-price: 24000.0
+        sell-price: -1
+        stock: -1
+        slot: 2
+
+      berserk_sword:
+        material: NETHERITE_SWORD
+        name: "Épée Berserk"
+        lore:
+          - "Arme custom New SMP"
+          - ""
+          - "Prix : {buy_price}"
+          - ""
+          - "Clique gauche pour acheter"
+        custom-item-id: "berserk_sword"
+        custom-model-data: 3031
+        buy-price: 30000.0
+        sell-price: -1
+        stock: -1
+        slot: 3
+

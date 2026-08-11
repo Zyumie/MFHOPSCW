@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -22,26 +23,17 @@ public class ShopGui {
     private final ShopAdmin plugin;
     private final ShopManager manager;
 
-    // Layout fixe (6 rangées = 54 slots)
-    // Rangée 0  (0-8)  : catégories + fill
-    // Rangées 1-4 (9-44): bordure noire aux colonnes 0 et 8, items au centre (7 colonnes)
-    // Rangée 5 (45-53) : navigation
     private static final int[] ITEM_SLOTS = {
-        10,11,12,13,14,15,16,
-        19,20,21,22,23,24,25,
-        28,29,30,31,32,33,34,
-        37,38,39,40,41,42,43
-    }; // 28 items par page
-
-    private static final Material FILL_MAT   = Material.GRAY_STAINED_GLASS_PANE;
-    private static final Material BORDER_MAT = Material.BLACK_STAINED_GLASS_PANE;
+            10,11,12,13,14,15,16,
+            19,20,21,22,23,24,25,
+            28,29,30,31,32,33,34,
+            37,38,39,40,41,42,43
+    };
 
     public ShopGui(ShopAdmin plugin, ShopManager manager) {
         this.plugin  = plugin;
         this.manager = manager;
     }
-
-    // ── Ouverture principale ──────────────────────────────────────────────
 
     public void open(Player player) {
         List<ShopCategory> cats = manager.getCategoryList();
@@ -49,33 +41,44 @@ public class ShopGui {
     }
 
     public void open(Player player, String categoryId, int page) {
-        ShopHolder holder = new ShopHolder(ShopHolder.Type.MAIN, categoryId, page);
-        Inventory inv = Bukkit.createInventory(holder, 54, mm("&6&lBoutique Admin"));
+        FileConfiguration guiConfig = plugin.getGuiConfig();
 
-        fillStructure(inv);
+        // Titre et taille depuis le Gui.yml
+        String title = guiConfig.getString("main-gui.title", "&6&lBoutique Admin");
+        int rows = guiConfig.getInt("main-gui.rows", 6);
+
+        ShopHolder holder = new ShopHolder(ShopHolder.Type.MAIN, categoryId, page);
+        Inventory inv = Bukkit.createInventory(holder, rows * 9, mm(title));
+
+        fillStructure(inv, guiConfig);
         buildCategoryBar(inv, categoryId);
         buildItems(inv, categoryId, page);
-        buildNavigation(inv, categoryId, page);
+        buildNavigation(inv, categoryId, page, guiConfig);
 
         player.openInventory(inv);
     }
 
-    // ── Structure ─────────────────────────────────────────────────────────
-
-    private void fillStructure(Inventory inv) {
-        ItemStack fill   = makeItem(FILL_MAT,   " ", null);
-        ItemStack border = makeItem(BORDER_MAT, " ", null);
-
-        // Fond général
-        for (int i = 0; i < 54; i++) inv.setItem(i, fill);
-
-        // Bordure noire (colonnes 0 et 8 des rangées 1-4)
-        for (int row = 1; row <= 4; row++) {
-            inv.setItem(row * 9,     border);
-            inv.setItem(row * 9 + 8, border);
+    private void fillStructure(Inventory inv, FileConfiguration guiConfig) {
+        boolean fillEnabled = guiConfig.getBoolean("main-gui.fill.enabled", true);
+        if (fillEnabled) {
+            Material fillMat = parseMat(guiConfig.getString("main-gui.fill.material", "GRAY_STAINED_GLASS_PANE"));
+            String fillName = guiConfig.getString("main-gui.fill.name", " ");
+            ItemStack fill = makeItem(fillMat, fillName, null);
+            for (int i = 0; i < inv.getSize(); i++) inv.setItem(i, fill);
         }
-        // Rangée 5 : barre de navigation full bordure
-        for (int i = 45; i <= 53; i++) inv.setItem(i, border);
+
+        ItemStack border = makeItem(Material.BLACK_STAINED_GLASS_PANE, " ", null);
+        for (int row = 1; row <= 4; row++) {
+            if (row * 9 + 8 < inv.getSize()) {
+                inv.setItem(row * 9, border);
+                inv.setItem(row * 9 + 8, border);
+            }
+        }
+        for (int i = 45; i <= 53; i++) {
+            if (i < inv.getSize() && (inv.getItem(i) == null || inv.getItem(i).getType() == parseMat(guiConfig.getString("main-gui.fill.material", "GRAY_STAINED_GLASS_PANE")))) {
+                inv.setItem(i, border);
+            }
+        }
     }
 
     private void buildCategoryBar(Inventory inv, String activeCatId) {
@@ -101,23 +104,45 @@ public class ShopGui {
         for (int i = 0; i < ITEM_SLOTS.length; i++) {
             int idx = start + i;
             if (idx >= items.size()) break;
-            inv.setItem(ITEM_SLOTS[i], buildShopItemStack(items.get(idx)));
+            if (ITEM_SLOTS[i] < inv.getSize()) {
+                inv.setItem(ITEM_SLOTS[i], buildShopItemStack(items.get(idx)));
+            }
         }
     }
 
-    private void buildNavigation(Inventory inv, String categoryId, int page) {
+    private void buildNavigation(Inventory inv, String categoryId, int page, FileConfiguration guiConfig) {
         ShopCategory cat  = categoryId != null ? manager.getCategories().get(categoryId) : null;
         int total = cat != null ? cat.getItemsSorted().size() : 0;
         int totalPages = Math.max(1, (int) Math.ceil(total / (double) ITEM_SLOTS.length));
 
-        if (page > 0)
-            inv.setItem(45, makeItem(Material.ARROW, "&7◀ Page précédente", null));
-        if (page < totalPages - 1)
-            inv.setItem(53, makeItem(Material.ARROW, "&7Page suivante ▶", null));
+        if (page > 0) {
+            int slot = guiConfig.getInt("main-gui.navigation.prev-page.slot", 45);
+            Material mat = parseMat(guiConfig.getString("main-gui.navigation.prev-page.material", "ARROW"));
+            String name = guiConfig.getString("main-gui.navigation.prev-page.name", "&7◀ Page précédente");
+            List<String> lore = guiConfig.getStringList("main-gui.navigation.prev-page.lore");
+            if(slot < inv.getSize()) inv.setItem(slot, makeItem(mat, name, lore));
+        }
 
-        inv.setItem(49, makeItem(Material.MAP,
-                "&7Page &e" + (page + 1) + "&7/&e" + totalPages, null));
-        inv.setItem(47, makeItem(Material.BARRIER, "&cFermer", null));
+        if (page < totalPages - 1) {
+            int slot = guiConfig.getInt("main-gui.navigation.next-page.slot", 53);
+            Material mat = parseMat(guiConfig.getString("main-gui.navigation.next-page.material", "ARROW"));
+            String name = guiConfig.getString("main-gui.navigation.next-page.name", "&7Page suivante ▶");
+            List<String> lore = guiConfig.getStringList("main-gui.navigation.next-page.lore");
+            if(slot < inv.getSize()) inv.setItem(slot, makeItem(mat, name, lore));
+        }
+
+        int indSlot = guiConfig.getInt("main-gui.page-indicator.slot", 48);
+        Material indMat = parseMat(guiConfig.getString("main-gui.page-indicator.material", "BOOK"));
+        String indName = guiConfig.getString("main-gui.page-indicator.name", "&7Page &e{page}&7/&e{max}")
+                .replace("{page}", String.valueOf(page + 1)).replace("{max}", String.valueOf(totalPages));
+        List<String> indLore = guiConfig.getStringList("main-gui.page-indicator.lore");
+        if(indSlot < inv.getSize()) inv.setItem(indSlot, makeItem(indMat, indName, indLore));
+
+        int closeSlot = guiConfig.getInt("main-gui.navigation.close.slot", 49);
+        Material closeMat = parseMat(guiConfig.getString("main-gui.navigation.close.material", "BARRIER"));
+        String closeName = guiConfig.getString("main-gui.navigation.close.name", "&cFermer");
+        List<String> closeLore = guiConfig.getStringList("main-gui.navigation.close.lore");
+        if(closeSlot < inv.getSize()) inv.setItem(closeSlot, makeItem(closeMat, closeName, closeLore));
     }
 
     private ItemStack buildShopItemStack(ShopItem si) {
@@ -144,66 +169,80 @@ public class ShopGui {
         return stack;
     }
 
-    // ── Sélecteur de quantité ─────────────────────────────────────────────
-
-    public void openQuantitySelector(Player player, ShopItem item, boolean buying,
-                                     ShopHolder parentHolder) {
-        ShopHolder holder = new ShopHolder(ShopHolder.Type.QUANTITY,
-                parentHolder.getCategoryId(), parentHolder.getPage());
+    public void openQuantitySelector(Player player, ShopItem item, boolean buying, ShopHolder parentHolder) {
+        FileConfiguration guiConfig = plugin.getGuiConfig();
+        ShopHolder holder = new ShopHolder(ShopHolder.Type.QUANTITY, parentHolder.getCategoryId(), parentHolder.getPage());
         holder.setPendingItem(item);
         holder.setBuying(buying);
 
-        Inventory inv = Bukkit.createInventory(holder, 27,
-                mm(buying ? "&6&lAcheter — " + item.getName() : "&6&lVendre — " + item.getName()));
+        String title = guiConfig.getString("quantity-selector.title", "&8Sélectionner une quantité");
+        int rows = guiConfig.getInt("quantity-selector.rows", 3);
+        Inventory inv = Bukkit.createInventory(holder, rows * 9, mm(title));
 
-        ItemStack fill = makeItem(Material.BLACK_STAINED_GLASS_PANE, " ", null);
-        for (int i = 0; i < 27; i++) inv.setItem(i, fill);
+        boolean fillEnabled = guiConfig.getBoolean("quantity-selector.fill.enabled", true);
+        if (fillEnabled) {
+            Material fillMat = parseMat(guiConfig.getString("quantity-selector.fill.material", "BLACK_STAINED_GLASS_PANE"));
+            String fillName = guiConfig.getString("quantity-selector.fill.name", " ");
+            ItemStack fill = makeItem(fillMat, fillName, null);
+            for (int i = 0; i < inv.getSize(); i++) inv.setItem(i, fill);
+        }
 
-        List<Integer> amounts = plugin.getConfig().getIntegerList(
-                buying ? "shop.buy-amounts" : "shop.sell-amounts");
+        List<Integer> amounts = plugin.getConfig().getIntegerList(buying ? "shop.buy-amounts" : "shop.sell-amounts");
         if (amounts.isEmpty()) amounts = List.of(1, 8, 16, 32, 64);
 
         double unitPrice = buying ? item.getBuyPrice() : item.getSellPrice();
-        // Centre les boutons sur la rangée du milieu (slots 9-17)
         int[] btnSlots = {10, 11, 12, 13, 14, 15, 16};
+
+        String prefixPath = buying ? "quantity-selector.confirm-buy" : "quantity-selector.confirm-sell";
+        Material btnMat = parseMat(guiConfig.getString(prefixPath + ".material", buying ? "LIME_STAINED_GLASS_PANE" : "ORANGE_STAINED_GLASS_PANE"));
+        String btnNameTpl = guiConfig.getString(prefixPath + ".name", buying ? "&aAcheter x{amount}" : "&6Vendre x{amount}");
+        List<String> btnLoreTpl = guiConfig.getStringList(prefixPath + ".lore");
+
         for (int i = 0; i < Math.min(amounts.size(), btnSlots.length); i++) {
             int amount  = amounts.get(i);
             double total = unitPrice * amount;
-            Material mat = buying ? Material.LIME_STAINED_GLASS_PANE : Material.ORANGE_STAINED_GLASS_PANE;
-            String name  = (buying ? "&ax" : "&6x") + amount;
-            List<String> lore = List.of(
-                    "&7Total: &e" + String.format("%.2f", total),
-                    "", "&aCliquer pour confirmer");
-            inv.setItem(btnSlots[i], makeItem(mat, name, lore));
+            String btnName = btnNameTpl.replace("{amount}", String.valueOf(amount));
+
+            List<String> btnLore = new ArrayList<>();
+            for (String line : btnLoreTpl) {
+                btnLore.add(line.replace("{amount}", String.valueOf(amount)).replace("{total_price}", String.format("%.2f", total)));
+            }
+            if(btnSlots[i] < inv.getSize()) inv.setItem(btnSlots[i], makeItem(btnMat, btnName, btnLore));
         }
-        inv.setItem(22, makeItem(Material.BARRIER, "&cAnnuler", null));
+
+        int cancelSlot = guiConfig.getInt("quantity-selector.cancel.slot", 22);
+        Material cancelMat = parseMat(guiConfig.getString("quantity-selector.cancel.material", "BARRIER"));
+        String cancelName = guiConfig.getString("quantity-selector.cancel.name", "&cAnnuler");
+        if(cancelSlot < inv.getSize()) inv.setItem(cancelSlot, makeItem(cancelMat, cancelName, null));
 
         player.openInventory(inv);
     }
 
-    // ── Utils ─────────────────────────────────────────────────────────────
-
     public static int[] getItemSlots() { return ITEM_SLOTS; }
 
     public ItemStack makeItem(Material mat, String name, List<String> lore) {
-        ItemStack stack = new ItemStack(mat);
+        ItemStack stack = new ItemStack(mat != null ? mat : Material.STONE);
         ItemMeta meta = stack.getItemMeta();
         meta.displayName(mm(name));
         if (lore != null && !lore.isEmpty())
             meta.lore(lore.stream().map(this::mm).toList());
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS,
-                          ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
         stack.setItemMeta(meta);
         return stack;
+    }
+
+    private Material parseMat(String name) {
+        try { return Material.valueOf(name.toUpperCase()); }
+        catch (Exception e) { return Material.STONE; }
     }
 
     private Component mm(String s) {
         return MiniMessage.miniMessage().deserialize(
                 s.replace("&0","<black>").replace("&8","<dark_gray>")
-                 .replace("&6","<gold>").replace("&e","<yellow>")
-                 .replace("&a","<green>").replace("&c","<red>")
-                 .replace("&b","<aqua>").replace("&7","<gray>")
-                 .replace("&f","<white>").replace("&l","<bold>")
-                 .replace("&r","<reset>").replace("&o","<italic>"));
+                        .replace("&6","<gold>").replace("&e","<yellow>")
+                        .replace("&a","<green>").replace("&c","<red>")
+                        .replace("&b","<aqua>").replace("&7","<gray>")
+                        .replace("&f","<white>").replace("&l","<bold>")
+                        .replace("&r","<reset>").replace("&o","<italic>"));
     }
 }
