@@ -43,7 +43,6 @@ public class ShopGui {
     public void open(Player player, String categoryId, int page) {
         FileConfiguration guiConfig = plugin.getGuiConfig();
 
-        // Titre et taille depuis le Gui.yml
         String title = guiConfig.getString("main-gui.title", "&6&lBoutique Admin");
         int rows = guiConfig.getInt("main-gui.rows", 6);
 
@@ -59,24 +58,31 @@ public class ShopGui {
     }
 
     private void fillStructure(Inventory inv, FileConfiguration guiConfig) {
-        boolean fillEnabled = guiConfig.getBoolean("main-gui.fill.enabled", true);
-        if (fillEnabled) {
-            Material fillMat = parseMat(guiConfig.getString("main-gui.fill.material", "GRAY_STAINED_GLASS_PANE"));
-            String fillName = guiConfig.getString("main-gui.fill.name", " ");
-            ItemStack fill = makeItem(fillMat, fillName, null);
-            for (int i = 0; i < inv.getSize(); i++) inv.setItem(i, fill);
-        }
-
-        ItemStack border = makeItem(Material.BLACK_STAINED_GLASS_PANE, " ", null);
-        for (int row = 1; row <= 4; row++) {
-            if (row * 9 + 8 < inv.getSize()) {
-                inv.setItem(row * 9, border);
-                inv.setItem(row * 9 + 8, border);
+        // Remplissage de fond (activable/désactivable dans le YAML)
+        if (guiConfig.getBoolean("main-gui.fill.enabled", false)) {
+            Material fillMat = parseMat(guiConfig.getString("main-gui.fill.material", "AIR"));
+            if (fillMat != Material.AIR) {
+                ItemStack fill = makeItem(fillMat, guiConfig.getString("main-gui.fill.name", " "), null);
+                for (int i = 0; i < inv.getSize(); i++) inv.setItem(i, fill);
             }
         }
-        for (int i = 45; i <= 53; i++) {
-            if (i < inv.getSize() && (inv.getItem(i) == null || inv.getItem(i).getType() == parseMat(guiConfig.getString("main-gui.fill.material", "GRAY_STAINED_GLASS_PANE")))) {
-                inv.setItem(i, border);
+
+        // Bordures (activables/désactivables dans le YAML)
+        if (guiConfig.getBoolean("main-gui.border.enabled", false)) {
+            Material borderMat = parseMat(guiConfig.getString("main-gui.border.material", "AIR"));
+            if (borderMat != Material.AIR) {
+                ItemStack border = makeItem(borderMat, " ", null);
+                for (int row = 1; row <= 4; row++) {
+                    if (row * 9 + 8 < inv.getSize()) {
+                        inv.setItem(row * 9, border);
+                        inv.setItem(row * 9 + 8, border);
+                    }
+                }
+                for (int i = 45; i <= 53; i++) {
+                    if (i < inv.getSize() && (inv.getItem(i) == null || inv.getItem(i).getType() == Material.AIR)) {
+                        inv.setItem(i, border);
+                    }
+                }
             }
         }
     }
@@ -115,34 +121,39 @@ public class ShopGui {
         int total = cat != null ? cat.getItemsSorted().size() : 0;
         int totalPages = Math.max(1, (int) Math.ceil(total / (double) ITEM_SLOTS.length));
 
-        if (page > 0) {
+        if (page > 0 && guiConfig.contains("main-gui.navigation.prev-page")) {
             int slot = guiConfig.getInt("main-gui.navigation.prev-page.slot", 45);
-            Material mat = parseMat(guiConfig.getString("main-gui.navigation.prev-page.material", "ARROW"));
-            String name = guiConfig.getString("main-gui.navigation.prev-page.name", "&7◀ Page précédente");
-            List<String> lore = guiConfig.getStringList("main-gui.navigation.prev-page.lore");
-            if(slot < inv.getSize()) inv.setItem(slot, makeItem(mat, name, lore));
+            Material mat = parseMat(guiConfig.getString("main-gui.navigation.prev-page.material", "AIR"));
+            if (mat != Material.AIR && slot < inv.getSize()) {
+                inv.setItem(slot, makeItem(mat, guiConfig.getString("main-gui.navigation.prev-page.name", ""), guiConfig.getStringList("main-gui.navigation.prev-page.lore")));
+            }
         }
 
-        if (page < totalPages - 1) {
+        if (page < totalPages - 1 && guiConfig.contains("main-gui.navigation.next-page")) {
             int slot = guiConfig.getInt("main-gui.navigation.next-page.slot", 53);
-            Material mat = parseMat(guiConfig.getString("main-gui.navigation.next-page.material", "ARROW"));
-            String name = guiConfig.getString("main-gui.navigation.next-page.name", "&7Page suivante ▶");
-            List<String> lore = guiConfig.getStringList("main-gui.navigation.next-page.lore");
-            if(slot < inv.getSize()) inv.setItem(slot, makeItem(mat, name, lore));
+            Material mat = parseMat(guiConfig.getString("main-gui.navigation.next-page.material", "AIR"));
+            if (mat != Material.AIR && slot < inv.getSize()) {
+                inv.setItem(slot, makeItem(mat, guiConfig.getString("main-gui.navigation.next-page.name", ""), guiConfig.getStringList("main-gui.navigation.next-page.lore")));
+            }
         }
 
-        int indSlot = guiConfig.getInt("main-gui.page-indicator.slot", 48);
-        Material indMat = parseMat(guiConfig.getString("main-gui.page-indicator.material", "BOOK"));
-        String indName = guiConfig.getString("main-gui.page-indicator.name", "&7Page &e{page}&7/&e{max}")
-                .replace("{page}", String.valueOf(page + 1)).replace("{max}", String.valueOf(totalPages));
-        List<String> indLore = guiConfig.getStringList("main-gui.page-indicator.lore");
-        if(indSlot < inv.getSize()) inv.setItem(indSlot, makeItem(indMat, indName, indLore));
+        if (guiConfig.contains("main-gui.page-indicator")) {
+            int indSlot = guiConfig.getInt("main-gui.page-indicator.slot", 48);
+            Material indMat = parseMat(guiConfig.getString("main-gui.page-indicator.material", "AIR"));
+            if (indMat != Material.AIR && indSlot < inv.getSize()) {
+                String indName = guiConfig.getString("main-gui.page-indicator.name", "&7Page &e{page}&7/&e{max}")
+                        .replace("{page}", String.valueOf(page + 1)).replace("{max}", String.valueOf(totalPages));
+                inv.setItem(indSlot, makeItem(indMat, indName, guiConfig.getStringList("main-gui.page-indicator.lore")));
+            }
+        }
 
-        int closeSlot = guiConfig.getInt("main-gui.navigation.close.slot", 49);
-        Material closeMat = parseMat(guiConfig.getString("main-gui.navigation.close.material", "BARRIER"));
-        String closeName = guiConfig.getString("main-gui.navigation.close.name", "&cFermer");
-        List<String> closeLore = guiConfig.getStringList("main-gui.navigation.close.lore");
-        if(closeSlot < inv.getSize()) inv.setItem(closeSlot, makeItem(closeMat, closeName, closeLore));
+        if (guiConfig.contains("main-gui.navigation.close")) {
+            int closeSlot = guiConfig.getInt("main-gui.navigation.close.slot", 49);
+            Material closeMat = parseMat(guiConfig.getString("main-gui.navigation.close.material", "AIR"));
+            if (closeMat != Material.AIR && closeSlot < inv.getSize()) {
+                inv.setItem(closeSlot, makeItem(closeMat, guiConfig.getString("main-gui.navigation.close.name", ""), guiConfig.getStringList("main-gui.navigation.close.lore")));
+            }
+        }
     }
 
     private ItemStack buildShopItemStack(ShopItem si) {
@@ -150,22 +161,44 @@ public class ShopGui {
         String sell = si.canSell() ? String.format("%.2f", si.getSellPrice()) : "&cDésactivé";
         String stock = si.isUnlimitedStock() ? "∞" : String.valueOf(si.getStock());
 
-        List<String> lore = new ArrayList<>();
-        for (String line : si.getLore())
-            lore.add(line.replace("{buy_price}", buy).replace("{sell_price}", sell).replace("{stock}", stock));
-        lore.add("");
-        lore.add("&7Stock: &e" + stock);
-        lore.add("");
-        lore.add("&eClique gauche &7→ Acheter");
-        lore.add("&eClique droit &7→ Vendre");
-        lore.add("&eShift+clic &7→ Choisir la quantité");
-
-        ItemStack stack = makeItem(si.getMaterial(), si.getName(), lore);
-        if (si.getCustomModelData() > 0) {
-            ItemMeta m = stack.getItemMeta();
-            m.setCustomModelData(si.getCustomModelData());
-            stack.setItemMeta(m);
+        List<String> loreText = new ArrayList<>();
+        for (String line : si.getLore()) {
+            loreText.add(line
+                    .replace("{buy_price}", buy)
+                    .replace("{sell_price}", sell)
+                    .replace("{stock}", stock));
         }
+        loreText.add("");
+        loreText.add("&7Stock: &e" + stock);
+        loreText.add("");
+
+        boolean isCustom = manager.isCustomItem(si);
+        if (!isCustom) {
+            loreText.add("&eClique gauche &7→ Acheter");
+            loreText.add("&eClique droit &7→ Vendre");
+            loreText.add("&eShift+clic &7→ Choisir la quantité");
+        } else {
+            loreText.add("&eClique gauche &7→ Acheter");
+            loreText.add("&8Achat unique : x1");
+        }
+
+        ItemStack stack = manager.getDisplayItem(si);
+        if (stack == null) stack = new ItemStack(si.getMaterial());
+        stack.setAmount(1);
+
+        ItemMeta meta = stack.getItemMeta();
+        if (meta != null) {
+            meta.displayName(mm(si.getName()));
+            List<Component> loreComponents = new ArrayList<>();
+            for (String line : loreText) loreComponents.add(mm(line));
+            meta.lore(loreComponents);
+
+            if (si.getCustomModelData() > 0) {
+                meta.setCustomModelData(si.getCustomModelData());
+            }
+            stack.setItemMeta(meta);
+        }
+
         return stack;
     }
 
@@ -179,16 +212,21 @@ public class ShopGui {
         int rows = guiConfig.getInt("quantity-selector.rows", 3);
         Inventory inv = Bukkit.createInventory(holder, rows * 9, mm(title));
 
-        boolean fillEnabled = guiConfig.getBoolean("quantity-selector.fill.enabled", true);
-        if (fillEnabled) {
-            Material fillMat = parseMat(guiConfig.getString("quantity-selector.fill.material", "BLACK_STAINED_GLASS_PANE"));
-            String fillName = guiConfig.getString("quantity-selector.fill.name", " ");
-            ItemStack fill = makeItem(fillMat, fillName, null);
-            for (int i = 0; i < inv.getSize(); i++) inv.setItem(i, fill);
+        if (guiConfig.getBoolean("quantity-selector.fill.enabled", false)) {
+            Material fillMat = parseMat(guiConfig.getString("quantity-selector.fill.material", "AIR"));
+            if (fillMat != Material.AIR) {
+                ItemStack fill = makeItem(fillMat, guiConfig.getString("quantity-selector.fill.name", " "), null);
+                for (int i = 0; i < inv.getSize(); i++) inv.setItem(i, fill);
+            }
         }
 
-        List<Integer> amounts = plugin.getConfig().getIntegerList(buying ? "shop.buy-amounts" : "shop.sell-amounts");
-        if (amounts.isEmpty()) amounts = List.of(1, 8, 16, 32, 64);
+        List<Integer> amounts;
+        if (manager.isCustomItem(item)) {
+            amounts = List.of(1);
+        } else {
+            amounts = plugin.getConfig().getIntegerList(buying ? "shop.buy-amounts" : "shop.sell-amounts");
+            if (amounts == null || amounts.isEmpty()) amounts = List.of(1, 8, 16, 32, 64);
+        }
 
         double unitPrice = buying ? item.getBuyPrice() : item.getSellPrice();
         int[] btnSlots = {10, 11, 12, 13, 14, 15, 16};
@@ -207,13 +245,16 @@ public class ShopGui {
             for (String line : btnLoreTpl) {
                 btnLore.add(line.replace("{amount}", String.valueOf(amount)).replace("{total_price}", String.format("%.2f", total)));
             }
-            if(btnSlots[i] < inv.getSize()) inv.setItem(btnSlots[i], makeItem(btnMat, btnName, btnLore));
+            if (btnSlots[i] < inv.getSize()) inv.setItem(btnSlots[i], makeItem(btnMat, btnName, btnLore));
         }
 
-        int cancelSlot = guiConfig.getInt("quantity-selector.cancel.slot", 22);
-        Material cancelMat = parseMat(guiConfig.getString("quantity-selector.cancel.material", "BARRIER"));
-        String cancelName = guiConfig.getString("quantity-selector.cancel.name", "&cAnnuler");
-        if(cancelSlot < inv.getSize()) inv.setItem(cancelSlot, makeItem(cancelMat, cancelName, null));
+        if (guiConfig.contains("quantity-selector.cancel")) {
+            int cancelSlot = guiConfig.getInt("quantity-selector.cancel.slot", 22);
+            Material cancelMat = parseMat(guiConfig.getString("quantity-selector.cancel.material", "AIR"));
+            if (cancelMat != Material.AIR && cancelSlot < inv.getSize()) {
+                inv.setItem(cancelSlot, makeItem(cancelMat, guiConfig.getString("quantity-selector.cancel.name", "&cAnnuler"), null));
+            }
+        }
 
         player.openInventory(inv);
     }
@@ -223,26 +264,36 @@ public class ShopGui {
     public ItemStack makeItem(Material mat, String name, List<String> lore) {
         ItemStack stack = new ItemStack(mat != null ? mat : Material.STONE);
         ItemMeta meta = stack.getItemMeta();
-        meta.displayName(mm(name));
-        if (lore != null && !lore.isEmpty())
-            meta.lore(lore.stream().map(this::mm).toList());
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
-        stack.setItemMeta(meta);
+        if (meta != null) {
+            meta.displayName(mm(name == null ? "" : name));
+            if (lore != null && !lore.isEmpty()) {
+                List<Component> components = new ArrayList<>();
+                for (String line : lore) components.add(mm(line));
+                meta.lore(components);
+            }
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+            stack.setItemMeta(meta);
+        }
         return stack;
     }
 
     private Material parseMat(String name) {
         try { return Material.valueOf(name.toUpperCase()); }
-        catch (Exception e) { return Material.STONE; }
+        catch (Exception e) { return Material.AIR; } // On retourne AIR si c'est invalide
     }
 
     private Component mm(String s) {
-        return MiniMessage.miniMessage().deserialize(
-                s.replace("&0","<black>").replace("&8","<dark_gray>")
-                        .replace("&6","<gold>").replace("&e","<yellow>")
-                        .replace("&a","<green>").replace("&c","<red>")
-                        .replace("&b","<aqua>").replace("&7","<gray>")
-                        .replace("&f","<white>").replace("&l","<bold>")
-                        .replace("&r","<reset>").replace("&o","<italic>"));
+        if (s == null) s = "";
+        return MiniMessage.miniMessage().deserialize(s
+                .replace("&0", "<black>").replace("&1", "<dark_blue>")
+                .replace("&2", "<dark_green>").replace("&3", "<dark_aqua>")
+                .replace("&4", "<dark_red>").replace("&5", "<dark_purple>")
+                .replace("&6", "<gold>").replace("&7", "<gray>")
+                .replace("&8", "<dark_gray>").replace("&9", "<blue>")
+                .replace("&a", "<green>").replace("&b", "<aqua>")
+                .replace("&c", "<red>").replace("&d", "<light_purple>")
+                .replace("&e", "<yellow>").replace("&f", "<white>")
+                .replace("&l", "<bold>").replace("&r", "<reset>")
+                .replace("&o", "<italic>"));
     }
 }

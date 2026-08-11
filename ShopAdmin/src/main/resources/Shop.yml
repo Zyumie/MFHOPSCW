@@ -7,6 +7,9 @@
 # stock: stock disponible (-1 = illimité)
 # slot: position dans le GUI de catégorie (0-based dans la zone items, définie dans Gui.yml)
 # custom-model-data: optionnel, pour les resource packs
+# trim: optionnel, pour ajouté de la variété
+#   | Motifs : COAST, DUNE, EYE, RIB, SENTRY, SHAPER, SILENCE, SNOUT, SPIRE, TIDE, VEX, WARD, WAYFINDER, RAISER, SHAPER, HOST
+#   | Matériaux : QUARTZ, IRON, NETHERITE, REDSTONE, COPPER, GOLD, EMERALD, DIAMOND, LAPIS, AMETHYST
 #
 # IMPORTANT :
 # ShopAdmin doit gérer "custom-item-id".
@@ -246,6 +249,9 @@ categories:
           - "Clique gauche pour acheter"
         custom-item-id: "soul_armor"
         custom-model-data: 2032
+        trim:
+          pattern: SILENCE    # Motifs : COAST, DUNE, EYE, RIB, SENTRY, SHAPER, SILENCE, SNOUT, SPIRE, TIDE, VEX, WARD, WAYFINDER, RAISER, SHAPER, HOST
+          material: DIAMOND
         buy-price: 43000.0
         sell-price: -1
         stock: -1

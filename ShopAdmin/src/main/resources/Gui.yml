@@ -11,6 +11,9 @@ main-gui:
     enabled: true
     material: GRAY_STAINED_GLASS_PANE
     name: " "
+    border:
+      enabled: true
+      material: BLACK_STAINED_GLASS_PANE
 
   # Barre de catégories (rangée 0 = première rangée)
   category-bar:

@@ -6,11 +6,17 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.trim.ArmorTrim;
+import org.bukkit.inventory.meta.trim.TrimMaterial;
+import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -91,13 +97,16 @@ public class ShopManager {
                         int slot = is.getInt("slot", 0);
                         int cmd = is.getInt("custom-model-data", 0);
 
+                        String trimPattern = is.getString("trim.pattern", null);
+                        String trimMaterial = is.getString("trim.material", null);
+
                         String customItemId = is.getString("custom-item-id", "");
                         if (customItemId != null && !customItemId.isBlank()) {
                             customItemIds.put(key(catId, itemId), customItemId.trim());
                         }
 
                         category.addItem(new ShopItem(itemId, catId, mat, name, lore,
-                                buyPrice, sellPrice, stock, slot, cmd));
+                                buyPrice, sellPrice, stock, slot, cmd, trimPattern, trimMaterial));
                     } catch (Exception e) {
                         plugin.getLogger().warning("Erreur chargement item " + itemId + " : " + e.getMessage());
                     }
@@ -120,11 +129,6 @@ public class ShopManager {
         return customItemIds.get(key(item.getCategoryId(), item.getId()));
     }
 
-    /**
-     * Retourne le VRAI item CustomItems à afficher dans le shop.
-     * Pour un set d'armure, on sélectionne réellement son plastron parmi les pièces.
-     * Le clone conserve PDC, trims, enchantements, CustomModelData, etc.
-     */
     public ItemStack getDisplayItem(ShopItem item) {
         String customId = getCustomItemId(item);
         if (customId != null) {
@@ -132,7 +136,6 @@ public class ShopManager {
             if (resolved != null && resolved.length > 0) {
                 ItemStack chosen = null;
 
-                // Si c'est une armure, on cherche le plastron
                 if (customId.endsWith("_armor")) {
                     for (ItemStack stack : resolved) {
                         if (stack != null && stack.getType().name().endsWith("_CHESTPLATE")) {
@@ -142,7 +145,6 @@ public class ShopManager {
                     }
                 }
 
-                // Sinon, on prend le premier item valide
                 if (chosen == null) {
                     for (ItemStack stack : resolved) {
                         if (stack != null) {
@@ -160,15 +162,7 @@ public class ShopManager {
             }
         }
 
-        // Fallback si ce n'est pas un custom item ou en cas d'erreur
-        ItemStack fallback = new ItemStack(item.getMaterial(), 1);
-        ItemMeta meta = fallback.getItemMeta();
-        if (meta != null) {
-            meta.displayName(color(item.getName()));
-            if (item.getCustomModelData() > 0) meta.setCustomModelData(item.getCustomModelData());
-            fallback.setItemMeta(meta);
-        }
-        return fallback;
+        return buildVanillaItem(item, 1);
     }
 
     public TransactionResult buy(Player player, ShopItem item, int requestedAmount) {
@@ -176,14 +170,10 @@ public class ShopManager {
         if (!item.canBuy()) return TransactionResult.DISABLED;
 
         String customId = getCustomItemId(item);
-
-        // Les CustomItems s'achètent TOUJOURS par 1 :
-        // 1 clic = 1 arme OU 1 set complet, jamais x8/x16/x64.
         int amount = customId != null ? 1 : Math.max(1, requestedAmount);
 
         if (!item.hasStock(amount)) return TransactionResult.INSUFFICIENT_STOCK;
 
-        // Anti double-clic (Spam/Duplication) : aucun achat identique pendant 650 ms.
         if (customId != null) {
             String lockKey = player.getUniqueId() + ":" + key(item.getCategoryId(), item.getId());
             long now = System.currentTimeMillis();
@@ -197,7 +187,6 @@ public class ShopManager {
         double total = item.getBuyPrice() * amount;
         if (!economy.has(player, total)) return TransactionResult.INSUFFICIENT_FUNDS;
 
-        // Logique de don d'objets pour les CustomItems
         if (customId != null) {
             ItemStack[] items = resolveCustomItems(customId);
             if (items == null || items.length == 0) {
@@ -224,7 +213,6 @@ public class ShopManager {
             return TransactionResult.SUCCESS;
         }
 
-        // Logique de don d'objets classique (Vanilla)
         if (player.getInventory().firstEmpty() == -1) return TransactionResult.INVENTORY_FULL;
         economy.withdrawPlayer(player, total);
         item.removeStock(amount);
@@ -292,7 +280,24 @@ public class ShopManager {
         ItemMeta meta = stack.getItemMeta();
         if (meta != null) {
             meta.displayName(color(item.getName()));
-            if (item.getCustomModelData() > 0) meta.setCustomModelData(item.getCustomModelData());
+            if (item.getCustomModelData() > 0) {
+                meta.setCustomModelData(item.getCustomModelData());
+            }
+
+            if (meta instanceof ArmorMeta armorMeta
+                    && item.getTrimPattern() != null && item.getTrimMaterial() != null) {
+                try {
+                    TrimPattern pattern = Registry.TRIM_PATTERN.get(NamespacedKey.minecraft(item.getTrimPattern().toLowerCase()));
+                    TrimMaterial trimMat = Registry.TRIM_MATERIAL.get(NamespacedKey.minecraft(item.getTrimMaterial().toLowerCase()));
+
+                    if (pattern != null && trimMat != null) {
+                        armorMeta.setTrim(new ArmorTrim(trimMat, pattern));
+                    }
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Erreur trim sur l'item " + item.getId() + " : " + e.getMessage());
+                }
+            }
+
             stack.setItemMeta(meta);
         }
         return stack;
@@ -330,24 +335,14 @@ public class ShopManager {
     private Component color(String s) {
         if (s == null) s = "";
         return MiniMessage.miniMessage().deserialize(s
-                .replace("&0", "<black>")
-                .replace("&1", "<dark_blue>")
-                .replace("&2", "<dark_green>")
-                .replace("&3", "<dark_aqua>")
-                .replace("&4", "<dark_red>")
-                .replace("&5", "<dark_purple>")
-                .replace("&6", "<gold>")
-                .replace("&7", "<gray>")
-                .replace("&8", "<dark_gray>")
-                .replace("&9", "<blue>")
-                .replace("&a", "<green>")
-                .replace("&b", "<aqua>")
-                .replace("&c", "<red>")
-                .replace("&d", "<light_purple>")
-                .replace("&e", "<yellow>")
-                .replace("&f", "<white>")
-                .replace("&r", "<reset>")
-                .replace("&l", "<bold>")
-                .replace("&o", "<italic>"));
+                .replace("&0", "<black>").replace("&1", "<dark_blue>")
+                .replace("&2", "<dark_green>").replace("&3", "<dark_aqua>")
+                .replace("&4", "<dark_red>").replace("&5", "<dark_purple>")
+                .replace("&6", "<gold>").replace("&7", "<gray>")
+                .replace("&8", "<dark_gray>").replace("&9", "<blue>")
+                .replace("&a", "<green>").replace("&b", "<aqua>")
+                .replace("&c", "<red>").replace("&d", "<light_purple>")
+                .replace("&e", "<yellow>").replace("&f", "<white>")
+                .replace("&r", "<reset>").replace("&l", "<bold>").replace("&o", "<italic>"));
     }
 }

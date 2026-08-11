@@ -16,10 +16,13 @@ public class ShopItem {
     private int stock;
     private final int slot;
     private final int customModelData;
+    private final String trimPattern;
+    private final String trimMaterial;
 
     public ShopItem(String id, String categoryId, Material material, String name,
                     List<String> lore, double buyPrice, double sellPrice,
-                    int stock, int slot, int customModelData) {
+                    int stock, int slot, int customModelData,
+                    String trimPattern, String trimMaterial) {
         this.id = id;
         this.categoryId = categoryId;
         this.material = material;
@@ -30,6 +33,8 @@ public class ShopItem {
         this.stock = stock;
         this.slot = slot;
         this.customModelData = customModelData;
+        this.trimPattern = trimPattern;
+        this.trimMaterial = trimMaterial;
     }
 
     public String getId()           { return id; }
@@ -42,6 +47,8 @@ public class ShopItem {
     public int getStock()           { return stock; }
     public int getSlot()            { return slot; }
     public int getCustomModelData() { return customModelData; }
+    public String getTrimPattern() { return trimPattern; }
+    public String getTrimMaterial() { return trimMaterial; }
 
     public boolean canBuy()          { return buyPrice >= 0; }
     public boolean canSell()         { return sellPrice >= 0; }
