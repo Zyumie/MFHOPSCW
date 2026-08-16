@@ -4,6 +4,7 @@ import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.module.Module;
 import fr.zyumie.home.command.HomeCommands;
 import fr.zyumie.home.listener.HomeListener;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Home extends JavaPlugin implements Module {
@@ -37,6 +38,7 @@ public class Home extends JavaPlugin implements Module {
 
     @Override
     public void onModuleDisable() {
+        HandlerList.unregisterAll(this);
         homeManager.saveAll();
         getLogger().info("HomeModule désactivé.");
     }

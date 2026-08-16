@@ -8,6 +8,7 @@ import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.module.Module;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -54,7 +55,9 @@ public class Hdv extends JavaPlugin implements Module {
 
     @Override
     public void onModuleDisable() {
+        HandlerList.unregisterAll(this);
         hdvManager.saveAll();
+        hdvManager.stopExpiryTask();
         getLogger().info("HdvModule désactivé.");
     }
 

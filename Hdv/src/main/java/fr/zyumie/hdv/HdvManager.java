@@ -27,6 +27,7 @@ public class HdvManager {
     // UUID joueur → liste d'ItemStacks à récupérer (items non vendus / expirés)
     private final Map<UUID, List<ItemStack>> pendingClaims = new ConcurrentHashMap<>();
     private Economy economy;
+    private org.bukkit.scheduler.BukkitTask expiryTask;
 
     public HdvManager(Hdv plugin) {
         this.plugin = plugin;
@@ -246,7 +247,8 @@ public class HdvManager {
     // ── Expiry task ───────────────────────────────────────────────────────
 
     private void startExpiryTask() {
-        plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+        if (expiryTask != null) expiryTask.cancel();
+        expiryTask = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             List<HdvListing> expired = listings.values().stream()
                     .filter(l -> l.isActive() && l.isExpired()).toList();
             for (HdvListing l : expired) {
@@ -264,6 +266,13 @@ public class HdvManager {
                 });
             }
         }, 600L, 1200L); // check toutes les 60s
+    }
+
+    public void stopExpiryTask() {
+        if (expiryTask != null) {
+            expiryTask.cancel();
+            expiryTask = null;
+        }
     }
 
     // ── Queries ───────────────────────────────────────────────────────────
