@@ -6,6 +6,7 @@ import fr.zyumie.main.oxygen.command.OxygenCommand;
 import fr.zyumie.main.oxygen.listener.PlayerConnectionListener;
 import fr.zyumie.main.oxygen.listener.PlayerZoneListener;
 import fr.zyumie.main.oxygen.task.OxygenTickTask;
+import org.bukkit.event.HandlerList;
 
 /**
  * Module Oxygène enregistré auprès du MainPlugin via ModuleManager.
@@ -62,6 +63,7 @@ public class OxygenModule implements Module {
 
     @Override
     public void onModuleDisable() {
+        HandlerList.unregisterAll(plugin);
         if (tickTask != null && !tickTask.isCancelled()) {
             tickTask.cancel();
         }

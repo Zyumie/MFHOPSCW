@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -65,6 +66,7 @@ public class OxygenArmor extends JavaPlugin implements Module {
 
     @Override
     public void onModuleDisable() {
+        HandlerList.unregisterAll(this);
         if (supplier != null) OxygenAPI.get().unregisterSupplier(supplier);
         if (displayTask != null) displayTask.cleanup();
         if (displayBukkitTask != null) displayBukkitTask.cancel();

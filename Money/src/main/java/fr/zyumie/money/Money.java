@@ -8,6 +8,7 @@ import fr.zyumie.money.command.MoneyTopCommand;
 import fr.zyumie.money.command.PayCommand;
 import fr.zyumie.money.listener.PlayerListener;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -66,6 +67,7 @@ public class Money extends JavaPlugin implements Module {
 
     @Override
     public void onModuleDisable() {
+        HandlerList.unregisterAll(this);
         moneyManager.saveAll();
         getServer().getServicesManager().unregisterAll(this);
         getLogger().info("MoneyModule désactivé.");

@@ -5,6 +5,7 @@ import fr.zyumie.main.module.Module;
 import fr.zyumie.quest.command.QuestCommand;
 import fr.zyumie.quest.listener.QuestListener;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -51,6 +52,7 @@ public class WeeklyQuest extends JavaPlugin implements Module {
 
     @Override
     public void onModuleDisable() {
+        HandlerList.unregisterAll(this);
         questManager.saveAll();
         getLogger().info("WeeklyQuestModule désactivé.");
     }
