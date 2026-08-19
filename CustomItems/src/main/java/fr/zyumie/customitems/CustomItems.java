@@ -5,6 +5,7 @@ import fr.zyumie.customitems.handler.armor.*;
 import fr.zyumie.customitems.handler.weapon.*;
 import fr.zyumie.customitems.listener.*;
 import fr.zyumie.main.api.MainAPI;
+import org.bukkit.event.HandlerList;
 import fr.zyumie.main.module.Module;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
