@@ -7,7 +7,6 @@ import fr.zyumie.customitems.listener.*;
 import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.module.Module;
 import org.bukkit.Bukkit;
-import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CustomItems extends JavaPlugin implements Module {
