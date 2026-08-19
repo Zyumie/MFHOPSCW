@@ -23,21 +23,27 @@ public class ShopGui {
     private final ShopAdmin plugin;
     private final ShopManager manager;
 
-    private static final int[] ITEM_SLOTS = {
-            10,11,12,13,14,15,16,
-            19,20,21,22,23,24,25,
-            28,29,30,31,32,33,34,
-            37,38,39,40,41,42,43
-    };
-
     public ShopGui(ShopAdmin plugin, ShopManager manager) {
         this.plugin  = plugin;
         this.manager = manager;
     }
 
-    public void open(Player player) {
-        List<ShopCategory> cats = manager.getCategoryList();
-        open(player, cats.isEmpty() ? null : cats.get(0).getId(), 0);
+    public void openHub(Player player) {
+        FileConfiguration guiConfig = plugin.getGuiConfig();
+
+        String title = guiConfig.getString("hub.title", "&6&lBoutique - Menu Principal");
+        int rows = guiConfig.getInt("hub.rows", 3);
+
+        ShopHolder holder = new ShopHolder(ShopHolder.Type.HUB, null, 0);
+        Inventory inv = Bukkit.createInventory(holder, rows * 9, mm(title));
+
+        int[] catSlots = getHubCategorySlots(guiConfig);
+
+        fillStructure(inv, guiConfig, catSlots, "hub");
+        buildHubCategories(inv, catSlots);
+        buildHubNavigation(inv, guiConfig);
+
+        player.openInventory(inv);
     }
 
     public void open(Player player, String categoryId, int page) {
@@ -49,37 +55,92 @@ public class ShopGui {
         ShopHolder holder = new ShopHolder(ShopHolder.Type.MAIN, categoryId, page);
         Inventory inv = Bukkit.createInventory(holder, rows * 9, mm(title));
 
-        fillStructure(inv, guiConfig);
-        buildCategoryBar(inv, categoryId);
-        buildItems(inv, categoryId, page);
-        buildNavigation(inv, categoryId, page, guiConfig);
+        int[] itemSlots = computeItemSlots(guiConfig, rows);
+
+        fillStructure(inv, guiConfig, itemSlots, "main-gui");
+        buildItems(inv, categoryId, page, itemSlots);
+        buildNavigation(inv, categoryId, page, guiConfig, itemSlots.length);
 
         player.openInventory(inv);
     }
 
-    private void fillStructure(Inventory inv, FileConfiguration guiConfig) {
+    /**
+     * Calcule un quadrillage de slots (colonnes 1 à 7 de chaque rangée couverte, les colonnes
+     * 0 et 8 restant pour la bordure) à partir d'un start-slot/end-slot donné. Utilisé à la
+     * fois pour la zone d'items (main-gui.items-area) et pour la grille de catégories du hub
+     * (hub.categories-area), pour garder exactement la même logique aux deux endroits.
+     */
+    private static int[] computeGridSlots(FileConfiguration guiConfig, int rows, String startPath, String endPath, int defaultStart, int defaultEnd) {
+        int start = guiConfig.getInt(startPath, defaultStart);
+        int end = guiConfig.getInt(endPath, defaultEnd);
+
+        int startRow = Math.max(0, start / 9);
+        int endRow = Math.min(rows - 1, end / 9);
+        if (endRow < startRow) return new int[0];
+
+        List<Integer> slots = new ArrayList<>();
+        for (int row = startRow; row <= endRow; row++) {
+            for (int col = 1; col <= 7; col++) {
+                slots.add(row * 9 + col);
+            }
+        }
+
+        int[] result = new int[slots.size()];
+        for (int i = 0; i < result.length; i++) result[i] = slots.get(i);
+        return result;
+    }
+
+    private static int[] computeItemSlots(FileConfiguration guiConfig, int rows) {
+        return computeGridSlots(guiConfig, rows, "main-gui.items-area.start-slot", "main-gui.items-area.end-slot", 9, 44);
+    }
+
+    private static int[] computeHubCategorySlots(FileConfiguration guiConfig, int rows) {
+        return computeGridSlots(guiConfig, rows, "hub.categories-area.start-slot", "hub.categories-area.end-slot", 9, 17);
+    }
+
+    public static int[] getHubCategorySlots(FileConfiguration guiConfig) {
+        int rows = guiConfig.getInt("hub.rows", 3);
+        return computeHubCategorySlots(guiConfig, rows);
+    }
+
+    private void fillStructure(Inventory inv, FileConfiguration guiConfig, int[] contentSlots, String prefix) {
         // Remplissage de fond (activable/désactivable dans le YAML)
-        if (guiConfig.getBoolean("main-gui.fill.enabled", false)) {
-            Material fillMat = parseMat(guiConfig.getString("main-gui.fill.material", "AIR"));
+        if (guiConfig.getBoolean(prefix + ".fill.enabled", false)) {
+            Material fillMat = parseMat(guiConfig.getString(prefix + ".fill.material", "AIR"));
             if (fillMat != Material.AIR) {
-                ItemStack fill = makeItem(fillMat, guiConfig.getString("main-gui.fill.name", " "), null);
+                ItemStack fill = makeItem(fillMat, guiConfig.getString(prefix + ".fill.name", " "), null);
                 for (int i = 0; i < inv.getSize(); i++) inv.setItem(i, fill);
             }
         }
 
         // Bordures (activables/désactivables dans le YAML)
-        if (guiConfig.getBoolean("main-gui.border.enabled", false)) {
-            Material borderMat = parseMat(guiConfig.getString("main-gui.border.material", "AIR"));
+        if (guiConfig.getBoolean(prefix + ".fill.border.enabled", false)) {
+            Material borderMat = parseMat(guiConfig.getString(prefix + ".fill.border.material", "AIR"));
             if (borderMat != Material.AIR) {
                 ItemStack border = makeItem(borderMat, " ", null);
-                for (int row = 1; row <= 4; row++) {
-                    if (row * 9 + 8 < inv.getSize()) {
-                        inv.setItem(row * 9, border);
-                        inv.setItem(row * 9 + 8, border);
+
+                // Encadre les colonnes 0 et 8 de chaque rangée réellement occupée par le
+                // contenu (items ou catégories), pour rester cohérent si la zone change.
+                if (contentSlots.length > 0) {
+                    int minRow = contentSlots[0] / 9, maxRow = contentSlots[0] / 9;
+                    for (int slot : contentSlots) {
+                        int row = slot / 9;
+                        if (row < minRow) minRow = row;
+                        if (row > maxRow) maxRow = row;
+                    }
+                    for (int row = minRow; row <= maxRow; row++) {
+                        if (row * 9 + 8 < inv.getSize()) {
+                            inv.setItem(row * 9, border);
+                            inv.setItem(row * 9 + 8, border);
+                        }
                     }
                 }
-                for (int i = 45; i <= 53; i++) {
-                    if (i < inv.getSize() && (inv.getItem(i) == null || inv.getItem(i).getType() == Material.AIR)) {
+
+                // Dernière rangée : comble ce qui n'a pas déjà été posé par le contenu.
+                // Basé sur inv.getSize() plutôt que 45..53 en dur, pour s'adapter à n'importe
+                // quel nombre de rangées (main-gui.rows / hub.rows), pas seulement 6.
+                for (int i = Math.max(0, inv.getSize() - 9); i < inv.getSize(); i++) {
+                    if (inv.getItem(i) == null || inv.getItem(i).getType() == Material.AIR) {
                         inv.setItem(i, border);
                     }
                 }
@@ -87,39 +148,53 @@ public class ShopGui {
         }
     }
 
-    private void buildCategoryBar(Inventory inv, String activeCatId) {
+    private void buildHubCategories(Inventory inv, int[] slots) {
         List<ShopCategory> cats = manager.getCategoryList();
-        for (int i = 0; i < Math.min(cats.size(), 9); i++) {
+        for (int i = 0; i < Math.min(cats.size(), slots.length); i++) {
             ShopCategory cat = cats.get(i);
-            boolean active = cat.getId().equals(activeCatId);
-            String suffix = active ? " &a✔" : "";
-            List<String> lore = new ArrayList<>(cat.getIconLore());
-            if (active) lore.add(0, "&a▶ Catégorie active");
-            inv.setItem(i, makeItem(cat.getIcon(), cat.getIconName() + suffix, lore));
+            inv.setItem(slots[i], makeItem(cat.getIcon(), cat.getIconName(), new ArrayList<>(cat.getIconLore())));
         }
     }
 
-    private void buildItems(Inventory inv, String categoryId, int page) {
+    private void buildHubNavigation(Inventory inv, FileConfiguration guiConfig) {
+        if (guiConfig.contains("hub.navigation.close")) {
+            int closeSlot = guiConfig.getInt("hub.navigation.close.slot", 22);
+            Material closeMat = parseMat(guiConfig.getString("hub.navigation.close.material", "AIR"));
+            if (closeMat != Material.AIR && closeSlot < inv.getSize()) {
+                inv.setItem(closeSlot, makeItem(closeMat, guiConfig.getString("hub.navigation.close.name", "&cFermer"), guiConfig.getStringList("hub.navigation.close.lore")));
+            }
+        }
+    }
+
+    private void buildItems(Inventory inv, String categoryId, int page, int[] itemSlots) {
         if (categoryId == null) return;
         ShopCategory cat = manager.getCategories().get(categoryId);
         if (cat == null) return;
 
         List<ShopItem> items = cat.getItemsSorted();
-        int start = page * ITEM_SLOTS.length;
+        int start = page * itemSlots.length;
 
-        for (int i = 0; i < ITEM_SLOTS.length; i++) {
+        for (int i = 0; i < itemSlots.length; i++) {
             int idx = start + i;
             if (idx >= items.size()) break;
-            if (ITEM_SLOTS[i] < inv.getSize()) {
-                inv.setItem(ITEM_SLOTS[i], buildShopItemStack(items.get(idx)));
+            if (itemSlots[i] < inv.getSize()) {
+                inv.setItem(itemSlots[i], buildShopItemStack(items.get(idx)));
             }
         }
     }
 
-    private void buildNavigation(Inventory inv, String categoryId, int page, FileConfiguration guiConfig) {
+    private void buildNavigation(Inventory inv, String categoryId, int page, FileConfiguration guiConfig, int itemsPerPage) {
         ShopCategory cat  = categoryId != null ? manager.getCategories().get(categoryId) : null;
         int total = cat != null ? cat.getItemsSorted().size() : 0;
-        int totalPages = Math.max(1, (int) Math.ceil(total / (double) ITEM_SLOTS.length));
+        int totalPages = Math.max(1, (int) Math.ceil(total / (double) Math.max(1, itemsPerPage)));
+
+        if (guiConfig.contains("main-gui.navigation.back")) {
+            int backSlot = guiConfig.getInt("main-gui.navigation.back.slot", 46);
+            Material backMat = parseMat(guiConfig.getString("main-gui.navigation.back.material", "AIR"));
+            if (backMat != Material.AIR && backSlot < inv.getSize()) {
+                inv.setItem(backSlot, makeItem(backMat, guiConfig.getString("main-gui.navigation.back.name", "&e« Retour"), guiConfig.getStringList("main-gui.navigation.back.lore")));
+            }
+        }
 
         if (page > 0 && guiConfig.contains("main-gui.navigation.prev-page")) {
             int slot = guiConfig.getInt("main-gui.navigation.prev-page.slot", 45);
@@ -259,7 +334,10 @@ public class ShopGui {
         player.openInventory(inv);
     }
 
-    public static int[] getItemSlots() { return ITEM_SLOTS; }
+    public static int[] getItemSlots(FileConfiguration guiConfig) {
+        int rows = guiConfig.getInt("main-gui.rows", 6);
+        return computeItemSlots(guiConfig, rows);
+    }
 
     public ItemStack makeItem(Material mat, String name, List<String> lore) {
         ItemStack stack = new ItemStack(mat != null ? mat : Material.STONE);

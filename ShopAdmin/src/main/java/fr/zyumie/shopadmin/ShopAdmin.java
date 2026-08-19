@@ -7,7 +7,6 @@ import fr.zyumie.shopadmin.gui.ShopGui;
 import fr.zyumie.shopadmin.listener.GuiListener;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -65,7 +64,6 @@ public class ShopAdmin extends JavaPlugin implements Module {
 
     @Override
     public void onModuleDisable() {
-        HandlerList.unregisterAll(this);
         getLogger().info("ShopAdmin désactivé.");
     }
 

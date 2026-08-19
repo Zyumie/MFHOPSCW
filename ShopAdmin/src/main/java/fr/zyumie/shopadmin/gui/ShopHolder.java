@@ -6,7 +6,7 @@ import org.bukkit.inventory.InventoryHolder;
 
 public class ShopHolder implements InventoryHolder {
 
-    public enum Type { MAIN, QUANTITY }
+    public enum Type { HUB, MAIN, QUANTITY }
 
     private final Type type;
     private String categoryId;

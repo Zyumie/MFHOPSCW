@@ -1,7 +1,39 @@
 # =========================================
 #   ShopAdmin - Configuration du GUI
 # =========================================
+# Trois écrans, trois sections de premier niveau : hub -> main-gui -> quantity-selector.
 
+# Menu principal (hub) : première chose que voit le joueur avec /shop. N'affiche que les
+# catégories ; cliquer sur une catégorie ouvre son sous-menu (voir main-gui ci-dessous).
+hub:
+  title: "&6&lBoutique - Menu Principal"
+  rows: 3  # 1-6
+
+  fill:
+    enabled: true
+    material: GRAY_STAINED_GLASS_PANE
+    name: " "
+    border:
+      enabled: true
+      material: BLACK_STAINED_GLASS_PANE
+
+  # Grille des catégories : rangées couvertes par [start-slot, end-slot], colonnes 1 à 7
+  # de chaque rangée utilisées (0 et 8 réservées à la bordure) — même logique que
+  # main-gui.items-area ci-dessous. Avec les valeurs par défaut (9 à 17 = rangée 1 seule),
+  # ça fait 7 catégories max sur une rangée ; élargis end-slot pour en couvrir davantage.
+  categories-area:
+    start-slot: 9
+    end-slot: 17
+
+  navigation:
+    close:
+      slot: 22
+      material: BARRIER
+      name: "&cFermer"
+      lore:
+        - "&7Cliquer pour fermer"
+
+# Sous-menu : liste les items d'une catégorie choisie depuis le hub ci-dessus.
 main-gui:
   title: "&6&lBoutique Admin"
   rows: 6  # 1-6
@@ -15,20 +47,22 @@ main-gui:
       enabled: true
       material: BLACK_STAINED_GLASS_PANE
 
-  # Barre de catégories (rangée 0 = première rangée)
-  category-bar:
-    row: 0
-    # Slots de 0 à 8 disponibles dans cette rangée
-    # Les catégories du Shop.yml seront placées dans l'ordre
-
-  # Zone d'affichage des items (slots 9 à 44 = rangées 1 à 4)
+  # Zone d'affichage des items : rangées couvertes par [start-slot, end-slot].
+  # Sur chaque rangée couverte, seules les colonnes 1 à 7 sont utilisées pour les items
+  # (les colonnes 0 et 8 restent réservées à la bordure). Avec les valeurs par défaut
+  # (9 à 44 = rangées 1 à 4), ça donne 4 rangées x 7 colonnes = 28 items par page.
   items-area:
     start-slot: 9
     end-slot: 44
-    # Nombre d'items par page (max = end-slot - start-slot + 1)
 
   # Barre de navigation (rangée 5 = dernière rangée)
   navigation:
+    back:
+      slot: 46
+      material: ARROW
+      name: "&e« Retour au menu"
+      lore:
+        - "&7Retourner au menu principal"
     prev-page:
       slot: 45
       material: ARROW
@@ -56,29 +90,32 @@ main-gui:
     lore:
       - "&7Navigation entre les pages"
 
-  # Sélecteur de quantité (ouvert au Shift+clic)
-  quantity-selector:
-    title: "&8Sélectionner une quantité"
-    rows: 3
-    fill:
-      enabled: true
-      material: BLACK_STAINED_GLASS_PANE
-      name: " "
-    confirm-buy:
-      material: LIME_STAINED_GLASS_PANE
-      name: "&aAcheter x{amount}"
-      lore:
-        - "&7Coût total: &e{total_price}"
-        - ""
-        - "&aCliquer pour confirmer"
-    confirm-sell:
-      material: ORANGE_STAINED_GLASS_PANE
-      name: "&6Vendre x{amount}"
-      lore:
-        - "&7Revenu total: &e{total_price}"
-        - ""
-        - "&6Cliquer pour confirmer"
-    cancel:
-      slot: 22
-      material: BARRIER
-      name: "&cAnnuler"
+# Sélecteur de quantité (ouvert au Shift+clic sur un item du sous-menu).
+# NOTE : cette section était avant indentée sous main-gui, mais le code l'a toujours lue
+# à la racine (quantity-selector.*) — elle était donc entièrement ignorée. C'est corrigé
+# ici : section de premier niveau, au même titre que hub et main-gui.
+quantity-selector:
+  title: "&8Sélectionner une quantité"
+  rows: 3
+  fill:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+  confirm-buy:
+    material: LIME_STAINED_GLASS_PANE
+    name: "&aAcheter x{amount}"
+    lore:
+      - "&7Coût total: &e{total_price}"
+      - ""
+      - "&aCliquer pour confirmer"
+  confirm-sell:
+    material: ORANGE_STAINED_GLASS_PANE
+    name: "&6Vendre x{amount}"
+    lore:
+      - "&7Revenu total: &e{total_price}"
+      - ""
+      - "&6Cliquer pour confirmer"
+  cancel:
+    slot: 22
+    material: BARRIER
+    name: "&cAnnuler"

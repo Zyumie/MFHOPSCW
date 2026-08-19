@@ -34,7 +34,7 @@ public class ShopCommand implements CommandExecutor, TabCompleter {
             send(sender, plugin.getConfig().getString("messages.reload-success", "")); return true;
         }
         if (!(sender instanceof Player player)) { sender.sendMessage("Commande réservée aux joueurs."); return true; }
-        gui.open(player);
+        gui.openHub(player);
         return true;
     }
 

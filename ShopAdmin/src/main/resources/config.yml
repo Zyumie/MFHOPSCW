@@ -22,3 +22,5 @@ messages:
   sell-disabled: "&cCet item ne peut pas être vendu."
   no-permission: "&cTu n'as pas la permission."
   reload-success: "&aShop rechargé avec succès."
+  no-economy: "&cLa boutique est indisponible pour le moment (économie non détectée)."
+  duplicate-purchase: "&cTrop rapide ! Réessaie dans un instant."

@@ -13,6 +13,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
@@ -175,8 +176,12 @@ public class ShopManager {
         if (!item.hasStock(amount)) return TransactionResult.INSUFFICIENT_STOCK;
 
         if (customId != null) {
-            String lockKey = player.getUniqueId() + ":" + key(item.getCategoryId(), item.getId());
             long now = System.currentTimeMillis();
+            // Purge les verrous expirés (largement au-delà de la fenêtre anti-doublon de 650ms)
+            // pour que cette map ne grossisse pas indéfiniment sur un serveur qui tourne longtemps.
+            recentPurchases.entrySet().removeIf(e -> now - e.getValue() > 5000L);
+
+            String lockKey = player.getUniqueId() + ":" + key(item.getCategoryId(), item.getId());
             Long last = recentPurchases.get(lockKey);
             if (last != null && now - last < 650L) {
                 return TransactionResult.DUPLICATE;
@@ -213,12 +218,41 @@ public class ShopManager {
             return TransactionResult.SUCCESS;
         }
 
-        if (player.getInventory().firstEmpty() == -1) return TransactionResult.INVENTORY_FULL;
+        if (!hasRoomFor(player, item.getMaterial(), amount)) return TransactionResult.INVENTORY_FULL;
         economy.withdrawPlayer(player, total);
         item.removeStock(amount);
         ItemStack stack = buildVanillaItem(item, amount);
         player.getInventory().addItem(stack);
         return TransactionResult.SUCCESS;
+    }
+
+    /**
+     * Vérifie que amount unités de mat rentrent réellement dans l'inventaire, en tenant
+     * compte du max-stack-size du matériau (ex: les outils ont un max-stack de 1). L'ancien
+     * check ne vérifiait qu'un seul slot vide, donc un achat en grande quantité d'un item à
+     * stack réduit (ex: x8 pioches) était débité en entier alors que addItem() ne pouvait en
+     * donner qu'une partie — le reste disparaissait silencieusement.
+     */
+    private boolean hasRoomFor(Player player, Material mat, int amount) {
+        ItemStack[] contents = player.getInventory().getStorageContents();
+        if (contents == null) return false;
+
+        int remaining = amount;
+        for (ItemStack stack : contents) {
+            if (stack != null && stack.getType() == mat) {
+                remaining -= (stack.getMaxStackSize() - stack.getAmount());
+            }
+        }
+        if (remaining <= 0) return true;
+
+        int maxStackSize = mat.getMaxStackSize();
+        for (ItemStack stack : contents) {
+            if (stack == null || stack.getType() == Material.AIR) {
+                remaining -= maxStackSize;
+                if (remaining <= 0) return true;
+            }
+        }
+        return remaining <= 0;
     }
 
     private ItemStack[] resolveCustomItems(String customId) {
@@ -262,10 +296,13 @@ public class ShopManager {
         if (economy == null) return TransactionResult.NO_ECONOMY;
         if (!item.canSell()) return TransactionResult.DISABLED;
 
-        int has = countInInventory(player, item.getMaterial());
+        boolean allowEnchanted = plugin.getConfig().getBoolean("shop.allow-enchanted-sell", false);
+        boolean allowDamaged = plugin.getConfig().getBoolean("shop.allow-damaged-sell", false);
+
+        int has = countInInventory(player, item.getMaterial(), allowEnchanted, allowDamaged);
         if (has < amount) return TransactionResult.NOT_ENOUGH_ITEMS;
 
-        removeFromInventory(player, item.getMaterial(), amount);
+        removeFromInventory(player, item.getMaterial(), amount, allowEnchanted, allowDamaged);
         item.addStock(amount);
         economy.depositPlayer(player, item.getSellPrice() * amount);
         return TransactionResult.SUCCESS;
@@ -303,20 +340,23 @@ public class ShopManager {
         return stack;
     }
 
-    private int countInInventory(Player player, Material mat) {
+    private int countInInventory(Player player, Material mat, boolean allowEnchanted, boolean allowDamaged) {
         int count = 0;
         for (ItemStack stack : player.getInventory().getContents()) {
-            if (stack != null && stack.getType() == mat) count += stack.getAmount();
+            if (stack == null || stack.getType() != mat) continue;
+            if (!isSellable(stack, allowEnchanted, allowDamaged)) continue;
+            count += stack.getAmount();
         }
         return count;
     }
 
-    private void removeFromInventory(Player player, Material mat, int amount) {
+    private void removeFromInventory(Player player, Material mat, int amount, boolean allowEnchanted, boolean allowDamaged) {
         int remaining = amount;
         ItemStack[] contents = player.getInventory().getContents();
         for (int i = 0; i < contents.length && remaining > 0; i++) {
             ItemStack stack = contents[i];
             if (stack == null || stack.getType() != mat) continue;
+            if (!isSellable(stack, allowEnchanted, allowDamaged)) continue;
             if (stack.getAmount() <= remaining) {
                 remaining -= stack.getAmount();
                 player.getInventory().setItem(i, null);
@@ -325,6 +365,22 @@ public class ShopManager {
                 remaining = 0;
             }
         }
+    }
+
+    /**
+     * Applique shop.allow-enchanted-sell et shop.allow-damaged-sell : ces deux clés existaient
+     * dans config.yml mais n'étaient lues nulle part, donc un item enchanté ou quasi-cassé se
+     * vendait au même prix qu'un neuf. Les copies non éligibles sont simplement ignorées (ni
+     * comptées, ni retirées) — si le joueur n'en a pas assez d'éligibles, il retombe sur le
+     * message "pas assez de {item}" déjà existant.
+     */
+    private boolean isSellable(ItemStack stack, boolean allowEnchanted, boolean allowDamaged) {
+        if (!allowEnchanted && !stack.getEnchantments().isEmpty()) return false;
+        if (!allowDamaged) {
+            ItemMeta meta = stack.getItemMeta();
+            if (meta instanceof Damageable dmg && dmg.getDamage() > 0) return false;
+        }
+        return true;
     }
 
     private Material parseMat(String name) {

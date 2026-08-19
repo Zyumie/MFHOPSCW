@@ -5,7 +5,9 @@
 # buy-price: prix pour acheter 1 unité (-1 = achat désactivé)
 # sell-price: prix pour vendre 1 unité (-1 = vente désactivée)
 # stock: stock disponible (-1 = illimité)
-# slot: position dans le GUI de catégorie (0-based dans la zone items, définie dans Gui.yml)
+# slot: ordre d'affichage de l'item dans sa catégorie (0 = premier affiché, 1 = second, ...).
+#   Ce n'est PAS un numéro de slot d'inventaire littéral : la position réelle dans le GUI
+#   dépend de main-gui.items-area (Gui.yml), qui peut changer indépendamment de ce nombre.
 # custom-model-data: optionnel, pour les resource packs
 # trim: optionnel, pour ajouté de la variété
 #   | Motifs : COAST, DUNE, EYE, RIB, SENTRY, SHAPER, SILENCE, SNOUT, SPIRE, TIDE, VEX, WARD, WAYFINDER, RAISER, SHAPER, HOST

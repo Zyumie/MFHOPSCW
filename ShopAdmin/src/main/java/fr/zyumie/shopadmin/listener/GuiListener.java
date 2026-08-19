@@ -39,29 +39,41 @@ public class GuiListener implements Listener {
 
         int slot = e.getRawSlot();
 
-        if (holder.getType() == ShopHolder.Type.MAIN) {
+        if (holder.getType() == ShopHolder.Type.HUB) {
+            handleHub(player, slot);
+        } else if (holder.getType() == ShopHolder.Type.MAIN) {
             handleMain(player, slot, holder, e.isRightClick(), e.isShiftClick());
         } else if (holder.getType() == ShopHolder.Type.QUANTITY) {
             handleQty(player, slot, holder);
         }
     }
 
-    private void handleMain(Player player, int slot, ShopHolder holder,
-                            boolean rightClick, boolean shiftClick) {
-        List<ShopCategory> cats = manager.getCategoryList();
+    private void handleHub(Player player, int slot) {
         FileConfiguration guiConfig = plugin.getGuiConfig();
+        List<ShopCategory> cats = manager.getCategoryList();
 
-        if (slot < 9 && slot < cats.size()) {
-            holder.setCategoryId(cats.get(slot).getId());
-            holder.setPage(0);
-            gui.open(player, holder.getCategoryId(), 0);
-            return;
+        int[] catSlots = ShopGui.getHubCategorySlots(guiConfig);
+        for (int i = 0; i < catSlots.length && i < cats.size(); i++) {
+            if (catSlots[i] == slot) {
+                gui.open(player, cats.get(i).getId(), 0);
+                return;
+            }
         }
 
+        int closeSlot = guiConfig.getInt("hub.navigation.close.slot", 22);
+        if (slot == closeSlot) { player.closeInventory(); }
+    }
+
+    private void handleMain(Player player, int slot, ShopHolder holder,
+                            boolean rightClick, boolean shiftClick) {
+        FileConfiguration guiConfig = plugin.getGuiConfig();
+
+        int backSlot = guiConfig.getInt("main-gui.navigation.back.slot", 46);
         int prevSlot = guiConfig.getInt("main-gui.navigation.prev-page.slot", 45);
         int nextSlot = guiConfig.getInt("main-gui.navigation.next-page.slot", 53);
         int closeSlot = guiConfig.getInt("main-gui.navigation.close.slot", 49);
 
+        if (slot == backSlot) { gui.openHub(player); return; }
         if (slot == closeSlot) { player.closeInventory(); return; }
         if (slot == prevSlot && holder.getPage() > 0) {
             holder.setPage(holder.getPage() - 1);
@@ -72,7 +84,7 @@ public class GuiListener implements Listener {
             gui.open(player, holder.getCategoryId(), holder.getPage()); return;
         }
 
-        int[] itemSlots = ShopGui.getItemSlots();
+        int[] itemSlots = ShopGui.getItemSlots(guiConfig);
         for (int i = 0; i < itemSlots.length; i++) {
             if (itemSlots[i] != slot) continue;
 
@@ -140,6 +152,8 @@ public class GuiListener implements Listener {
             case INVENTORY_FULL -> send(player, plugin.getConfig().getString("messages.inventory-full", ""));
             case NOT_ENOUGH_ITEMS -> send(player, plugin.getConfig().getString("messages.not-enough-items", "").replace("{item}", item.getName()));
             case DISABLED -> send(player, plugin.getConfig().getString("messages.sell-disabled", ""));
+            case NO_ECONOMY -> send(player, plugin.getConfig().getString("messages.no-economy", ""));
+            case DUPLICATE -> send(player, plugin.getConfig().getString("messages.duplicate-purchase", ""));
             default -> {}
         }
     }
