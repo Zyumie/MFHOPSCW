@@ -29,6 +29,7 @@
 
 - 📖 [Readme](README.md)
 - 🛠️ [CustomItems](CUSTOMITEMS.md)
+- 💵 [Money](MONEY.md)
 
 ---
 
