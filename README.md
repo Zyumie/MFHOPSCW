@@ -28,6 +28,7 @@
 ## 📁 Documentation
 
 - 📖 [Readme](README.md)
+- 💵 [Money](MONEY.md)
 - 🛠️ [CustomItems](CUSTOMITEMS.md)
 
 ---
