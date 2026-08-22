@@ -1,4 +1,4 @@
-# Profil (ProfilePlugin)
+# Profil
 
 Affiche une carte de profil pour soi-même ou un autre joueur : statut en ligne, solde (via Vault) et faction (via FactionPlugin) — si ces modules sont présents.
 
