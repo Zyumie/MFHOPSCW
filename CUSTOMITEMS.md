@@ -779,5 +779,4 @@ String id = container.get(key, PersistentDataType.STRING);
 
 ---
 
-*© 2026 Zyumie — Zyumie Production. Tous droits réservés.*
-WIKIEOF
+*Dernière révision : 22 août 2026.*
