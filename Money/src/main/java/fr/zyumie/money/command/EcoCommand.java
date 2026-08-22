@@ -2,7 +2,7 @@ package fr.zyumie.money.command;
 
 import fr.zyumie.money.Money;
 import fr.zyumie.money.MoneyManager;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import fr.zyumie.money.util.Msg;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -12,6 +12,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Locale;
 
 public class EcoCommand implements CommandExecutor, TabCompleter {
 
@@ -29,10 +30,10 @@ public class EcoCommand implements CommandExecutor, TabCompleter {
             send(sender, msg("messages.no-permission")); return true;
         }
         if (args.length < 3) {
-            send(sender, "<red>Usage: /eco <give|set|take> <joueur> <montant>"); return true;
+            send(sender, "&cUsage: /eco <give|set|take> <joueur> <montant>"); return true;
         }
 
-        String action = args[0].toLowerCase();
+        String action = args[0].toLowerCase(Locale.ROOT);
         String targetName = args[1];
         double amount;
 
@@ -48,7 +49,7 @@ public class EcoCommand implements CommandExecutor, TabCompleter {
 
         String displayName = target.getName() != null ? target.getName() : targetName;
         String plural = plugin.getConfig().getString("economy.currency-plural", "Crédits");
-        String amountStr = String.format("%.2f", amount);
+        String amountStr = String.format(Locale.ROOT, "%.2f", amount);
 
         switch (action) {
             case "give" -> {
@@ -66,7 +67,7 @@ public class EcoCommand implements CommandExecutor, TabCompleter {
                 send(sender, msg("messages.eco-set")
                         .replace("{amount}", amountStr).replace("{player}", displayName).replace("{currency}", plural));
             }
-            default -> send(sender, "<red>Action inconnue. Usage: /eco <give|set|take> <joueur> <montant>");
+            default -> send(sender, "&cAction inconnue. Usage: /eco <give|set|take> <joueur> <montant>");
         }
         return true;
     }
@@ -74,9 +75,11 @@ public class EcoCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length == 1) return List.of("give", "set", "take");
-        if (args.length == 2)
+        if (args.length == 2) {
+            String prefix = args[1].toLowerCase(Locale.ROOT);
             return Bukkit.getOnlinePlayers().stream().map(Player::getName)
-                    .filter(n -> n.toLowerCase().startsWith(args[1].toLowerCase())).toList();
+                    .filter(n -> n.toLowerCase(Locale.ROOT).startsWith(prefix)).toList();
+        }
         return List.of();
     }
 
@@ -84,10 +87,6 @@ public class EcoCommand implements CommandExecutor, TabCompleter {
     private String prefix()         { return msg("messages.prefix"); }
 
     private void send(CommandSender s, String legacy) {
-        s.sendMessage(MiniMessage.miniMessage().deserialize(
-                (prefix() + legacy)
-                        .replace("&8","<dark_gray>").replace("&6","<gold>")
-                        .replace("&e","<yellow>").replace("&a","<green>")
-                        .replace("&c","<red>").replace("&7","<gray>")));
+        Msg.send(s, prefix() + legacy);
     }
 }

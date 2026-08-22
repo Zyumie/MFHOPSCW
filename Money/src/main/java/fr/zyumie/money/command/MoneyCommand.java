@@ -2,7 +2,7 @@ package fr.zyumie.money.command;
 
 import fr.zyumie.money.Money;
 import fr.zyumie.money.MoneyManager;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import fr.zyumie.money.util.Msg;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -12,6 +12,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.Locale;
 
 public class MoneyCommand implements CommandExecutor, TabCompleter {
 
@@ -47,23 +48,21 @@ public class MoneyCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
-        if (args.length == 1)
+        if (args.length == 1) {
+            String prefix = args[0].toLowerCase(Locale.ROOT);
             return Bukkit.getOnlinePlayers().stream().map(Player::getName)
-                    .filter(n -> n.toLowerCase().startsWith(args[0].toLowerCase())).toList();
+                    .filter(n -> n.toLowerCase(Locale.ROOT).startsWith(prefix)).toList();
+        }
         return List.of();
     }
 
     private String msg(String path)  { return plugin.getConfig().getString(path, ""); }
     private String singular()        { return plugin.getConfig().getString("economy.currency-singular", "Crédit"); }
     private String plural()          { return plugin.getConfig().getString("economy.currency-plural", "Crédits"); }
-    private String fmt(double v)     { return String.format("%.2f", v); }
+    private String fmt(double v)     { return String.format(Locale.ROOT, "%.2f", v); }
     private String prefix()          { return msg("messages.prefix"); }
 
     private void send(CommandSender s, String legacy) {
-        s.sendMessage(MiniMessage.miniMessage().deserialize(
-                (prefix() + legacy)
-                        .replace("&8","<dark_gray>").replace("&6","<gold>")
-                        .replace("&e","<yellow>").replace("&a","<green>")
-                        .replace("&c","<red>").replace("&7","<gray>")));
+        Msg.send(s, prefix() + legacy);
     }
 }

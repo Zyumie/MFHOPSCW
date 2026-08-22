@@ -7,6 +7,7 @@ import org.bukkit.OfflinePlayer;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class MoneyManager {
 
@@ -32,6 +33,28 @@ public class MoneyManager {
             cache.put(uuid, starting);
             save(uuid);
         }
+    }
+
+    /**
+     * Équivalent async de loadPlayer(), à utiliser sur les chemins "chauds" comme la connexion
+     * d'un joueur (PlayerJoinEvent), pour ne pas bloquer le thread principal avec une lecture
+     * disque à chaque connexion. La lecture se fait hors-thread ; le cache (partagé) n'est modifié
+     * que depuis le thread principal, comme partout ailleurs dans cette classe.
+     * getBalance() garde son filet de sécurité synchrone si ce chargement n'a pas eu le temps de finir.
+     */
+    public void loadPlayerAsync(UUID uuid) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            DataStore store = MainAPI.get().getDataStore();
+            Map<String, Object> raw = store.load(NS, uuid.toString());
+            double starting = plugin.getConfig().getDouble("economy.starting-balance", 500.0);
+            boolean isNew = !(raw != null && raw.get("balance") instanceof Number);
+            double value = isNew ? starting : ((Number) raw.get("balance")).doubleValue();
+
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                cache.put(uuid, value);
+                if (isNew) save(uuid); // écrit le solde de départ pour un tout nouveau joueur
+            });
+        });
     }
 
     public void save(UUID uuid) {
@@ -85,11 +108,25 @@ public class MoneyManager {
 
     // ── Classement ───────────────────────────────────────────────────────
 
+    // Cache du classement complet trié, pour éviter de rescanner tout le DataStore à chaque
+    // /moneytop. Un scan complet charge depuis le disque CHAQUE joueur connu non déjà en cache
+    // mémoire : coûteux et inutile si deux joueurs tapent /moneytop à quelques secondes d'intervalle.
+    // Durée réglable via moneytop.cache-seconds (0 = désactive le cache, toujours à jour).
+    private volatile List<Map.Entry<String, Double>> topCache;
+    private final AtomicLong topCacheAt = new AtomicLong(0L);
+
     /**
      * Retourne les N entrées les plus riches (tous les joueurs connus, online ou offline).
-     * Charge les données de tous les UUID connus depuis le DataStore.
+     * Charge les données de tous les UUID connus depuis le DataStore (avec cache configurable).
      */
     public List<Map.Entry<String, Double>> getTopBalances(int limit) {
+        long ttlMs = plugin.getConfig().getLong("moneytop.cache-seconds", 30) * 1000L;
+        List<Map.Entry<String, Double>> cached = topCache;
+        long now = System.currentTimeMillis();
+        if (cached != null && ttlMs > 0 && (now - topCacheAt.get()) < ttlMs) {
+            return cached.size() > limit ? cached.subList(0, limit) : cached;
+        }
+
         DataStore store = MainAPI.get().getDataStore();
         Map<String, Double> all = new LinkedHashMap<>();
 
@@ -112,10 +149,14 @@ public class MoneyManager {
             } catch (IllegalArgumentException ignored) {}
         }
 
-        return all.entrySet().stream()
+        List<Map.Entry<String, Double>> sorted = all.entrySet().stream()
                 .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
-                .limit(limit)
                 .toList();
+
+        topCache = sorted;
+        topCacheAt.set(now);
+
+        return sorted.size() > limit ? sorted.subList(0, limit) : sorted;
     }
 
     private String nameOf(UUID uuid) {

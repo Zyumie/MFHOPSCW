@@ -5,6 +5,7 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.OfflinePlayer;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Implémente l'interface Vault Economy et s'enregistre comme provider.
@@ -28,7 +29,7 @@ public class VaultEconomyProvider implements Economy {
 
     @Override
     public String format(double amount) {
-        return String.format("%.2f %s", amount, currencyNamePlural());
+        return String.format(Locale.ROOT, "%.2f %s", amount, currencyNamePlural());
     }
 
     @Override

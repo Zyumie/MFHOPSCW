@@ -16,7 +16,9 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
-        manager.loadPlayer(e.getPlayer().getUniqueId());
+        // Chargement async : évite de bloquer le thread principal avec une lecture disque
+        // à chaque connexion. getBalance() garde un filet de sécurité synchrone au besoin.
+        manager.loadPlayerAsync(e.getPlayer().getUniqueId());
     }
 
     @EventHandler

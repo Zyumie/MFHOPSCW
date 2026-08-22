@@ -2,13 +2,14 @@ package fr.zyumie.money.command;
 
 import fr.zyumie.money.Money;
 import fr.zyumie.money.MoneyManager;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import fr.zyumie.money.util.Msg;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class MoneyTopCommand implements CommandExecutor, TabCompleter {
@@ -48,12 +49,12 @@ public class MoneyTopCommand implements CommandExecutor, TabCompleter {
             send(sender, msg("messages.moneytop-entry")
                     .replace("{rank}", String.valueOf(rank++))
                     .replace("{player}", e.getKey())
-                    .replace("{amount}", String.format("%.2f", e.getValue()))
+                    .replace("{amount}", String.format(Locale.ROOT, "%.2f", e.getValue()))
                     .replace("{currency}", plural));
         }
 
         if (pageEntries.isEmpty()) {
-            send(sender, "<gray>Aucune entrée.");
+            send(sender, "&7Aucune entrée.");
         }
         return true;
     }
@@ -67,10 +68,6 @@ public class MoneyTopCommand implements CommandExecutor, TabCompleter {
     private String prefix()         { return msg("messages.prefix"); }
 
     private void send(CommandSender s, String legacy) {
-        s.sendMessage(MiniMessage.miniMessage().deserialize(
-                (prefix() + legacy)
-                        .replace("&8","<dark_gray>").replace("&6","<gold>")
-                        .replace("&e","<yellow>").replace("&a","<green>")
-                        .replace("&7","<gray>")));
+        Msg.send(s, prefix() + legacy);
     }
 }

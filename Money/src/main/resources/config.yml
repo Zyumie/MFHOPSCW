@@ -27,6 +27,9 @@ physical-item:
 # Classement
 moneytop:
   entries-per-page: 10
+  # Durée (secondes) pendant laquelle le classement est mis en cache avant de rescanner
+  # tous les joueurs sur le disque. 0 = désactive le cache (toujours à jour, mais plus lent).
+  cache-seconds: 30
 
 messages:
   prefix: "&8[&6Money&8] &7"
