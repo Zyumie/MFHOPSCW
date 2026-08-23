@@ -115,6 +115,12 @@ public class MoneyManager {
     private volatile List<Map.Entry<String, Double>> topCache;
     private final AtomicLong topCacheAt = new AtomicLong(0L);
 
+    /** Force le prochain /moneytop à rescanner le DataStore plutôt que de servir le cache — utilisé par /money reload. */
+    public void invalidateTopCache() {
+        topCache = null;
+        topCacheAt.set(0L);
+    }
+
     /**
      * Retourne les N entrées les plus riches (tous les joueurs connus, online ou offline).
      * Charge les données de tous les UUID connus depuis le DataStore (avec cache configurable).

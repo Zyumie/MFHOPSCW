@@ -1,0 +1,36 @@
+# =========================================
+#   Profil - Configuration
+# =========================================
+
+display:
+  # Mode d'affichage de /profile : "chat" (texte dans le chat) ou "gui" (inventaire, voir gui.yml)
+  # Si "gui" est choisi mais que l'expéditeur n'est pas un joueur (ex: console), on retombe sur "chat".
+  mode: chat
+
+messages:
+  # --- Mode chat ---
+  header: "&8┌───────────────────────"
+  spacer: "&8│"
+  footer: "&8└───────────────────────"
+  name-line-prefix: "&8│ "
+  name-format: "&b&l"
+  separator: "&8 — "
+  line-prefix: "&8│ &7"
+  money-label: "💰 Argent        : "
+  faction-label: "⚔ Faction       : "
+  bank-label: "🏦 Bank faction : "
+  value-color: "&f"
+  value-fallback-color: "&7"
+  usage: "&cUsage: /profile <joueur>"
+  player-not-found: "&cJoueur introuvable : "
+  no-permission: "&cTu n'as pas la permission."
+  reload-success: "&aConfiguration Profil rechargée (config.yml + gui.yml)."
+
+  # --- Communs chat + gui ---
+  status-online: "En ligne"
+  status-offline: "Hors ligne"
+  no-economy: "Aucun plugin économie"
+  no-faction-module: "Module faction inactif"
+  no-faction: "Aucune"
+  no-faction-bank: "N/A"
+  no-faction-selected: "Aucune faction"

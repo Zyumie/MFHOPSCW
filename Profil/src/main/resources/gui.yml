@@ -1,0 +1,52 @@
+# =========================================
+#   Profil - Configuration du GUI
+#   (utilisé si config.yml -> display.mode: gui)
+# =========================================
+
+title: "&8Profil de &b{player}"
+rows: 3   # 1 à 6
+
+# Remplissage des slots non utilisés. "material: NONE" pour désactiver.
+filler:
+  material: GRAY_STAINED_GLASS_PANE
+  name: " "
+
+# Placeholders disponibles dans name/lore : {player} {status} {money} {faction} {bank}
+#
+# Layout par défaut (3 lignes, tête au centre) :
+#   .  .  .  .  .  .  .  .  .
+#   .  .  MONEY  .  HEAD  .  FACTION  .  .
+#   .  .  .  .  BANK  .  .  .  .
+items:
+
+  head:
+    slot: 13
+    type: HEAD              # tête (skin) du joueur affiché — le material n'est pas utilisé pour ce type
+    name: "&b&l{player}"
+    lore:
+      - ""
+      - "{status}"
+
+  money:
+    slot: 11
+    type: MONEY
+    material: GOLD_INGOT
+    name: "&7Argent"
+    lore:
+      - "&f{money}"
+
+  faction:
+    slot: 15
+    type: FACTION
+    material: WHITE_BANNER
+    name: "&7Faction"
+    lore:
+      - "&f{faction}"
+
+  faction-bank:
+    slot: 22
+    type: FACTION_BANK
+    material: CHEST
+    name: "&7Banque de faction"
+    lore:
+      - "&f{bank}"

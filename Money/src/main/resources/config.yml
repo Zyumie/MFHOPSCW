@@ -47,5 +47,6 @@ messages:
   player-not-found: "&cJoueur introuvable: &e{player}"
   invalid-amount: "&cMontant invalide."
   no-permission: "&cTu n'as pas la permission."
+  reload-success: "&aConfiguration Money rechargée."
   moneytop-header: "&8─── &6Classement des richesses &8(page {page}/{max}) ───"
   moneytop-entry: "  &7{rank}. &e{player} &7— &e{amount} {currency}"

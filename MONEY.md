@@ -14,9 +14,11 @@ Système d'économie du serveur. Gère le solde des joueurs et s'enregistre comm
 | Commande | Alias | Description | Permission |
 |---|---|---|---|
 | `/money [joueur]` | `/balance`, `/bal` | Affiche ton solde, ou celui d'un autre joueur si un pseudo est donné | — |
+| `/money reload` | — | Recharge `config.yml` à chaud (sans redémarrer le serveur) | `money.admin` |
 | `/pay <joueur> <montant>` | — | Transfère de l'argent à un joueur **en ligne** | — |
 | `/moneytop [page]` | `/baltop` | Classement des joueurs les plus riches (en ligne + hors ligne) | — |
 | `/eco <give\|set\|take> <joueur> <montant>` | — | Donne / fixe / retire le solde d'un joueur | `money.admin` |
+| `/money reload` | — | Recharge `config.yml` à chaud et vide le cache du classement | `money.admin` |
 
 Le montant accepte la virgule ou le point comme séparateur décimal (`10,5` ou `10.5`).
 
@@ -67,6 +69,8 @@ messages:
 - **`/moneytop`** ne rescanne le `DataStore` en entier que si le cache a expiré (`moneytop.cache-seconds`) ; sinon il ressert la même liste triée déjà en mémoire.
 - **`createPlayerAccount()`** et **`hasAccount()`** (interface Vault) retournent toujours `true` / déclenchent un chargement : il n'existe pas de notion de "compte inexistant" côté Money, un joueur a toujours un solde par défaut (`economy.starting-balance`).
 - La sauvegarde à la déconnexion est volontairement **synchrone** (contrairement au chargement à la connexion, async) pour garantir l'intégrité des soldes à l'arrêt du serveur.
+- **`/money reload`** recharge `config.yml` (`plugin.reloadConfig()`) et invalide le cache de `/moneytop`, pour qu'un `cache-seconds` modifié (ou n'importe quel autre réglage) s'applique immédiatement sans redémarrage. Comme la quasi-totalité des valeurs de config sont déjà lues à la demande (pas mises en cache au démarrage), le reload suffit à tout appliquer d'un coup.
+- `/money reload` appelle `reloadConfig()` (Bukkit) puis `MoneyManager#invalidateTopCache()` : aucun redémarrage du serveur nécessaire pour appliquer un changement dans `config.yml`. Comme tous les autres réglages (`starting-balance`, libellés, `cache-seconds`, ...) sont déjà relus depuis `getConfig()` à chaque utilisation plutôt que mis en cache dans un champ, ils sont à jour dès le reload sans code supplémentaire.
 
 ---
 *Dernière révision : 22 août 2026.*

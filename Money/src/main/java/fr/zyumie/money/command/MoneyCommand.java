@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -26,6 +27,16 @@ public class MoneyCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (args.length >= 1 && args[0].equalsIgnoreCase("reload")) {
+            if (!sender.hasPermission("money.admin")) {
+                send(sender, msg("messages.no-permission")); return true;
+            }
+            plugin.reloadConfig();
+            manager.invalidateTopCache();
+            send(sender, msg("messages.reload-success"));
+            return true;
+        }
+
         if (args.length == 0) {
             // /money → propre solde
             if (!(sender instanceof Player player)) { sender.sendMessage("Usage: /money <joueur>"); return true; }
@@ -50,8 +61,14 @@ public class MoneyCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length == 1) {
             String prefix = args[0].toLowerCase(Locale.ROOT);
-            return Bukkit.getOnlinePlayers().stream().map(Player::getName)
-                    .filter(n -> n.toLowerCase(Locale.ROOT).startsWith(prefix)).toList();
+            List<String> suggestions = new ArrayList<>();
+            if (sender.hasPermission("money.admin") && "reload".startsWith(prefix)) {
+                suggestions.add("reload");
+            }
+            Bukkit.getOnlinePlayers().stream().map(Player::getName)
+                    .filter(n -> n.toLowerCase(Locale.ROOT).startsWith(prefix))
+                    .forEach(suggestions::add);
+            return suggestions;
         }
         return List.of();
     }

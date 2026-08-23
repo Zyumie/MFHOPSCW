@@ -1,7 +1,9 @@
 package fr.zyumie.profile.command;
 
+import fr.zyumie.profile.ProfileData;
+import fr.zyumie.profile.gui.ProfileGuiManager;
+import fr.zyumie.profile.util.Msg;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -13,31 +15,46 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Locale;
 
 public class ProfileCommand implements CommandExecutor, TabCompleter {
 
     private final JavaPlugin plugin;
+    private final ProfileGuiManager guiManager;
 
-    public ProfileCommand(JavaPlugin plugin) {
+    public ProfileCommand(JavaPlugin plugin, ProfileGuiManager guiManager) {
         this.plugin = plugin;
+        this.guiManager = guiManager;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (args.length >= 1 && args[0].equalsIgnoreCase("reload")) {
+            if (!sender.hasPermission("profile.admin")) {
+                sender.sendMessage(mm(msg("messages.no-permission")));
+                return true;
+            }
+            plugin.reloadConfig();
+            guiManager.reload();
+            sender.sendMessage(mm(msg("messages.reload-success")));
+            return true;
+        }
+
         OfflinePlayer target;
 
         if (args.length >= 1) {
             target = Bukkit.getOfflinePlayerIfCached(args[0]);
             if (target == null) {
-                sender.sendMessage(mm("<red>Joueur introuvable : " + args[0]));
+                // args[0] est écrit tel quel (Component.text), jamais réinterprété comme du MiniMessage/legacy
+                sender.sendMessage(mm(msg("messages.player-not-found")).append(Component.text(args[0])));
                 return true;
             }
         } else if (sender instanceof Player p) {
             target = p;
         } else {
-            sender.sendMessage("Usage: /profile <joueur>");
+            sender.sendMessage(mm(msg("messages.usage")));
             return true;
         }
 
@@ -48,32 +65,116 @@ public class ProfileCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length == 1) {
-            return Bukkit.getOnlinePlayers().stream()
+            String prefix = args[0].toLowerCase(Locale.ROOT);
+            List<String> suggestions = new ArrayList<>();
+            if (sender.hasPermission("profile.admin") && "reload".startsWith(prefix)) {
+                suggestions.add("reload");
+            }
+            Bukkit.getOnlinePlayers().stream()
                     .map(Player::getName)
-                    .filter(n -> n.toLowerCase().startsWith(args[0].toLowerCase()))
-                    .toList();
+                    .filter(n -> n.toLowerCase(Locale.ROOT).startsWith(prefix))
+                    .forEach(suggestions::add);
+            return suggestions;
         }
         return List.of();
     }
 
     private void showProfile(CommandSender viewer, OfflinePlayer target) {
-        String name = target.getName() != null ? target.getName() : "Inconnu";
-        String status = target.isOnline() ? "<green>● En ligne" : "<gray>○ Hors ligne";
+        ProfileData data = computeProfileData(target);
 
-        viewer.sendMessage(mm("<dark_gray>┌──────────────────────────────────"));
-        viewer.sendMessage(mm("<dark_gray>│ <aqua><bold>" + name + "</bold> <dark_gray>— " + status));
-        viewer.sendMessage(mm("<dark_gray>│"));
-        viewer.sendMessage(mm("<dark_gray>│ <gray>💰 Argent       : <white>" + getMoneyString(target)));
-        viewer.sendMessage(mm("<dark_gray>│ <gray>⚔ Faction       : <white>" + getFactionName(target.getUniqueId())));
-        viewer.sendMessage(mm("<dark_gray>│ <gray>🏦 Bank faction : <white>" + getFactionBank(target.getUniqueId())));
-        viewer.sendMessage(mm("<dark_gray>└──────────────────────────────────"));
+        String mode = plugin.getConfig().getString("display.mode", "chat");
+        if (mode.equalsIgnoreCase("gui") && viewer instanceof Player viewerPlayer) {
+            guiManager.open(viewerPlayer, data);
+        } else {
+            showProfileChat(viewer, data);
+        }
     }
 
-    private String getMoneyString(OfflinePlayer player) {
+    /**
+     * Résout argent/faction/banque une seule fois pour ce /profile. Le résultat est ensuite
+     * utilisé aussi bien par l'affichage chat que par le GUI, pour ne jamais interroger
+     * Vault/FactionPlugin deux fois pour la même commande.
+     */
+    private ProfileData computeProfileData(OfflinePlayer target) {
+        fr.zyumie.faction.Faction factionPlugin = getFactionPlugin();
+        fr.zyumie.faction.model.Faction faction = (factionPlugin != null)
+                ? factionPlugin.getFactionManager().getFactionOf(target.getUniqueId())
+                : null;
         Economy eco = getEconomy();
-        if (eco == null) return "<gray>Aucun plugin économie";
 
-        return String.format("%.2f %s", eco.getBalance(player), eco.currencyNamePlural());
+        String money;
+        boolean moneyFallback;
+        if (eco == null) {
+            money = msg("messages.no-economy");
+            moneyFallback = true;
+        } else {
+            money = String.format(Locale.ROOT, "%.2f %s", eco.getBalance(target), eco.currencyNamePlural());
+            moneyFallback = false;
+        }
+
+        String factionName;
+        boolean factionFallback;
+        if (factionPlugin == null) {
+            factionName = msg("messages.no-faction-module");
+            factionFallback = true;
+        } else if (faction == null) {
+            factionName = msg("messages.no-faction");
+            factionFallback = true;
+        } else {
+            factionName = faction.getName();
+            factionFallback = false;
+        }
+
+        String bank;
+        boolean bankFallback;
+        if (factionPlugin == null) {
+            bank = msg("messages.no-faction-bank");
+            bankFallback = true;
+        } else if (faction == null) {
+            bank = msg("messages.no-faction-selected");
+            bankFallback = true;
+        } else {
+            bank = String.format(
+                    Locale.ROOT, "%.2f%s",
+                    faction.getBankBalance(),
+                    eco != null ? " " + eco.currencyNamePlural() : ""
+            );
+            bankFallback = false;
+        }
+
+        return new ProfileData(target, target.isOnline(), money, moneyFallback, factionName, factionFallback, bank, bankFallback);
+    }
+
+    private void showProfileChat(CommandSender viewer, ProfileData data) {
+        String name = data.target().getName() != null ? data.target().getName() : "Inconnu";
+        Component status = mm(msg(data.online() ? "messages.status-online" : "messages.status-offline"));
+
+        viewer.sendMessage(mm(msg("messages.header")));
+        // Nom du joueur toujours en texte brut (Component.text), jamais réinterprété comme du MiniMessage :
+        // un pseudo ne peut pas contenir de balise, mais on reste cohérent avec le reste de la classe.
+        viewer.sendMessage(mm(msg("messages.name-line-prefix") + msg("messages.name-format"))
+                .append(Component.text(name))
+                .append(mm(msg("messages.separator")))
+                .append(status));
+        viewer.sendMessage(mm(msg("messages.spacer")));
+        viewer.sendMessage(valueLine("messages.money-label", data.money(), data.moneyFallback()));
+        viewer.sendMessage(valueLine("messages.faction-label", data.faction(), data.factionFallback()));
+        viewer.sendMessage(valueLine("messages.bank-label", data.bank(), data.bankFallback()));
+        viewer.sendMessage(mm(msg("messages.footer")));
+    }
+
+    /**
+     * Construit une ligne "préfixe + label + couleur de valeur" (tout config, donc fiable),
+     * puis ajoute la valeur elle-même en texte brut, jamais reparsée.
+     */
+    private Component valueLine(String labelKey, String value, boolean fallback) {
+        String colorKey = fallback ? "messages.value-fallback-color" : "messages.value-color";
+        return mm(msg("messages.line-prefix") + msg(labelKey) + msg(colorKey))
+                .append(Component.text(value));
+    }
+
+    private String msg(String path) {
+        return plugin.getConfig().getString(path, "");
     }
 
     private Economy getEconomy() {
@@ -93,41 +194,7 @@ public class ProfileCommand implements CommandExecutor, TabCompleter {
         return null;
     }
 
-    private String getFactionName(UUID uuid) {
-        fr.zyumie.faction.Faction fp = getFactionPlugin();
-
-        if (fp == null) {
-            return "<gray>Module faction inactif";
-        }
-
-        fr.zyumie.faction.model.Faction faction = fp.getFactionManager().getFactionOf(uuid);
-
-        return faction != null ? faction.getName() : "<gray>Aucune";
-    }
-
-    private String getFactionBank(UUID uuid) {
-        fr.zyumie.faction.Faction fp = getFactionPlugin();
-
-        if (fp == null) {
-            return "<gray>N/A";
-        }
-
-        fr.zyumie.faction.model.Faction faction = fp.getFactionManager().getFactionOf(uuid);
-
-        if (faction == null) {
-            return "<gray>Aucune faction";
-        }
-
-        Economy eco = getEconomy();
-
-        return String.format(
-                "%.2f%s",
-                faction.getBankBalance(),
-                eco != null ? " " + eco.currencyNamePlural() : ""
-        );
-    }
-
     private Component mm(String s) {
-        return MiniMessage.miniMessage().deserialize(s);
+        return Msg.parse(s);
     }
 }
