@@ -44,10 +44,10 @@
 | **Économie** | `Money` | `fr.zyumie.money` | Monnaie virtuelle, provider Vault |
 | **Économie** | `ShopAdmin` | `fr.zyumie.shopadmin` | Boutique admin GUI, catégories, quantités |
 | **Économie** | `Hdv` | `fr.zyumie.hdv` | Hôtel des Ventes joueur-à-joueur |
-| **Gameplay** | `FactionPlugin` | `fr.zyumie.faction` | Factions, 5 grades, bank liée à Vault |
-| **Gameplay** | `WeeklyQuestPlugin` | `fr.zyumie.quest` | Quêtes hebdo, cycle 12 semaines, récompenses faction |
-| **Gameplay** | `ProfilePlugin` | `fr.zyumie.profile` | Profil joueur — argent, faction, bank |
-| **Gameplay** | `HomePlugin` | `fr.zyumie.home` | /sethome débloqué après 1ère mort, cooldown 5min |
+| **Gameplay** | `Faction` | `fr.zyumie.faction` | Factions, 5 grades, bank liée à Vault |
+| **Gameplay** | `WeeklyQuest` | `fr.zyumie.quest` | Quêtes hebdo, cycle 12 semaines, récompenses faction |
+| **Gameplay** | `Profile` | `fr.zyumie.profile` | Profil joueur — argent, faction, bank |
+| **Gameplay** | `Home` | `fr.zyumie.home` | /sethome débloqué après 1ère mort, cooldown 5min |
 | **Monde** | `Storm` | `fr.zyumie.storm` | Tempête apocalyptique hebdomadaire, cycle réel |
 | **Items** | `CustomItems` | `fr.zyumie.customitems` | 4 armures + 4 armes custom, PDC-based |
 
@@ -64,12 +64,12 @@ SMP/  (Gradle multi-module)
 │   ├── Money               ← depend: [Main, Vault]   → Vault Economy provider
 │   │   ├── ShopAdmin       ← depend: [Main, Vault, Money]
 │   │   └── Hdv             ← depend: [Main, Vault, Money]
-│   ├── FactionPlugin       ← depend: [Main, Vault]   → FactionAPI
-│   │   ├── WeeklyQuestPlugin  ← depend: [Main] + import direct FactionPlugin
-│   │   └── ProfilePlugin      ← depend: [Main] + import direct FactionPlugin
-│   ├── HomePlugin          ← depend: [Main]
+│   ├── Faction             ← depend: [Main, Vault]   → FactionAPI
+│   │   ├── WeeklyQuest     ← depend: [Main] + import direct Faction
+│   │   └── Profile         ← depend: [Main] + import direct Faction
+│   ├── Home                ← depend: [Main]
 │   ├── Storm               ← depend: [Main]           → setImmunityChecker(Predicate)
-│   │   └── CustomItems     ← depend: [Main], softdepend: [Storm, FactionPlugin]
+│   │   └── CustomItems     ← depend: [Main], softdepend: [Storm, Faction]
 │   └── NewV5 (Minsane)     ← softdepend de Main uniquement (MisaneBridge stub)
 ```
 
