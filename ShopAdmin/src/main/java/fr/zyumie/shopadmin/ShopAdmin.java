@@ -4,9 +4,11 @@ import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.module.Module;
 import fr.zyumie.shopadmin.command.ShopCommand;
 import fr.zyumie.shopadmin.gui.ShopGui;
+import fr.zyumie.shopadmin.gui.ShopHolder;
 import fr.zyumie.shopadmin.listener.GuiListener;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -64,6 +66,15 @@ public class ShopAdmin extends JavaPlugin implements Module {
 
     @Override
     public void onModuleDisable() {
+        // Sans ça : le listener de clic restait enregistré (et un nouveau s'ajoutait à
+        // chaque réactivation, cf. onModuleEnable), et /shop continuait à ouvrir le GUI
+        // normalement — ni la coupure du module ni la fermeture des GUI ouverts n'avaient
+        // le moindre effet réel (cf. storm-lockout du Main).
+        if (guiListener != null) {
+            HandlerList.unregisterAll(guiListener);
+            guiListener = null;
+        }
+        closeOpenShops();
         getLogger().info("ShopAdmin désactivé.");
     }
 
@@ -72,8 +83,12 @@ public class ShopAdmin extends JavaPlugin implements Module {
         loadGuiConfig();
         shopGui = new ShopGui(this, shopManager);
         shopManager.loadShop();
+        closeOpenShops();
+    }
+
+    private void closeOpenShops() {
         getServer().getOnlinePlayers().forEach(p -> {
-            if (p.getOpenInventory().getTopInventory().getHolder() instanceof fr.zyumie.shopadmin.gui.ShopHolder)
+            if (p.getOpenInventory().getTopInventory().getHolder() instanceof ShopHolder)
                 p.closeInventory();
         });
     }

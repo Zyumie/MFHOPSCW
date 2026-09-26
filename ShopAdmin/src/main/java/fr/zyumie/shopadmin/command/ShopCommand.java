@@ -1,5 +1,6 @@
 package fr.zyumie.shopadmin.command;
 
+import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.shopadmin.ShopAdmin;
 import fr.zyumie.shopadmin.ShopManager;
 import fr.zyumie.shopadmin.gui.ShopGui;
@@ -34,6 +35,14 @@ public class ShopCommand implements CommandExecutor, TabCompleter {
             send(sender, plugin.getConfig().getString("messages.reload-success", "")); return true;
         }
         if (!(sender instanceof Player player)) { sender.sendMessage("Commande réservée aux joueurs."); return true; }
+
+        // Le module peut être coupé temporairement (ex: storm-lockout du Main) sans que
+        // la commande elle-même soit désenregistrée — donc on vérifie explicitement ici.
+        if (!MainAPI.get().getModuleManager().isEnabled("shop-admin")) {
+            send(player, plugin.getConfig().getString("messages.shop-closed", "&cLa boutique est fermée pour le moment."));
+            return true;
+        }
+
         gui.openHub(player);
         return true;
     }

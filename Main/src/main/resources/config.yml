@@ -28,6 +28,13 @@ modules:
   home: true
   Storm: true
 
+# Verrou tempête : modules à désactiver automatiquement tant qu'une tempête
+# (déclenchée par le module Storm) est en cours. Ils sont réactivés dès la fin
+# de la tempête, à condition d'être toujours autorisés dans "modules:" ci-dessus.
+# Seule la valeur "false" a un effet ici — inutile de lister un module à "true".
+storm-lockout:
+  shop-admin: false
+
 # Intégration avec le plugin de Misane (softdepend, optionnel)
 integration:
   misane:

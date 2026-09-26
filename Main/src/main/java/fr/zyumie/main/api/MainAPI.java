@@ -18,7 +18,7 @@ import fr.zyumie.main.storage.DataStore;
  *       }
  *   }
  *
- * IMPORTANT: le sous-plugin doit déclarer "depend: [MainPlugin]" dans son plugin.yml
+ * IMPORTANT: le sous-plugin doit déclarer "depend: [Main]" dans son plugin.yml
  * pour garantir que MainAPI.get() ne soit jamais null au moment de l'appel.
  */
 public final class MainAPI {
@@ -38,8 +38,8 @@ public final class MainAPI {
     public static MainAPI get() {
         if (instance == null) {
             throw new IllegalStateException(
-                "MainAPI n'est pas initialisée. Vérifie que MainPlugin est bien chargé " +
-                "et que ton sous-plugin a 'depend: [MainPlugin]' dans son plugin.yml."
+                "MainAPI n'est pas initialisée. Vérifie que Main est bien chargé " +
+                "et que ton sous-plugin a 'depend: [Main]' dans son plugin.yml."
             );
         }
         return instance;

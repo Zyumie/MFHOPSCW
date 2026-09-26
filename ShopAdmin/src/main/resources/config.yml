@@ -24,3 +24,4 @@ messages:
   reload-success: "&aShop rechargé avec succès."
   no-economy: "&cLa boutique est indisponible pour le moment (économie non détectée)."
   duplicate-purchase: "&cTrop rapide ! Réessaie dans un instant."
+  shop-closed: "&cLa boutique est fermée pour le moment."

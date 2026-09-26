@@ -45,7 +45,7 @@ public class MySQLDataStore implements DataStore {
         HikariConfig hikariConfig = new HikariConfig();
         String host = mysqlConfig.getString("host", "localhost");
         int port = mysqlConfig.getInt("port", 3306);
-        String database = mysqlConfig.getString("database", "mainplugin");
+        String database = mysqlConfig.getString("database", "main");
         boolean useSSL = mysqlConfig.getBoolean("useSSL", false);
 
         String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + database
@@ -55,7 +55,7 @@ public class MySQLDataStore implements DataStore {
         hikariConfig.setUsername(mysqlConfig.getString("user", "root"));
         hikariConfig.setPassword(mysqlConfig.getString("password", ""));
         hikariConfig.setMaximumPoolSize(mysqlConfig.getInt("poolSize", 10));
-        hikariConfig.setPoolName("MainPlugin-Pool");
+        hikariConfig.setPoolName("Main-Pool");
 
         this.dataSource = new HikariDataSource(hikariConfig);
         createTableIfNotExists();

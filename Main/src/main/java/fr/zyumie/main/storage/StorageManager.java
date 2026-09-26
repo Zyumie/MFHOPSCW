@@ -20,7 +20,7 @@ public class StorageManager {
                 this.dataStore = new MySQLDataStore(plugin, mysqlSection);
             }
         } else {
-            plugin.getLogger().info("Stockage: YAML (plugins/MainPlugin/data/)");
+            plugin.getLogger().info("Stockage: YAML (plugins/Main/data/)");
             this.dataStore = new YamlDataStore(plugin);
         }
     }

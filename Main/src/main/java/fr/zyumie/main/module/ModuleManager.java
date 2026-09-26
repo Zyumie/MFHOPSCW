@@ -23,8 +23,8 @@ public class ModuleManager {
      *
      *   MainAPI.get().getModuleManager().register(new OxygenModule(this));
      *
-     * Si MainPlugin n'est pas encore prêt (ordre de chargement), le sous-plugin
-     * doit avoir "depend: [MainPlugin]" dans son plugin.yml pour garantir l'ordre.
+     * Si Main n'est pas encore prêt (ordre de chargement), le sous-plugin
+     * doit avoir "depend: [Main]" dans son plugin.yml pour garantir l'ordre.
      */
     public void register(Module module) {
         if (registered.containsKey(module.getId())) {
@@ -42,6 +42,39 @@ public class ModuleManager {
             m.onModuleDisable();
             enabled.remove(id);
         }
+    }
+
+    /**
+     * Désactive un module encore enregistré, SANS le désenregistrer (contrairement à
+     * {@link #unregister}) : il reste dans {@link #registered} et pourra être réactivé
+     * plus tard via {@link #enable(String)}.
+     *
+     * Utilisé pour des coupures temporaires, ex: verrou "storm-lockout" pendant une tempête.
+     */
+    public void disable(String id) {
+        if (!enabled.contains(id)) return; // déjà inactif, rien à faire
+        Module m = registered.get(id);
+        if (m == null) return;
+        try {
+            m.onModuleDisable();
+        } catch (Exception e) {
+            plugin.getLogger().severe("Erreur lors de la désactivation du module '" + id + "': " + e.getMessage());
+            e.printStackTrace();
+        }
+        enabled.remove(id);
+        plugin.getLogger().info("Module '" + m.getDisplayName() + "' désactivé.");
+    }
+
+    /**
+     * Réactive un module précédemment coupé avec {@link #disable(String)}.
+     * Repasse par {@link #tryEnable(Module)} : mêmes vérifications que l'activation
+     * initiale (autorisation dans config.yml, dépendances).
+     */
+    public void enable(String id) {
+        if (enabled.contains(id)) return; // déjà actif
+        Module m = registered.get(id);
+        if (m == null) return;
+        tryEnable(m);
     }
 
     private boolean isAllowedInConfig(String id) {

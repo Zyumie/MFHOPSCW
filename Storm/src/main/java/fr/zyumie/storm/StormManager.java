@@ -1,5 +1,6 @@
 package fr.zyumie.storm;
 
+import fr.zyumie.main.api.events.StormStateChangeEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -84,6 +85,9 @@ public class StormManager {
 
         if (broadcast) broadcastLines("messages.storm-start");
         plugin.getLogger().info("⛈ Tempête démarrée.");
+
+        // Notifie le reste de l'écosystème (ex: storm-lockout du Main) que la tempête démarre.
+        Bukkit.getPluginManager().callEvent(new StormStateChangeEvent(true));
     }
 
     public void stopStorm(boolean broadcast) {
@@ -97,6 +101,9 @@ public class StormManager {
         Bukkit.getOnlinePlayers().forEach(this::clearExposureEffects);
         if (broadcast) broadcastLines("messages.storm-end");
         plugin.getLogger().info("☀ Tempête terminée.");
+
+        // Notifie le reste de l'écosystème (ex: storm-lockout du Main) que la tempête se termine.
+        Bukkit.getPluginManager().callEvent(new StormStateChangeEvent(false));
     }
 
     // ── Environnement ─────────────────────────────────────────────────

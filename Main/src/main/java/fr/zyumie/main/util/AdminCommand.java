@@ -17,7 +17,7 @@ public class AdminCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("mainplugin.admin")) {
+        if (!sender.hasPermission("main.admin")) {
             sender.sendMessage(legacyToComponent(prefix() + plugin.getConfig().getString("messages.no-permission")));
             return true;
         }
@@ -31,6 +31,9 @@ public class AdminCommand implements CommandExecutor {
             case "reload" -> {
                 plugin.reloadConfig();
                 plugin.getModuleManager().reloadAll();
+                // reloadAll() réactive tout selon config.yml sans savoir qu'une tempête
+                // est en cours : on réapplique le verrou storm-lockout immédiatement après.
+                plugin.getStormLockoutManager().reapplyIfStormActive();
                 sender.sendMessage(legacyToComponent(prefix() + plugin.getConfig().getString("messages.reload-success")));
             }
             case "list" -> {

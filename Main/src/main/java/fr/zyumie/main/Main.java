@@ -4,6 +4,7 @@ import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.integration.MisaneBridge;
 import fr.zyumie.main.module.ModuleManager;
 import fr.zyumie.main.storage.StorageManager;
+import fr.zyumie.main.module.StormLockoutManager;
 import fr.zyumie.main.util.AdminCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -12,6 +13,7 @@ public class Main extends JavaPlugin {
     private ModuleManager moduleManager;
     private StorageManager storageManager;
     private MisaneBridge misaneBridge;
+    private StormLockoutManager stormLockoutManager;
 
     @Override
     public void onEnable() {
@@ -22,16 +24,19 @@ public class Main extends JavaPlugin {
         this.misaneBridge = new MisaneBridge(this);
 
         // MainAPI doit être initialisée avant que les sous-plugins ne se chargent.
-        // Comme ces sous-plugins déclarent "depend: [MainPlugin]", Bukkit garantit
+        // Comme ces sous-plugins déclarent "depend: [Main]", Bukkit garantit
         // que ce onEnable() tourne entièrement avant le leur.
         MainAPI.init(this);
 
         misaneBridge.setup();
 
+        this.stormLockoutManager = new StormLockoutManager(this);
+        getServer().getPluginManager().registerEvents(stormLockoutManager, this);
+
         getCommand("mainadmin").setExecutor(new AdminCommand(this));
 
         getLogger().info("=================================");
-        getLogger().info(" MainPlugin activé.");
+        getLogger().info(" Main activé.");
         getLogger().info(" Stockage: " + getConfig().getString("storage.type"));
         getLogger().info(" En attente d'enregistrement des modules...");
         getLogger().info("=================================");
@@ -45,7 +50,7 @@ public class Main extends JavaPlugin {
         if (storageManager != null) {
             storageManager.close();
         }
-        getLogger().info("MainPlugin désactivé.");
+        getLogger().info("Main désactivé.");
     }
 
     public ModuleManager getModuleManager() {
@@ -58,5 +63,9 @@ public class Main extends JavaPlugin {
 
     public MisaneBridge getMisaneBridge() {
         return misaneBridge;
+    }
+
+    public StormLockoutManager getStormLockoutManager() {
+        return stormLockoutManager;
     }
 }
