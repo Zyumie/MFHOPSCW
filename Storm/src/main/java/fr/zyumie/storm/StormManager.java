@@ -2,9 +2,7 @@ package fr.zyumie.storm;
 
 import fr.zyumie.main.api.events.StormStateChangeEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -109,8 +107,8 @@ public class StormManager {
     // ── Environnement ─────────────────────────────────────────────────
 
     private void activateWeather(World world) {
-        world.setGameRule(org.bukkit.GameRule.DO_DAYLIGHT_CYCLE, false);
-        world.setGameRule(org.bukkit.GameRule.DO_WEATHER_CYCLE,  false);
+        world.setGameRule(GameRules.ADVANCE_TIME, false);
+        world.setGameRule(GameRules.ADVANCE_WEATHER,  false);
         if (plugin.getConfig().getBoolean("environment.thunderstorm", true)) {
             world.setStorm(true);
             world.setThundering(true);
@@ -120,8 +118,8 @@ public class StormManager {
     }
 
     private void deactivateWeather(World world) {
-        world.setGameRule(org.bukkit.GameRule.DO_DAYLIGHT_CYCLE, true);
-        world.setGameRule(org.bukkit.GameRule.DO_WEATHER_CYCLE,  true);
+        world.setGameRule(GameRules.ADVANCE_TIME, true);
+        world.setGameRule(GameRules.ADVANCE_WEATHER,  true);
         world.setStorm(false);
         world.setThundering(false);
     }
