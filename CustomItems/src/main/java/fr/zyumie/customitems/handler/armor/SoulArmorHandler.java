@@ -107,10 +107,8 @@ public class SoulArmorHandler {
         return c == 4;
     }
 
-    private void send(Player p, String legacy) {
-        if (legacy == null || legacy.isEmpty()) return;
-        p.sendMessage(MiniMessage.miniMessage().deserialize(
-                legacy.replace("&5","<dark_purple>").replace("&c","<red>")
-                      .replace("&e","<yellow>").replace("&8","<dark_gray>").replace("&7","<gray>")));
+    private void send(Player p, String message) {
+        if (message == null || message.isEmpty()) return;
+        p.sendMessage(MiniMessage.miniMessage().deserialize(message));
     }
 }

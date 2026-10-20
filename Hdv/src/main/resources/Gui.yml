@@ -5,7 +5,7 @@
 # Mettre 0 pour désactiver et utiliser l'item vanilla.
 
 main-gui:
-  title: "&5&l✦ Hôtel des Ventes"
+  title: "<dark_purple><bold>✦ Hôtel des Ventes"
   rows: 6
 
   fill:
@@ -20,33 +20,33 @@ main-gui:
     all-items:
       slot: 0
       material: NETHER_STAR
-      name: "&f✦ Toutes les annonces"
+      name: "<white>✦ Toutes les annonces"
       lore:
-        - "&7Afficher toutes les annonces"
+        - "<gray>Afficher toutes les annonces"
       custom-model-data: 1001
     my-listings:
       slot: 1
       material: CHEST
-      name: "&e⬡ Mes annonces"
+      name: "<yellow>⬡ Mes annonces"
       lore:
-        - "&7Voir et gérer tes annonces"
+        - "<gray>Voir et gérer tes annonces"
       custom-model-data: 1002
     sell-item:
       slot: 2
       material: GOLD_INGOT
-      name: "&6✚ Mettre en vente"
+      name: "<gold>✚ Mettre en vente"
       lore:
-        - "&7Mettre un item en vente"
-        - "&7Tiens l'item dans ta main principale"
-        - "&7et clique ici."
+        - "<gray>Mettre un item en vente"
+        - "<gray>Tiens l'item dans ta main principale"
+        - "<gray>et clique ici."
       custom-model-data: 1003
     claim:
       slot: 3
       material: ENDER_CHEST
-      name: "&a⬇ Récupérer mes items"
+      name: "<green>⬇ Récupérer mes items"
       lore:
-        - "&7Récupérer les items des annonces"
-        - "&7expirées ou annulées."
+        - "<gray>Récupérer les items des annonces"
+        - "<gray>expirées ou annulées."
       custom-model-data: 1004
 
   # Zone annonces (rangées 1 à 4 = slots 9 à 44)
@@ -59,28 +59,28 @@ main-gui:
     prev-page:
       slot: 45
       material: ARROW
-      name: "&7◀ Page précédente"
+      name: "<gray>◀ Page précédente"
       lore:
-        - "&7Aller à la page précédente"
+        - "<gray>Aller à la page précédente"
       custom-model-data: 1010
     page-indicator:
       slot: 49
       material: MAP
-      name: "&7Page &e{page}&7/&e{max}"
+      name: "<gray>Page <yellow>{page}<gray>/<yellow>{max}"
       lore:
-        - "&7Navigation entre les pages"
+        - "<gray>Navigation entre les pages"
       custom-model-data: 1011
     next-page:
       slot: 53
       material: ARROW
-      name: "&7Page suivante ▶"
+      name: "<gray>Page suivante ▶"
       lore:
-        - "&7Aller à la page suivante"
+        - "<gray>Aller à la page suivante"
       custom-model-data: 1012
     close:
       slot: 47
       material: BARRIER
-      name: "&c✖ Fermer"
+      name: "<red>✖ Fermer"
       lore: []
       custom-model-data: 0
 
@@ -88,16 +88,16 @@ main-gui:
   listing-item:
     lore-append:
       - ""
-      - "&7Vendeur: &e{seller}"
-      - "&7Prix: &e{price}"
-      - "&7Expire dans: &e{expires}"
+      - "<gray>Vendeur: <yellow>{seller}"
+      - "<gray>Prix: <yellow>{price}"
+      - "<gray>Expire dans: <yellow>{expires}"
       - ""
-      - "&aClique gauche &7pour acheter"
-      - "&eClique droit &7pour annuler (si ta liste)"
+      - "<green>Clique gauche <gray>pour acheter"
+      - "<yellow>Clique droit <gray>pour annuler (si ta liste)"
 
 # GUI de confirmation d'achat
 confirm-gui:
-  title: "&5&lConfirmer l'achat"
+  title: "<dark_purple><bold>Confirmer l'achat"
   rows: 3
   fill:
     enabled: true # Mettre 'false' pour enlever le remplissage
@@ -107,26 +107,26 @@ confirm-gui:
   confirm:
     slot: 11
     material: LIME_STAINED_GLASS_PANE
-    name: "&a✔ Confirmer l'achat"
+    name: "<green>✔ Confirmer l'achat"
     lore:
-      - "&7Item: &f{item}"
-      - "&7Prix: &e{price}"
-      - "&7Taxe incluse dans le prix vendeur"
+      - "<gray>Item: <white>{item}"
+      - "<gray>Prix: <yellow>{price}"
+      - "<gray>Taxe incluse dans le prix vendeur"
       - ""
-      - "&aCliquer pour confirmer"
+      - "<green>Cliquer pour confirmer"
     custom-model-data: 1020
   cancel:
     slot: 15
     material: RED_STAINED_GLASS_PANE
-    name: "&c✖ Annuler"
+    name: "<red>✖ Annuler"
     lore:
-      - "&7Retour à la liste"
+      - "<gray>Retour à la liste"
     custom-model-data: 1021
   item-display-slot: 13
 
 # GUI de création d'annonce
 create-gui:
-  title: "&5&lMise en vente"
+  title: "<dark_purple><bold>Mise en vente"
   rows: 3
   fill:
     enabled: true # Mettre 'false' pour enlever le remplissage
@@ -137,57 +137,57 @@ create-gui:
   duration-decrease:
     slot: 9
     material: RED_STAINED_GLASS_PANE
-    name: "&c- &71h"
+    name: "<red>- <gray>1h"
     custom-model-data: 0
   duration-display:
     slot: 10
     material: CLOCK
-    name: "&7Durée: &e{duration}h"
+    name: "<gray>Durée: <yellow>{duration}h"
     lore:
-      - "&7Clique sur + ou - pour ajuster"
+      - "<gray>Clique sur + ou - pour ajuster"
     custom-model-data: 0
   duration-increase:
     slot: 11
     material: LIME_STAINED_GLASS_PANE
-    name: "&a+ &71h"
+    name: "<green>+ <gray>1h"
     custom-model-data: 0
   price-decrease:
     slot: 18
     material: RED_STAINED_GLASS_PANE
-    name: "&c- &7Prix"
+    name: "<red>- <gray>Prix"
     lore:
-      - "&eClique gauche &7-1"
-      - "&eShift+clic &7-100"
+      - "<yellow>Clique gauche <gray>-1"
+      - "<yellow>Shift+clic <gray>-100"
     custom-model-data: 0
   price-display:
     slot: 19
     material: SUNFLOWER
-    name: "&7Prix: &e{price}"
+    name: "<gray>Prix: <yellow>{price}"
     lore:
-      - "&7Clique sur + ou - pour ajuster"
+      - "<gray>Clique sur + ou - pour ajuster"
     custom-model-data: 1030
   price-increase:
     slot: 20
     material: LIME_STAINED_GLASS_PANE
-    name: "&a+ &7Prix"
+    name: "<green>+ <gray>Prix"
     lore:
-      - "&eClique gauche &7+1"
-      - "&eShift+clic &7+100"
+      - "<yellow>Clique gauche <gray>+1"
+      - "<yellow>Shift+clic <gray>+100"
     custom-model-data: 0
   confirm:
     slot: 24
     material: LIME_STAINED_GLASS_PANE
-    name: "&a✔ Mettre en vente"
+    name: "<green>✔ Mettre en vente"
     lore:
-      - "&7Item: &f{item}"
-      - "&7Prix: &e{price}"
-      - "&7Durée: &e{duration}h"
-      - "&7Frais de création: &c{fee}"
+      - "<gray>Item: <white>{item}"
+      - "<gray>Prix: <yellow>{price}"
+      - "<gray>Durée: <yellow>{duration}h"
+      - "<gray>Frais de création: <red>{fee}"
       - ""
-      - "&aCliquer pour confirmer"
+      - "<green>Cliquer pour confirmer"
     custom-model-data: 1020
   cancel:
     slot: 22
     material: BARRIER
-    name: "&c✖ Annuler"
+    name: "<red>✖ Annuler"
     custom-model-data: 0

@@ -42,6 +42,6 @@ integration:
     plugin-name: "NewV5"
 
 messages:
-  prefix: "&8[&bMain&8] &7"
-  no-permission: "&cTu n'as pas la permission d'utiliser cette commande."
-  reload-success: "&aLa configuration a été rechargée."
+  prefix: "<dark_gray>[<aqua>Main<dark_gray>] <gray>"
+  no-permission: "<red>Tu n'as pas la permission d'utiliser cette commande."
+  reload-success: "<green>La configuration a été rechargée."

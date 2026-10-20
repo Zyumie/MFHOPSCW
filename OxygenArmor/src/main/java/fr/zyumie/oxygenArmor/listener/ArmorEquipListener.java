@@ -173,12 +173,8 @@ public class ArmorEquipListener implements Listener {
 
     private String cfg(String path) { return plugin.getConfig().getString(path, ""); }
 
-    private void send(Player p, String legacy) {
+    private void send(Player p, String message) {
         String prefix = cfg("messages.prefix");
-        String mm = (prefix + legacy)
-                .replace("&8","<dark_gray>").replace("&b","<aqua>")
-                .replace("&7","<gray>").replace("&a","<green>")
-                .replace("&e","<yellow>").replace("&c","<red>");
-        p.sendMessage(MiniMessage.miniMessage().deserialize(mm));
+        p.sendMessage(MiniMessage.miniMessage().deserialize(prefix + message));
     }
 }

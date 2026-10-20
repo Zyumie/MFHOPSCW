@@ -67,7 +67,7 @@ public class HdvGui {
 
         // Lecture dynamique du titre depuis Gui.yml
         ConfigurationSection mainSec = config.getConfigurationSection("main-gui");
-        String rawTitle = mainSec != null ? mainSec.getString("title", "&5&l✦ Hôtel des Ventes") : "&5&l✦ Hôtel des Ventes";
+        String rawTitle = mainSec != null ? mainSec.getString("title", "<dark_purple><bold>✦ Hôtel des Ventes") : "<dark_purple><bold>✦ Hôtel des Ventes";
 
         Inventory inv = Bukkit.createInventory(holder, 54, mm(rawTitle));
 
@@ -97,24 +97,24 @@ public class HdvGui {
     }
 
     private void buildFilterBar(Inventory inv) {
-        inv.setItem(0, item(Material.NETHER_STAR,  "&f✦ Toutes les annonces",
-                List.of("&7Afficher toutes les annonces"), 1001));
-        inv.setItem(1, item(Material.CHEST, "&e⬡ Mes annonces",
-                List.of("&7Voir et gérer tes annonces"), 1002));
-        inv.setItem(2, item(Material.GOLD_INGOT, "&6✚ Mettre en vente",
-                List.of("&7Mettre un item en vente", "&7Tiens l'item dans ta main principale", "&7et clique ici."), 1003));
-        inv.setItem(3, item(Material.ENDER_CHEST, "&a⬇ Récupérer mes items",
-                List.of("&7Récupérer les items des annonces", "&7expirées ou annulées."), 1004));
+        inv.setItem(0, item(Material.NETHER_STAR,  "<white>✦ Toutes les annonces",
+                List.of("<gray>Afficher toutes les annonces"), 1001));
+        inv.setItem(1, item(Material.CHEST, "<yellow>⬡ Mes annonces",
+                List.of("<gray>Voir et gérer tes annonces"), 1002));
+        inv.setItem(2, item(Material.GOLD_INGOT, "<gold>✚ Mettre en vente",
+                List.of("<gray>Mettre un item en vente", "<gray>Tiens l'item dans ta main principale", "<gray>et clique ici."), 1003));
+        inv.setItem(3, item(Material.ENDER_CHEST, "<green>⬇ Récupérer mes items",
+                List.of("<gray>Récupérer les items des annonces", "<gray>expirées ou annulées."), 1004));
     }
 
     private void buildMainNav(Inventory inv, int page, int totalPages) {
         if (page > 0)
-            inv.setItem(45, item(Material.ARROW, "&7◀ Page précédente", List.of("&7Aller à la page précédente"), 1010));
+            inv.setItem(45, item(Material.ARROW, "<gray>◀ Page précédente", List.of("<gray>Aller à la page précédente"), 1010));
         if (page < totalPages - 1)
-            inv.setItem(53, item(Material.ARROW, "&7Page suivante ▶", List.of("&7Aller à la page suivante"), 1012));
+            inv.setItem(53, item(Material.ARROW, "<gray>Page suivante ▶", List.of("<gray>Aller à la page suivante"), 1012));
         inv.setItem(49, item(Material.MAP,
-                "&7Page &e" + (page + 1) + "&7/&e" + totalPages, List.of("&7Navigation entre les pages"), 1011));
-        inv.setItem(47, item(Material.BARRIER, "&c✖ Fermer", new ArrayList<>(), 0));
+                "<gray>Page <yellow>" + (page + 1) + "<gray>/<yellow>" + totalPages, List.of("<gray>Navigation entre les pages"), 1011));
+        inv.setItem(47, item(Material.BARRIER, "<red>✖ Fermer", new ArrayList<>(), 0));
     }
 
     private ItemStack buildListingItem(HdvListing listing, Player viewer) {
@@ -125,14 +125,14 @@ public class HdvGui {
         List<Component> lore = new ArrayList<>();
         if (meta.hasLore()) lore.addAll(meta.lore());
         lore.add(mm(""));
-        lore.add(mm("&7Vendeur: &e" + listing.getSellerName()));
-        lore.add(mm("&7Prix: &e" + String.format("%.2f", listing.getPrice()) + " " + currency));
-        lore.add(mm("&7Expire dans: &e" + listing.getTimeRemaining()));
+        lore.add(mm("<gray>Vendeur: <yellow>" + listing.getSellerName()));
+        lore.add(mm("<gray>Prix: <yellow>" + String.format("%.2f", listing.getPrice()) + " " + currency));
+        lore.add(mm("<gray>Expire dans: <yellow>" + listing.getTimeRemaining()));
         lore.add(mm(""));
         if (listing.getSellerUuid().equals(viewer.getUniqueId())) {
-            lore.add(mm("&eClique droit &7pour annuler (si ta liste)"));
+            lore.add(mm("<yellow>Clique droit <gray>pour annuler (si ta liste)"));
         } else {
-            lore.add(mm("&aClique gauche &7pour acheter"));
+            lore.add(mm("<green>Clique gauche <gray>pour acheter"));
         }
         meta.lore(lore);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS);
@@ -150,7 +150,7 @@ public class HdvGui {
 
         // Lecture dynamique du titre depuis Gui.yml
         ConfigurationSection confirmSec = config.getConfigurationSection("confirm-gui");
-        String rawTitle = confirmSec != null ? confirmSec.getString("title", "&5&lConfirmer l'achat") : "&5&lConfirmer l'achat";
+        String rawTitle = confirmSec != null ? confirmSec.getString("title", "<dark_purple><bold>Confirmer l'achat") : "<dark_purple><bold>Confirmer l'achat";
 
         Inventory inv = Bukkit.createInventory(holder, 27, mm(rawTitle));
 
@@ -160,15 +160,15 @@ public class HdvGui {
         String currency = manager.getEconomy() != null ? manager.getEconomy().currencyNamePlural() : "";
         String price    = String.format("%.2f", listing.getPrice()) + " " + currency;
 
-        inv.setItem(11, item(Material.LIME_STAINED_GLASS_PANE, "&a✔ Confirmer l'achat",
-                List.of("&7Item: &f" + getDisplayName(listing.getItem()),
-                        "&7Prix: &e" + price,
-                        "&7Taxe incluse dans le prix vendeur",
+        inv.setItem(11, item(Material.LIME_STAINED_GLASS_PANE, "<green>✔ Confirmer l'achat",
+                List.of("<gray>Item: <white>" + getDisplayName(listing.getItem()),
+                        "<gray>Prix: <yellow>" + price,
+                        "<gray>Taxe incluse dans le prix vendeur",
                         "",
-                        "&aCliquer pour confirmer"), 1020));
+                        "<green>Cliquer pour confirmer"), 1020));
         inv.setItem(13, listing.getItem().clone());
-        inv.setItem(15, item(Material.RED_STAINED_GLASS_PANE, "&c✖ Annuler",
-                List.of("&7Retour à la liste"), 1021));
+        inv.setItem(15, item(Material.RED_STAINED_GLASS_PANE, "<red>✖ Annuler",
+                List.of("<gray>Retour à la liste"), 1021));
 
         player.openInventory(inv);
         return holder;
@@ -184,7 +184,7 @@ public class HdvGui {
 
         // Lecture dynamique du titre depuis Gui.yml
         ConfigurationSection createSec = config.getConfigurationSection("create-gui");
-        String rawTitle = createSec != null ? createSec.getString("title", "&5&lMise en vente") : "&5&lMise en vente";
+        String rawTitle = createSec != null ? createSec.getString("title", "<dark_purple><bold>Mise en vente") : "<dark_purple><bold>Mise en vente";
 
         Inventory inv = Bukkit.createInventory(holder, 27, mm(rawTitle));
 
@@ -195,31 +195,31 @@ public class HdvGui {
         double fee = plugin.getConfig().getDouble("hdv.listing-fee", 10.0);
 
         // Durée : slots 9, 10, 11
-        inv.setItem(9, item(Material.RED_STAINED_GLASS_PANE,  "&c- &71h",  null, 0));
-        inv.setItem(10, item(Material.CLOCK, "&7Durée: &e" + duration + "h",
-                List.of("&7Clique sur + ou - pour ajuster"), 0));
-        inv.setItem(11, item(Material.LIME_STAINED_GLASS_PANE, "&a+ &71h",  null, 0));
+        inv.setItem(9, item(Material.RED_STAINED_GLASS_PANE,  "<red>- <gray>1h",  null, 0));
+        inv.setItem(10, item(Material.CLOCK, "<gray>Durée: <yellow>" + duration + "h",
+                List.of("<gray>Clique sur + ou - pour ajuster"), 0));
+        inv.setItem(11, item(Material.LIME_STAINED_GLASS_PANE, "<green>+ <gray>1h",  null, 0));
 
         // Item affiché au centre
         inv.setItem(13, item.clone());
 
         // Prix : slots 18, 19, 20
-        inv.setItem(18, item(Material.RED_STAINED_GLASS_PANE,  "&c- &7Prix",
-                List.of("&eClique gauche &7-1", "&eShift+clic &7-100"), 0));
-        inv.setItem(19, item(Material.SUNFLOWER, "&7Prix: &e" + String.format("%.2f", price) + " " + currency,
-                List.of("&7Clique sur + ou - pour ajuster"), 1030));
-        inv.setItem(20, item(Material.LIME_STAINED_GLASS_PANE, "&a+ &7Prix",
-                List.of("&eClique gauche &7+1", "&eShift+clic &7+100"), 0));
+        inv.setItem(18, item(Material.RED_STAINED_GLASS_PANE,  "<red>- <gray>Prix",
+                List.of("<yellow>Clique gauche <gray>-1", "<yellow>Shift+clic <gray>-100"), 0));
+        inv.setItem(19, item(Material.SUNFLOWER, "<gray>Prix: <yellow>" + String.format("%.2f", price) + " " + currency,
+                List.of("<gray>Clique sur + ou - pour ajuster"), 1030));
+        inv.setItem(20, item(Material.LIME_STAINED_GLASS_PANE, "<green>+ <gray>Prix",
+                List.of("<yellow>Clique gauche <gray>+1", "<yellow>Shift+clic <gray>+100"), 0));
 
         // Annuler / Confirmer
-        inv.setItem(22, item(Material.BARRIER, "&c✖ Annuler", null, 0));
-        inv.setItem(24, item(Material.LIME_STAINED_GLASS_PANE, "&a✔ Mettre en vente",
-                List.of("&7Item: &f" + getDisplayName(item),
-                        "&7Prix: &e" + String.format("%.2f", price) + " " + currency,
-                        "&7Durée: &e" + duration + "h",
-                        "&7Frais de création: &c" + String.format("%.2f", fee),
+        inv.setItem(22, item(Material.BARRIER, "<red>✖ Annuler", null, 0));
+        inv.setItem(24, item(Material.LIME_STAINED_GLASS_PANE, "<green>✔ Mettre en vente",
+                List.of("<gray>Item: <white>" + getDisplayName(item),
+                        "<gray>Prix: <yellow>" + String.format("%.2f", price) + " " + currency,
+                        "<gray>Durée: <yellow>" + duration + "h",
+                        "<gray>Frais de création: <red>" + String.format("%.2f", fee),
                         "",
-                        "&aCliquer pour confirmer"), 1020));
+                        "<green>Cliquer pour confirmer"), 1020));
 
         player.openInventory(inv);
         return holder;
@@ -249,12 +249,6 @@ public class HdvGui {
     }
 
     private Component mm(String s) {
-        return MiniMessage.miniMessage().deserialize(
-                s.replace("&0","<black>").replace("&8","<dark_gray>")
-                        .replace("&5","<dark_purple>").replace("&6","<gold>")
-                        .replace("&e","<yellow>").replace("&a","<green>")
-                        .replace("&c","<red>").replace("&b","<aqua>")
-                        .replace("&7","<gray>").replace("&f","<white>")
-                        .replace("&l","<bold>").replace("&r","<reset>"));
+        return MiniMessage.miniMessage().deserialize(s);
     }
 }

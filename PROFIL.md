@@ -28,7 +28,7 @@ display:
 
 messages:
   # tous les textes du mode chat + les textes communs (statut, "aucune faction", etc.)
-  # couleurs en codes legacy (&8, &c, ...)
+  # couleurs au format MiniMessage (<dark_gray>, <red>, ...)
 ```
 
 Tous les libellés, couleurs et textes de repli (« Aucune faction », « Module faction inactif », ...) sont dans `messages.*`.
@@ -38,7 +38,7 @@ Tous les libellés, couleurs et textes de repli (« Aucune faction », « Module
 Utilisé uniquement si `display.mode: gui`. Layout, matériaux, noms et lores sont 100% configurables.
 
 ```yaml
-title: "&8Profil de &b{player}"
+title: "<dark_gray>Profil de <aqua>{player}"
 rows: 3   # 1 à 6
 
 filler:
@@ -100,7 +100,7 @@ items:
 ## Notes techniques
 
 - La faction du joueur ciblé n'est résolue **qu'une seule fois** par `/profile`, dans `ProfileData` — réutilisée par le chat ET le GUI.
-- Le nom du joueur et le nom de la faction ne sont jamais réinterprétés comme du MiniMessage/legacy : en mode chat ils passent en `Component.text()` brut, en mode GUI ils sont débarrassés de tout `&`/`§` avant insertion dans les templates. Un nom de faction contenant une balise ou un code couleur ne peut donc pas casser l'affichage d'un tiers.
+- Le nom du joueur et le nom de la faction ne sont jamais réinterprétés comme du MiniMessage : en mode chat ils sont insérés via `Placeholder.unparsed()`, en mode GUI ils sont échappés (`MiniMessage#escapeTags`) avant insertion dans les templates. Un nom de faction contenant une balise ne peut donc pas casser l'affichage d'un tiers.
 - `Bukkit.getOfflinePlayerIfCached()` est utilisé pour résoudre un joueur cible hors ligne (pas de requête réseau bloquante) — si ce joueur n'a jamais rejoint le serveur, il ne sera pas trouvé.
 - En mode GUI, si l'expéditeur de la commande n'est pas un joueur (console, commande bloc), l'affichage retombe automatiquement sur le mode chat.
 - `reload` est un mot-clé réservé sur `/profile` (comme `/profile reload`), vérifié en code (`profile.admin`) — pas une permission attachée à la commande entière dans `plugin.yml`, pour que la consultation normale du profil reste libre d'accès. La complétion ne le suggère qu'aux joueurs qui ont la permission.

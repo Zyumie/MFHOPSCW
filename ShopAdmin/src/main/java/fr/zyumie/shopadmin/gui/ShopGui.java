@@ -31,7 +31,7 @@ public class ShopGui {
     public void openHub(Player player) {
         FileConfiguration guiConfig = plugin.getGuiConfig();
 
-        String title = guiConfig.getString("hub.title", "&6&lBoutique - Menu Principal");
+        String title = guiConfig.getString("hub.title", "<gold><bold>Boutique - Menu Principal");
         int rows = guiConfig.getInt("hub.rows", 3);
 
         ShopHolder holder = new ShopHolder(ShopHolder.Type.HUB, null, 0);
@@ -49,7 +49,7 @@ public class ShopGui {
     public void open(Player player, String categoryId, int page) {
         FileConfiguration guiConfig = plugin.getGuiConfig();
 
-        String title = guiConfig.getString("main-gui.title", "&6&lBoutique Admin");
+        String title = guiConfig.getString("main-gui.title", "<gold><bold>Boutique Admin");
         int rows = guiConfig.getInt("main-gui.rows", 6);
 
         ShopHolder holder = new ShopHolder(ShopHolder.Type.MAIN, categoryId, page);
@@ -161,7 +161,7 @@ public class ShopGui {
             int closeSlot = guiConfig.getInt("hub.navigation.close.slot", 22);
             Material closeMat = parseMat(guiConfig.getString("hub.navigation.close.material", "AIR"));
             if (closeMat != Material.AIR && closeSlot < inv.getSize()) {
-                inv.setItem(closeSlot, makeItem(closeMat, guiConfig.getString("hub.navigation.close.name", "&cFermer"), guiConfig.getStringList("hub.navigation.close.lore")));
+                inv.setItem(closeSlot, makeItem(closeMat, guiConfig.getString("hub.navigation.close.name", "<red>Fermer"), guiConfig.getStringList("hub.navigation.close.lore")));
             }
         }
     }
@@ -192,7 +192,7 @@ public class ShopGui {
             int backSlot = guiConfig.getInt("main-gui.navigation.back.slot", 46);
             Material backMat = parseMat(guiConfig.getString("main-gui.navigation.back.material", "AIR"));
             if (backMat != Material.AIR && backSlot < inv.getSize()) {
-                inv.setItem(backSlot, makeItem(backMat, guiConfig.getString("main-gui.navigation.back.name", "&e« Retour"), guiConfig.getStringList("main-gui.navigation.back.lore")));
+                inv.setItem(backSlot, makeItem(backMat, guiConfig.getString("main-gui.navigation.back.name", "<yellow>« Retour"), guiConfig.getStringList("main-gui.navigation.back.lore")));
             }
         }
 
@@ -216,7 +216,7 @@ public class ShopGui {
             int indSlot = guiConfig.getInt("main-gui.page-indicator.slot", 48);
             Material indMat = parseMat(guiConfig.getString("main-gui.page-indicator.material", "AIR"));
             if (indMat != Material.AIR && indSlot < inv.getSize()) {
-                String indName = guiConfig.getString("main-gui.page-indicator.name", "&7Page &e{page}&7/&e{max}")
+                String indName = guiConfig.getString("main-gui.page-indicator.name", "<gray>Page <yellow>{page}<gray>/<yellow>{max}")
                         .replace("{page}", String.valueOf(page + 1)).replace("{max}", String.valueOf(totalPages));
                 inv.setItem(indSlot, makeItem(indMat, indName, guiConfig.getStringList("main-gui.page-indicator.lore")));
             }
@@ -232,8 +232,8 @@ public class ShopGui {
     }
 
     private ItemStack buildShopItemStack(ShopItem si) {
-        String buy  = si.canBuy()  ? String.format("%.2f", si.getBuyPrice())  : "&cDésactivé";
-        String sell = si.canSell() ? String.format("%.2f", si.getSellPrice()) : "&cDésactivé";
+        String buy  = si.canBuy()  ? String.format("%.2f", si.getBuyPrice())  : "<red>Désactivé";
+        String sell = si.canSell() ? String.format("%.2f", si.getSellPrice()) : "<red>Désactivé";
         String stock = si.isUnlimitedStock() ? "∞" : String.valueOf(si.getStock());
 
         List<String> loreText = new ArrayList<>();
@@ -244,17 +244,17 @@ public class ShopGui {
                     .replace("{stock}", stock));
         }
         loreText.add("");
-        loreText.add("&7Stock: &e" + stock);
+        loreText.add("<gray>Stock: <yellow>" + stock);
         loreText.add("");
 
         boolean isCustom = manager.isCustomItem(si);
         if (!isCustom) {
-            loreText.add("&eClique gauche &7→ Acheter");
-            loreText.add("&eClique droit &7→ Vendre");
-            loreText.add("&eShift+clic &7→ Choisir la quantité");
+            loreText.add("<yellow>Clique gauche <gray>→ Acheter");
+            loreText.add("<yellow>Clique droit <gray>→ Vendre");
+            loreText.add("<yellow>Shift+clic <gray>→ Choisir la quantité");
         } else {
-            loreText.add("&eClique gauche &7→ Acheter");
-            loreText.add("&8Achat unique : x1");
+            loreText.add("<yellow>Clique gauche <gray>→ Acheter");
+            loreText.add("<dark_gray>Achat unique : x1");
         }
 
         ItemStack stack = manager.getDisplayItem(si);
@@ -283,7 +283,7 @@ public class ShopGui {
         holder.setPendingItem(item);
         holder.setBuying(buying);
 
-        String title = guiConfig.getString("quantity-selector.title", "&8Sélectionner une quantité");
+        String title = guiConfig.getString("quantity-selector.title", "<dark_gray>Sélectionner une quantité");
         int rows = guiConfig.getInt("quantity-selector.rows", 3);
         Inventory inv = Bukkit.createInventory(holder, rows * 9, mm(title));
 
@@ -308,7 +308,7 @@ public class ShopGui {
 
         String prefixPath = buying ? "quantity-selector.confirm-buy" : "quantity-selector.confirm-sell";
         Material btnMat = parseMat(guiConfig.getString(prefixPath + ".material", buying ? "LIME_STAINED_GLASS_PANE" : "ORANGE_STAINED_GLASS_PANE"));
-        String btnNameTpl = guiConfig.getString(prefixPath + ".name", buying ? "&aAcheter x{amount}" : "&6Vendre x{amount}");
+        String btnNameTpl = guiConfig.getString(prefixPath + ".name", buying ? "<green>Acheter x{amount}" : "<gold>Vendre x{amount}");
         List<String> btnLoreTpl = guiConfig.getStringList(prefixPath + ".lore");
 
         for (int i = 0; i < Math.min(amounts.size(), btnSlots.length); i++) {
@@ -327,7 +327,7 @@ public class ShopGui {
             int cancelSlot = guiConfig.getInt("quantity-selector.cancel.slot", 22);
             Material cancelMat = parseMat(guiConfig.getString("quantity-selector.cancel.material", "AIR"));
             if (cancelMat != Material.AIR && cancelSlot < inv.getSize()) {
-                inv.setItem(cancelSlot, makeItem(cancelMat, guiConfig.getString("quantity-selector.cancel.name", "&cAnnuler"), null));
+                inv.setItem(cancelSlot, makeItem(cancelMat, guiConfig.getString("quantity-selector.cancel.name", "<red>Annuler"), null));
             }
         }
 
@@ -362,16 +362,6 @@ public class ShopGui {
 
     private Component mm(String s) {
         if (s == null) s = "";
-        return MiniMessage.miniMessage().deserialize(s
-                .replace("&0", "<black>").replace("&1", "<dark_blue>")
-                .replace("&2", "<dark_green>").replace("&3", "<dark_aqua>")
-                .replace("&4", "<dark_red>").replace("&5", "<dark_purple>")
-                .replace("&6", "<gold>").replace("&7", "<gray>")
-                .replace("&8", "<dark_gray>").replace("&9", "<blue>")
-                .replace("&a", "<green>").replace("&b", "<aqua>")
-                .replace("&c", "<red>").replace("&d", "<light_purple>")
-                .replace("&e", "<yellow>").replace("&f", "<white>")
-                .replace("&l", "<bold>").replace("&r", "<reset>")
-                .replace("&o", "<italic>"));
+        return MiniMessage.miniMessage().deserialize(s);
     }
 }

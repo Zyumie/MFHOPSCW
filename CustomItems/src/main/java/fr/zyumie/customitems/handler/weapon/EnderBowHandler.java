@@ -53,10 +53,8 @@ public class EnderBowHandler {
                 .replace("{target}", target.getName()));
     }
 
-    private void send(Player p, String legacy) {
-        if (legacy == null || legacy.isEmpty()) return;
-        p.sendMessage(MiniMessage.miniMessage().deserialize(
-                legacy.replace("&d","<light_purple>").replace("&e","<yellow>")
-                      .replace("&7","<gray>").replace("&l","<bold>")));
+    private void send(Player p, String message) {
+        if (message == null || message.isEmpty()) return;
+        p.sendMessage(MiniMessage.miniMessage().deserialize(message));
     }
 }

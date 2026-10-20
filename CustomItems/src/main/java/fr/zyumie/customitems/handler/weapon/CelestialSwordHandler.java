@@ -267,11 +267,8 @@ public class CelestialSwordHandler implements Listener {
 
     // ── Helpers ───────────────────────────────────────────────────────────
 
-    private void send(Player p, String legacy) {
-        if (legacy == null || legacy.isEmpty()) return;
-        p.sendMessage(MM.deserialize(
-                legacy.replace("&e", "<yellow>").replace("&6", "<gold>")
-                        .replace("&c", "<red>").replace("&7", "<gray>")
-                        .replace("&l", "<bold>")));
+    private void send(Player p, String message) {
+        if (message == null || message.isEmpty()) return;
+        p.sendMessage(MM.deserialize(message));
     }
 }

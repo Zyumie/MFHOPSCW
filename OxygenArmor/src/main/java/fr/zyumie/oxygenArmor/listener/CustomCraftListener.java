@@ -155,12 +155,8 @@ public class CustomCraftListener implements Listener {
         return plugin.getConfig().getString(path, "");
     }
 
-    private void send(Player p, String legacy) {
+    private void send(Player p, String message) {
         String prefix = cfg("messages.prefix");
-        String mm = (prefix + legacy)
-                .replace("&8","<dark_gray>").replace("&b","<aqua>")
-                .replace("&7","<gray>").replace("&a","<green>")
-                .replace("&c","<red>").replace("&e","<yellow>");
-        p.sendMessage(MiniMessage.miniMessage().deserialize(mm));
+        p.sendMessage(MiniMessage.miniMessage().deserialize(prefix + message));
     }
 }

@@ -32,21 +32,21 @@
 categories:
 
   minerais:
-    name: "&6Minéraux"
+    name: "<gold>Minéraux"
     icon: GOLD_INGOT
-    icon-name: "&6Minéraux"
+    icon-name: "<gold>Minéraux"
     icon-lore:
-      - "&7Cliquer pour voir les minéraux"
+      - "<gray>Cliquer pour voir les minéraux"
     items:
       diamond:
         material: DIAMOND
-        name: "&bDiamant"
+        name: "<aqua>Diamant"
         lore:
-          - "&7Acheter: &e{buy_price}"
-          - "&7Vendre: &e{sell_price}"
+          - "<gray>Acheter: <yellow>{buy_price}"
+          - "<gray>Vendre: <yellow>{sell_price}"
           - ""
-          - "&eClique gauche &7pour acheter"
-          - "&eClique droit &7pour vendre"
+          - "<yellow>Clique gauche <gray>pour acheter"
+          - "<yellow>Clique droit <gray>pour vendre"
         buy-price: 500.0
         sell-price: 250.0
         stock: -1
@@ -54,13 +54,13 @@ categories:
 
       emerald:
         material: EMERALD
-        name: "&aÉmeraude"
+        name: "<green>Émeraude"
         lore:
-          - "&7Acheter: &e{buy_price}"
-          - "&7Vendre: &e{sell_price}"
+          - "<gray>Acheter: <yellow>{buy_price}"
+          - "<gray>Vendre: <yellow>{sell_price}"
           - ""
-          - "&eClique gauche &7pour acheter"
-          - "&eClique droit &7pour vendre"
+          - "<yellow>Clique gauche <gray>pour acheter"
+          - "<yellow>Clique droit <gray>pour vendre"
         buy-price: 300.0
         sell-price: 150.0
         stock: -1
@@ -68,13 +68,13 @@ categories:
 
       iron_ingot:
         material: IRON_INGOT
-        name: "&7Lingot de Fer"
+        name: "<gray>Lingot de Fer"
         lore:
-          - "&7Acheter: &e{buy_price}"
-          - "&7Vendre: &e{sell_price}"
+          - "<gray>Acheter: <yellow>{buy_price}"
+          - "<gray>Vendre: <yellow>{sell_price}"
           - ""
-          - "&eClique gauche &7pour acheter"
-          - "&eClique droit &7pour vendre"
+          - "<yellow>Clique gauche <gray>pour acheter"
+          - "<yellow>Clique droit <gray>pour vendre"
         buy-price: 50.0
         sell-price: 25.0
         stock: -1
@@ -82,13 +82,13 @@ categories:
 
       gold_ingot:
         material: GOLD_INGOT
-        name: "&6Lingot d'Or"
+        name: "<gold>Lingot d'Or"
         lore:
-          - "&7Acheter: &e{buy_price}"
-          - "&7Vendre: &e{sell_price}"
+          - "<gray>Acheter: <yellow>{buy_price}"
+          - "<gray>Vendre: <yellow>{sell_price}"
           - ""
-          - "&eClique gauche &7pour acheter"
-          - "&eClique droit &7pour vendre"
+          - "<yellow>Clique gauche <gray>pour acheter"
+          - "<yellow>Clique droit <gray>pour vendre"
         buy-price: 80.0
         sell-price: 40.0
         stock: -1
@@ -96,34 +96,34 @@ categories:
 
       coal:
         material: COAL
-        name: "&8Charbon"
+        name: "<dark_gray>Charbon"
         lore:
-          - "&7Acheter: &e{buy_price}"
-          - "&7Vendre: &e{sell_price}"
+          - "<gray>Acheter: <yellow>{buy_price}"
+          - "<gray>Vendre: <yellow>{sell_price}"
           - ""
-          - "&eClique gauche &7pour acheter"
-          - "&eClique droit &7pour vendre"
+          - "<yellow>Clique gauche <gray>pour acheter"
+          - "<yellow>Clique droit <gray>pour vendre"
         buy-price: 10.0
         sell-price: 5.0
         stock: -1
         slot: 4
 
   nourriture:
-    name: "&aNourriture"
+    name: "<green>Nourriture"
     icon: BREAD
-    icon-name: "&aNourriture"
+    icon-name: "<green>Nourriture"
     icon-lore:
-      - "&7Cliquer pour voir la nourriture"
+      - "<gray>Cliquer pour voir la nourriture"
     items:
       bread:
         material: BREAD
-        name: "&6Pain"
+        name: "<gold>Pain"
         lore:
-          - "&7Acheter: &e{buy_price}"
-          - "&7Vendre: &e{sell_price}"
+          - "<gray>Acheter: <yellow>{buy_price}"
+          - "<gray>Vendre: <yellow>{sell_price}"
           - ""
-          - "&eClique gauche &7pour acheter"
-          - "&eClique droit &7pour vendre"
+          - "<yellow>Clique gauche <gray>pour acheter"
+          - "<yellow>Clique droit <gray>pour vendre"
         buy-price: 5.0
         sell-price: 2.0
         stock: -1
@@ -131,34 +131,34 @@ categories:
 
       cooked_beef:
         material: COOKED_BEEF
-        name: "&cBifteck"
+        name: "<red>Bifteck"
         lore:
-          - "&7Acheter: &e{buy_price}"
-          - "&7Vendre: &e{sell_price}"
+          - "<gray>Acheter: <yellow>{buy_price}"
+          - "<gray>Vendre: <yellow>{sell_price}"
           - ""
-          - "&eClique gauche &7pour acheter"
-          - "&eClique droit &7pour vendre"
+          - "<yellow>Clique gauche <gray>pour acheter"
+          - "<yellow>Clique droit <gray>pour vendre"
         buy-price: 15.0
         sell-price: 8.0
         stock: -1
         slot: 1
 
   outils:
-    name: "&bOutils"
+    name: "<aqua>Outils"
     icon: DIAMOND_PICKAXE
-    icon-name: "&bOutils"
+    icon-name: "<aqua>Outils"
     icon-lore:
-      - "&7Cliquer pour voir les outils"
+      - "<gray>Cliquer pour voir les outils"
     items:
       diamond_pickaxe:
         material: DIAMOND_PICKAXE
-        name: "&bPioche en Diamant"
+        name: "<aqua>Pioche en Diamant"
         lore:
-          - "&7Acheter: &e{buy_price}"
-          - "&7Vendre: &e{sell_price}"
+          - "<gray>Acheter: <yellow>{buy_price}"
+          - "<gray>Vendre: <yellow>{sell_price}"
           - ""
-          - "&eClique gauche &7pour acheter"
-          - "&eClique droit &7pour vendre"
+          - "<yellow>Clique gauche <gray>pour acheter"
+          - "<yellow>Clique droit <gray>pour vendre"
         buy-price: 1500.0
         sell-price: -1
         stock: -1
@@ -166,13 +166,13 @@ categories:
 
       iron_pickaxe:
         material: IRON_PICKAXE
-        name: "&7Pioche en Fer"
+        name: "<gray>Pioche en Fer"
         lore:
-          - "&7Acheter: &e{buy_price}"
-          - "&7Vendre: &e{sell_price}"
+          - "<gray>Acheter: <yellow>{buy_price}"
+          - "<gray>Vendre: <yellow>{sell_price}"
           - ""
-          - "&eClique gauche &7pour acheter"
-          - "&eClique droit &7pour vendre"
+          - "<yellow>Clique gauche <gray>pour acheter"
+          - "<yellow>Clique droit <gray>pour vendre"
         buy-price: 200.0
         sell-price: 80.0
         stock: -1

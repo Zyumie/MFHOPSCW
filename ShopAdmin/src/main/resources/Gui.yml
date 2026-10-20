@@ -6,7 +6,7 @@
 # Menu principal (hub) : première chose que voit le joueur avec /shop. N'affiche que les
 # catégories ; cliquer sur une catégorie ouvre son sous-menu (voir main-gui ci-dessous).
 hub:
-  title: "&6&lBoutique - Menu Principal"
+  title: "<gold><bold>Boutique - Menu Principal"
   rows: 3  # 1-6
 
   fill:
@@ -29,13 +29,13 @@ hub:
     close:
       slot: 22
       material: BARRIER
-      name: "&cFermer"
+      name: "<red>Fermer"
       lore:
-        - "&7Cliquer pour fermer"
+        - "<gray>Cliquer pour fermer"
 
 # Sous-menu : liste les items d'une catégorie choisie depuis le hub ci-dessus.
 main-gui:
-  title: "&6&lBoutique Admin"
+  title: "<gold><bold>Boutique Admin"
   rows: 6  # 1-6
 
   # Item de remplissage (fond du GUI)
@@ -60,42 +60,42 @@ main-gui:
     back:
       slot: 46
       material: ARROW
-      name: "&e« Retour au menu"
+      name: "<yellow>« Retour au menu"
       lore:
-        - "&7Retourner au menu principal"
+        - "<gray>Retourner au menu principal"
     prev-page:
       slot: 45
       material: ARROW
-      name: "&7← Page précédente"
+      name: "<gray>← Page précédente"
       lore:
-        - "&7Cliquer pour aller à la page précédente"
+        - "<gray>Cliquer pour aller à la page précédente"
     close:
       slot: 49
       material: BARRIER
-      name: "&cFermer"
+      name: "<red>Fermer"
       lore:
-        - "&7Cliquer pour fermer"
+        - "<gray>Cliquer pour fermer"
     next-page:
       slot: 53
       material: ARROW
-      name: "&7Page suivante →"
+      name: "<gray>Page suivante →"
       lore:
-        - "&7Cliquer pour aller à la page suivante"
+        - "<gray>Cliquer pour aller à la page suivante"
 
   # Indicateur de page
   page-indicator:
     slot: 48
     material: BOOK
-    name: "&7Page &e{page}&7/&e{max}"
+    name: "<gray>Page <yellow>{page}<gray>/<yellow>{max}"
     lore:
-      - "&7Navigation entre les pages"
+      - "<gray>Navigation entre les pages"
 
 # Sélecteur de quantité (ouvert au Shift+clic sur un item du sous-menu).
 # NOTE : cette section était avant indentée sous main-gui, mais le code l'a toujours lue
 # à la racine (quantity-selector.*) — elle était donc entièrement ignorée. C'est corrigé
 # ici : section de premier niveau, au même titre que hub et main-gui.
 quantity-selector:
-  title: "&8Sélectionner une quantité"
+  title: "<dark_gray>Sélectionner une quantité"
   rows: 3
   fill:
     enabled: true
@@ -103,19 +103,19 @@ quantity-selector:
     name: " "
   confirm-buy:
     material: LIME_STAINED_GLASS_PANE
-    name: "&aAcheter x{amount}"
+    name: "<green>Acheter x{amount}"
     lore:
-      - "&7Coût total: &e{total_price}"
+      - "<gray>Coût total: <yellow>{total_price}"
       - ""
-      - "&aCliquer pour confirmer"
+      - "<green>Cliquer pour confirmer"
   confirm-sell:
     material: ORANGE_STAINED_GLASS_PANE
-    name: "&6Vendre x{amount}"
+    name: "<gold>Vendre x{amount}"
     lore:
-      - "&7Revenu total: &e{total_price}"
+      - "<gray>Revenu total: <yellow>{total_price}"
       - ""
-      - "&6Cliquer pour confirmer"
+      - "<gold>Cliquer pour confirmer"
   cancel:
     slot: 22
     material: BARRIER
-    name: "&cAnnuler"
+    name: "<red>Annuler"

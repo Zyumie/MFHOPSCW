@@ -66,12 +66,8 @@ public class GiveItemCommand implements CommandExecutor, TabCompleter {
         return List.of();
     }
 
-    private void send(CommandSender s, String legacy) {
-        String prefix = plugin.getConfig().getString("general.prefix", "&8[&6Items&8] &7");
-        s.sendMessage(MiniMessage.miniMessage().deserialize(
-                (prefix + legacy)
-                        .replace("&8","<dark_gray>").replace("&6","<gold>")
-                        .replace("&a","<green>").replace("&c","<red>")
-                        .replace("&e","<yellow>").replace("&7","<gray>")));
+    private void send(CommandSender s, String message) {
+        String prefix = plugin.getConfig().getString("general.prefix", "<dark_gray>[<gold>Items<dark_gray>] <gray>");
+        s.sendMessage(MiniMessage.miniMessage().deserialize(prefix + message));
     }
 }

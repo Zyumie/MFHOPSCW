@@ -30,7 +30,7 @@ public class EcoCommand implements CommandExecutor, TabCompleter {
             send(sender, msg("messages.no-permission")); return true;
         }
         if (args.length < 3) {
-            send(sender, "&cUsage: /eco <give|set|take> <joueur> <montant>"); return true;
+            send(sender, "<red>Usage: /eco <give|set|take> <joueur> <montant>"); return true;
         }
 
         String action = args[0].toLowerCase(Locale.ROOT);
@@ -67,7 +67,7 @@ public class EcoCommand implements CommandExecutor, TabCompleter {
                 send(sender, msg("messages.eco-set")
                         .replace("{amount}", amountStr).replace("{player}", displayName).replace("{currency}", plural));
             }
-            default -> send(sender, "&cAction inconnue. Usage: /eco <give|set|take> <joueur> <montant>");
+            default -> send(sender, "<red>Action inconnue. Usage: /eco <give|set|take> <joueur> <montant>");
         }
         return true;
     }
@@ -86,7 +86,7 @@ public class EcoCommand implements CommandExecutor, TabCompleter {
     private String msg(String path) { return plugin.getConfig().getString(path, ""); }
     private String prefix()         { return msg("messages.prefix"); }
 
-    private void send(CommandSender s, String legacy) {
-        Msg.send(s, prefix() + legacy);
+    private void send(CommandSender s, String message) {
+        Msg.send(s, prefix() + message);
     }
 }

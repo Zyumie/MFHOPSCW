@@ -109,13 +109,8 @@ public class OxygenArmor extends JavaPlugin implements Module {
 
     private String cfg(String path) { return getConfig().getString(path, ""); }
 
-    private net.kyori.adventure.text.Component mm(String legacy) {
-        String s = legacy
-                .replace("&8","<dark_gray>").replace("&b","<aqua>")
-                .replace("&7","<gray>").replace("&a","<green>")
-                .replace("&c","<red>").replace("&e","<yellow>")
-                .replace("&6","<gold>");
-        return MiniMessage.miniMessage().deserialize(s);
+    private net.kyori.adventure.text.Component mm(String message) {
+        return MiniMessage.miniMessage().deserialize(message);
     }
 
     public ArmorManager getArmorManager() { return armorManager; }

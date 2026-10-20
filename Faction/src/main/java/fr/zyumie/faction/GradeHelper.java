@@ -19,10 +19,10 @@ public final class GradeHelper {
     }
 
     public String getColor(FactionGrade grade) {
-        return plugin.getConfig().getString("grades." + grade.name() + ".color", "&7");
+        return plugin.getConfig().getString("grades." + grade.name() + ".color", "<gray>");
     }
 
-    /** Retourne le nom coloré du grade (ex: "&cChef") */
+    /** Retourne le nom coloré du grade (ex: "<red>Chef") */
     public String coloredDisplay(FactionGrade grade) {
         return getColor(grade) + getDisplay(grade);
     }

@@ -306,10 +306,7 @@ public class HdvManager {
     private String prefix()      { return plugin.getConfig().getString("messages.prefix", ""); }
 
     private net.kyori.adventure.text.Component mm(String s) {
-        return net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(
-                s.replace("&8","<dark_gray>").replace("&5","<dark_purple>")
-                 .replace("&a","<green>").replace("&c","<red>")
-                 .replace("&e","<yellow>").replace("&7","<gray>"));
+        return net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(s);
     }
 
     // Helper pour déposer de l'argent chez un joueur offline

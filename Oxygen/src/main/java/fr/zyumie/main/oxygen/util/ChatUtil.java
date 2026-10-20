@@ -7,17 +7,8 @@ public final class ChatUtil {
 
     private ChatUtil() {}
 
-    public static Component color(String legacy) {
-        if (legacy == null) legacy = "";
-        String mm = legacy
-                .replace("&8", "<dark_gray>")
-                .replace("&4", "<dark_red>")
-                .replace("&c", "<red>")
-                .replace("&a", "<green>")
-                .replace("&b", "<aqua>")
-                .replace("&7", "<gray>")
-                .replace("&f", "<white>")
-                .replace("&l", "<bold>");
-        return MiniMessage.miniMessage().deserialize(mm);
+    public static Component color(String message) {
+        if (message == null) message = "";
+        return MiniMessage.miniMessage().deserialize(message);
     }
 }

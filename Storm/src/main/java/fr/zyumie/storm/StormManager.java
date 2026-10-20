@@ -211,15 +211,11 @@ public class StormManager {
     }
 
     private String prefix() {
-        return plugin.getConfig().getString("messages.prefix", "&8[&9⛈&8] &7");
+        return plugin.getConfig().getString("messages.prefix", "<dark_gray>[<blue>⛈<dark_gray>] <gray>");
     }
 
-    private net.kyori.adventure.text.Component mm(String legacy) {
-        return MiniMessage.miniMessage().deserialize(
-                legacy.replace("&8","<dark_gray>").replace("&9","<blue>")
-                      .replace("&a","<green>").replace("&c","<red>")
-                      .replace("&e","<yellow>").replace("&7","<gray>")
-                      .replace("&f","<white>").replace("&l","<bold>"));
+    private net.kyori.adventure.text.Component mm(String message) {
+        return MiniMessage.miniMessage().deserialize(message);
     }
 
     public boolean isStormActive() { return stormActive; }

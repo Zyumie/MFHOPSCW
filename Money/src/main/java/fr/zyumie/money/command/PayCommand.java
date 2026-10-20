@@ -26,7 +26,7 @@ public class PayCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player player)) { sender.sendMessage("Commande réservée aux joueurs."); return true; }
-        if (args.length < 2) { send(player, "&cUsage: /pay <joueur> <montant>"); return true; }
+        if (args.length < 2) { send(player, "<red>Usage: /pay <joueur> <montant>"); return true; }
 
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) { send(player, msg("messages.player-not-found").replace("{player}", args[0])); return true; }
@@ -81,7 +81,7 @@ public class PayCommand implements CommandExecutor, TabCompleter {
     private String fmt(double v)    { return String.format(Locale.ROOT, "%.2f", v); }
     private String prefix()         { return msg("messages.prefix"); }
 
-    private void send(Player p, String legacy) {
-        Msg.send(p, prefix() + legacy);
+    private void send(Player p, String message) {
+        Msg.send(p, prefix() + message);
     }
 }

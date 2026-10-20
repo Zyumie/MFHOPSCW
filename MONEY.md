@@ -35,8 +35,8 @@ economy:
 physical-item:                 # préparé dans la config, PAS ENCORE câblé aux commandes
   enabled: false
   material: GOLD_NUGGET
-  name: "&6Crédit"
-  lore: ["&7Valeur: &e1 Crédit"]
+  name: "<gold>Crédit"
+  lore: ["<gray>Valeur: <yellow>1 Crédit"]
   item-value: 1.0
 
 moneytop:
@@ -44,7 +44,7 @@ moneytop:
   cache-seconds: 30            # durée du cache du classement ; 0 = désactivé (toujours à jour, plus lent)
 
 messages:
-  # tous les textes affichés au joueur, couleurs en codes legacy (&8, &c, &e, ...)
+  # tous les textes affichés au joueur, couleurs au format MiniMessage (<dark_gray>, <red>, <yellow>, ...)
 ```
 
 ## Architecture

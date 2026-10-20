@@ -23,13 +23,13 @@ public class OxygenCommand implements CommandExecutor, TabCompleter {
     }
 
     private String prefix() {
-        return plugin.getConfig().getString("messages.prefix", "&8[&bOxygène&8] &7");
+        return plugin.getConfig().getString("messages.prefix", "<dark_gray>[<aqua>Oxygène<dark_gray>] <gray>");
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("oxygenplugin.admin")) {
-            sender.sendMessage(ChatUtil.color(prefix() + "&cPas la permission."));
+            sender.sendMessage(ChatUtil.color(prefix() + "<red>Pas la permission."));
             return true;
         }
 
@@ -42,7 +42,7 @@ public class OxygenCommand implements CommandExecutor, TabCompleter {
 
             case "reload" -> {
                 plugin.reloadConfig();
-                sender.sendMessage(ChatUtil.color(prefix() + "&aConfig rechargée."));
+                sender.sendMessage(ChatUtil.color(prefix() + "<green>Config rechargée."));
             }
 
             case "get" -> {
@@ -50,14 +50,14 @@ public class OxygenCommand implements CommandExecutor, TabCompleter {
                 if (args.length < 2) { sendUsage(sender); return true; }
                 Player target = Bukkit.getPlayerExact(args[1]);
                 if (target == null) {
-                    sender.sendMessage(ChatUtil.color(prefix() + "&cJoueur introuvable ou hors ligne."));
+                    sender.sendMessage(ChatUtil.color(prefix() + "<red>Joueur introuvable ou hors ligne."));
                     return true;
                 }
                 double pct = manager.getPercent(target);
                 boolean surface = manager.isSurface(target);
-                sender.sendMessage(ChatUtil.color(prefix() + "&f" + target.getName()
-                        + " &7— Oxygène: &b" + String.format("%.1f", pct) + "%"
-                        + " &7| Zone: " + (surface ? "&cSurface" : "&aSous-Terre")));
+                sender.sendMessage(ChatUtil.color(prefix() + "<white>" + target.getName()
+                        + " <gray>— Oxygène: <aqua>" + String.format("%.1f", pct) + "%"
+                        + " <gray>| Zone: " + (surface ? "<red>Surface" : "<green>Sous-Terre")));
             }
 
             case "set" -> {
@@ -65,16 +65,16 @@ public class OxygenCommand implements CommandExecutor, TabCompleter {
                 if (args.length < 3) { sendUsage(sender); return true; }
                 Player target = Bukkit.getPlayerExact(args[1]);
                 if (target == null) {
-                    sender.sendMessage(ChatUtil.color(prefix() + "&cJoueur introuvable ou hors ligne."));
+                    sender.sendMessage(ChatUtil.color(prefix() + "<red>Joueur introuvable ou hors ligne."));
                     return true;
                 }
                 try {
                     double value = Double.parseDouble(args[2]);
                     manager.setPercent(target, value);
-                    sender.sendMessage(ChatUtil.color(prefix() + "&aOxygène de &f" + target.getName()
-                            + " &amisé à &b" + String.format("%.1f", value) + "%."));
+                    sender.sendMessage(ChatUtil.color(prefix() + "<green>Oxygène de <white>" + target.getName()
+                            + " <green>misé à <aqua>" + String.format("%.1f", value) + "%."));
                 } catch (NumberFormatException e) {
-                    sender.sendMessage(ChatUtil.color(prefix() + "&c'" + args[2] + "' n'est pas un nombre valide."));
+                    sender.sendMessage(ChatUtil.color(prefix() + "<red>'" + args[2] + "' n'est pas un nombre valide."));
                 }
             }
 
@@ -84,10 +84,10 @@ public class OxygenCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendUsage(CommandSender sender) {
-        sender.sendMessage(ChatUtil.color(prefix() + "&7Commandes disponibles:"));
-        sender.sendMessage(ChatUtil.color("  &b/oxygen reload &7— Recharge la config"));
-        sender.sendMessage(ChatUtil.color("  &b/oxygen get <joueur> &7— Affiche le % d'oxygène d'un joueur"));
-        sender.sendMessage(ChatUtil.color("  &b/oxygen set <joueur> <0-100> &7— Modifie le % d'oxygène"));
+        sender.sendMessage(ChatUtil.color(prefix() + "<gray>Commandes disponibles:"));
+        sender.sendMessage(ChatUtil.color("  <aqua>/oxygen reload <gray>— Recharge la config"));
+        sender.sendMessage(ChatUtil.color("  <aqua>/oxygen get <joueur> <gray>— Affiche le % d'oxygène d'un joueur"));
+        sender.sendMessage(ChatUtil.color("  <aqua>/oxygen set <joueur> <0-100> <gray>— Modifie le % d'oxygène"));
     }
 
     @Override

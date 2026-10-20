@@ -73,8 +73,7 @@ public class ArmorStandChargeTask extends BukkitRunnable {
 
     private void notifyNearby(ArmorStand stand) {
         String raw = plugin.getConfig().getString("messages.recharge-complete", "");
-        var msg = MiniMessage.miniMessage().deserialize(
-                raw.replace("&a","<green>").replace("&b","<aqua>").replace("&7","<gray>"));
+        var msg = MiniMessage.miniMessage().deserialize(raw);
         stand.getLocation().getNearbyPlayers(16).forEach(p -> p.sendMessage(msg));
     }
 }

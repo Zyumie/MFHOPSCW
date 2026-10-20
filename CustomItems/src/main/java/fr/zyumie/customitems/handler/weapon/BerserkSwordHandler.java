@@ -35,6 +35,12 @@ public class BerserkSwordHandler {
     public void activate(Player player) {
         if (!plugin.getConfig().getBoolean("weapons.berserk-sword.enabled", true)) return;
 
+        // Vérifie si le joueur est déjà en train de subir l'effet (pendant les 10 secondes)
+        if (activeTasks.containsKey(player.getUniqueId())) {
+            send(player, plugin.getConfig().getString("weapons.berserk-sword.messages.already-active", "Vous êtes déjà en mode Berserk !"));
+            return;
+        }
+
         long cooldownMs = plugin.getConfig().getLong("weapons.berserk-sword.cooldown-seconds", 300) * 1000L;
         long now = System.currentTimeMillis();
         long last = cooldowns.getOrDefault(player.getUniqueId(), 0L);
@@ -62,6 +68,7 @@ public class BerserkSwordHandler {
         int taskId = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             deactivate(player);
             cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
+            activeTasks.remove(player.getUniqueId()); // N'oublie pas de nettoyer la tâche de la map !
         }, duration * 20L).getTaskId();
 
         activeTasks.put(player.getUniqueId(), taskId);
@@ -139,11 +146,8 @@ public class BerserkSwordHandler {
         removeAttackSpeed(player);
     }
 
-    private void send(Player p, String legacy) {
-        if (legacy == null || legacy.isEmpty()) return;
-        p.sendMessage(MiniMessage.miniMessage().deserialize(
-                legacy.replace("&4","<dark_red>").replace("&c","<red>")
-                      .replace("&e","<yellow>").replace("&7","<gray>")
-                      .replace("&a","<green>").replace("&l","<bold>")));
+    private void send(Player p, String message) {
+        if (message == null || message.isEmpty()) return;
+        p.sendMessage(MiniMessage.miniMessage().deserialize(message));
     }
 }

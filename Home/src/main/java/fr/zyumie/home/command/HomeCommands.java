@@ -70,12 +70,8 @@ public class HomeCommands implements CommandExecutor {
         return plugin.getConfig().getString(path, "");
     }
 
-    private void send(Player player, String legacy) {
+    private void send(Player player, String message) {
         String prefix = msg("messages.prefix");
-        String full = prefix + legacy;
-        String mm = full.replace("&8","<dark_gray>").replace("&a","<green>")
-                .replace("&c","<red>").replace("&e","<yellow>")
-                .replace("&7","<gray>").replace("&b","<aqua>");
-        player.sendMessage(MiniMessage.miniMessage().deserialize(mm));
+        player.sendMessage(MiniMessage.miniMessage().deserialize(prefix + message));
     }
 }

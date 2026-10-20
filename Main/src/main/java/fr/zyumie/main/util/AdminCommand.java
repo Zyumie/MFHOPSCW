@@ -18,12 +18,12 @@ public class AdminCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("main.admin")) {
-            sender.sendMessage(legacyToComponent(prefix() + plugin.getConfig().getString("messages.no-permission")));
+            sender.sendMessage(mm(prefix() + plugin.getConfig().getString("messages.no-permission")));
             return true;
         }
 
         if (args.length == 0) {
-            sender.sendMessage(legacyToComponent(prefix() + "&7Usage: /mainadmin <reload|list>"));
+            sender.sendMessage(mm(prefix() + "<gray>Usage: /mainadmin <reload|list>"));
             return true;
         }
 
@@ -34,34 +34,27 @@ public class AdminCommand implements CommandExecutor {
                 // reloadAll() réactive tout selon config.yml sans savoir qu'une tempête
                 // est en cours : on réapplique le verrou storm-lockout immédiatement après.
                 plugin.getStormLockoutManager().reapplyIfStormActive();
-                sender.sendMessage(legacyToComponent(prefix() + plugin.getConfig().getString("messages.reload-success")));
+                sender.sendMessage(mm(prefix() + plugin.getConfig().getString("messages.reload-success")));
             }
             case "list" -> {
-                sender.sendMessage(legacyToComponent(prefix() + "&7Modules enregistrés:"));
+                sender.sendMessage(mm(prefix() + "<gray>Modules enregistrés:"));
                 for (Module m : plugin.getModuleManager().getRegistered().values()) {
                     boolean enabled = plugin.getModuleManager().isEnabled(m.getId());
-                    String status = enabled ? "&aACTIF" : "&cINACTIF";
-                    sender.sendMessage(legacyToComponent("  &8- &f" + m.getDisplayName() + " &7(" + m.getId() + ") " + status));
+                    String status = enabled ? "<green>ACTIF" : "<red>INACTIF";
+                    sender.sendMessage(mm("  <dark_gray>- <white>" + m.getDisplayName() + " <gray>(" + m.getId() + ") " + status));
                 }
             }
-            default -> sender.sendMessage(legacyToComponent(prefix() + "&7Usage: /mainadmin <reload|list>"));
+            default -> sender.sendMessage(mm(prefix() + "<gray>Usage: /mainadmin <reload|list>"));
         }
         return true;
     }
 
     private String prefix() {
-        return plugin.getConfig().getString("messages.prefix", "&8[&bMain&8] &7");
+        return plugin.getConfig().getString("messages.prefix", "<dark_gray>[<aqua>Main<dark_gray>] <gray>");
     }
 
-    // Petit helper pour convertir le code couleur '&' en composant Adventure via MiniMessage
-    private net.kyori.adventure.text.Component legacyToComponent(String legacy) {
-        String miniMessage = legacy
-                .replace("&8", "<dark_gray>")
-                .replace("&b", "<aqua>")
-                .replace("&7", "<gray>")
-                .replace("&a", "<green>")
-                .replace("&c", "<red>")
-                .replace("&f", "<white>");
-        return MiniMessage.miniMessage().deserialize(miniMessage);
+    // Petit helper pour convertir un message MiniMessage en composant Adventure
+    private net.kyori.adventure.text.Component mm(String message) {
+        return MiniMessage.miniMessage().deserialize(message);
     }
 }

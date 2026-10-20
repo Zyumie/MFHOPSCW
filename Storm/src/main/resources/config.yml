@@ -56,20 +56,20 @@ hazards:
 
 # ── Messages ──────────────────────────────────────────────────────────
 messages:
-  prefix: "&8[&9⛈ Tempête&8] &7"
+  prefix: "<dark_gray>[<blue>⛈ Tempête<dark_gray>] <gray>"
   storm-start:
-    - "&9&l⛈ UNE TEMPÊTE APOCALYPTIQUE COMMENCE ⛈"
-    - "&7Durée: &e{duration} jour(s) &7| Fin prévue: &e{end-date}"
-    - "&cRentrez à l'abri immédiatement !"
+    - "<blue><bold>⛈ UNE TEMPÊTE APOCALYPTIQUE COMMENCE ⛈"
+    - "<gray>Durée: <yellow>{duration} jour(s) <gray>| Fin prévue: <yellow>{end-date}"
+    - "<red>Rentrez à l'abri immédiatement !"
   storm-end:
-    - "&a&l☀ LA TEMPÊTE EST PASSÉE ☀"
-    - "&7Le soleil renaît. Le monde reprend son souffle."
-  surface-warning: "&c⚠ Tu es exposé à la tempête ! Mets-toi à l'abri !"
+    - "<green><bold>☀ LA TEMPÊTE EST PASSÉE ☀"
+    - "<gray>Le soleil renaît. Le monde reprend son souffle."
+  surface-warning: "<red>⚠ Tu es exposé à la tempête ! Mets-toi à l'abri !"
   surface-warning-interval-ticks: 100  # Intervalle d'affichage du warning (ticks)
-  scheduled: "&7Prochaine tempête programmée: &e{start-date} &7({duration} jour(s))"
-  no-storm: "&7Aucune tempête prévue cette semaine."
-  storm-active: "&cTempête en cours &7— Fin: &e{end-date}"
-  admin-start: "&aTempête démarrée manuellement."
-  admin-stop: "&aTempête arrêtée manuellement."
-  admin-reload: "&aConfiguration rechargée."
-  no-permission: "&cTu n'as pas la permission."
+  scheduled: "<gray>Prochaine tempête programmée: <yellow>{start-date} <gray>({duration} jour(s))"
+  no-storm: "<gray>Aucune tempête prévue cette semaine."
+  storm-active: "<red>Tempête en cours <gray>— Fin: <yellow>{end-date}"
+  admin-start: "<green>Tempête démarrée manuellement."
+  admin-stop: "<green>Tempête arrêtée manuellement."
+  admin-reload: "<green>Configuration rechargée."
+  no-permission: "<red>Tu n'as pas la permission."

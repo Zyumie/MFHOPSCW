@@ -3,7 +3,7 @@
 #   (utilisé si config.yml -> display.mode: gui)
 # =========================================
 
-title: "&8Profil de &b{player}"
+title: "<dark_gray>Profil de <aqua>{player}"
 rows: 3   # 1 à 6
 
 # Remplissage des slots non utilisés. "material: NONE" pour désactiver.
@@ -22,7 +22,7 @@ items:
   head:
     slot: 13
     type: HEAD              # tête (skin) du joueur affiché — le material n'est pas utilisé pour ce type
-    name: "&b&l{player}"
+    name: "<aqua><bold>{player}"
     lore:
       - ""
       - "{status}"
@@ -31,22 +31,22 @@ items:
     slot: 11
     type: MONEY
     material: GOLD_INGOT
-    name: "&7Argent"
+    name: "<gray>Argent"
     lore:
-      - "&f{money}"
+      - "<white>{money}"
 
   faction:
     slot: 15
     type: FACTION
     material: WHITE_BANNER
-    name: "&7Faction"
+    name: "<gray>Faction"
     lore:
-      - "&f{faction}"
+      - "<white>{faction}"
 
   faction-bank:
     slot: 22
     type: FACTION_BANK
     material: CHEST
-    name: "&7Banque de faction"
+    name: "<gray>Banque de faction"
     lore:
-      - "&f{bank}"
+      - "<white>{bank}"

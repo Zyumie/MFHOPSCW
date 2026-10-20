@@ -4,6 +4,8 @@ import fr.zyumie.profile.ProfileData;
 import fr.zyumie.profile.gui.ProfileGuiManager;
 import fr.zyumie.profile.util.Msg;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -47,7 +49,7 @@ public class ProfileCommand implements CommandExecutor, TabCompleter {
         if (args.length >= 1) {
             target = Bukkit.getOfflinePlayerIfCached(args[0]);
             if (target == null) {
-                // args[0] est écrit tel quel (Component.text), jamais réinterprété comme du MiniMessage/legacy
+                // args[0] est écrit tel quel (Component.text), jamais réinterprété comme du MiniMessage
                 sender.sendMessage(mm(msg("messages.player-not-found")).append(Component.text(args[0])));
                 return true;
             }
@@ -150,10 +152,10 @@ public class ProfileCommand implements CommandExecutor, TabCompleter {
         Component status = mm(msg(data.online() ? "messages.status-online" : "messages.status-offline"));
 
         viewer.sendMessage(mm(msg("messages.header")));
-        // Nom du joueur toujours en texte brut (Component.text), jamais réinterprété comme du MiniMessage :
+        // Nom du joueur inséré via Placeholder.unparsed, jamais réinterprété comme du MiniMessage :
         // un pseudo ne peut pas contenir de balise, mais on reste cohérent avec le reste de la classe.
-        viewer.sendMessage(mm(msg("messages.name-line-prefix") + msg("messages.name-format"))
-                .append(Component.text(name))
+        viewer.sendMessage(mm(msg("messages.name-line-prefix") + msg("messages.name-format") + "<value>",
+                        Placeholder.unparsed("value", name))
                 .append(mm(msg("messages.separator")))
                 .append(status));
         viewer.sendMessage(mm(msg("messages.spacer")));
@@ -165,12 +167,12 @@ public class ProfileCommand implements CommandExecutor, TabCompleter {
 
     /**
      * Construit une ligne "préfixe + label + couleur de valeur" (tout config, donc fiable),
-     * puis ajoute la valeur elle-même en texte brut, jamais reparsée.
+     * puis insère la valeur elle-même en texte brut (Placeholder.unparsed), jamais reparsée.
      */
     private Component valueLine(String labelKey, String value, boolean fallback) {
         String colorKey = fallback ? "messages.value-fallback-color" : "messages.value-color";
-        return mm(msg("messages.line-prefix") + msg(labelKey) + msg(colorKey))
-                .append(Component.text(value));
+        return mm(msg("messages.line-prefix") + msg(labelKey) + msg(colorKey) + "<value>",
+                Placeholder.unparsed("value", value));
     }
 
     private String msg(String path) {
@@ -194,7 +196,7 @@ public class ProfileCommand implements CommandExecutor, TabCompleter {
         return null;
     }
 
-    private Component mm(String s) {
-        return Msg.parse(s);
+    private Component mm(String s, TagResolver... resolvers) {
+        return Msg.parse(s, resolvers);
     }
 }
