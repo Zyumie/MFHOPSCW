@@ -39,7 +39,7 @@ public class ShopCommand implements CommandExecutor, TabCompleter {
         // Le module peut être coupé temporairement (ex: storm-lockout du Main) sans que
         // la commande elle-même soit désenregistrée — donc on vérifie explicitement ici.
         if (!MainAPI.get().getModuleManager().isEnabled("shop-admin")) {
-            send(player, plugin.getConfig().getString("messages.shop-closed", "&cLa boutique est fermée pour le moment."));
+            send(player, plugin.getConfig().getString("messages.shop-closed", "<red>La boutique est fermée pour le moment."));
             return true;
         }
 
@@ -53,10 +53,8 @@ public class ShopCommand implements CommandExecutor, TabCompleter {
         return List.of();
     }
 
-    private void send(CommandSender s, String legacy) {
+    private void send(CommandSender s, String message) {
         String prefix = plugin.getConfig().getString("messages.prefix", "");
-        s.sendMessage(MiniMessage.miniMessage().deserialize(
-                (prefix + legacy).replace("&8","<dark_gray>").replace("&6","<gold>")
-                        .replace("&a","<green>").replace("&c","<red>").replace("&7","<gray>")));
+        s.sendMessage(MiniMessage.miniMessage().deserialize(prefix + message));
     }
 }

@@ -132,8 +132,8 @@ public class ProfileGuiManager {
     /**
      * Remplace les placeholders {player} {status} {money} {faction} {bank}.
      * Les valeurs qui peuvent contenir du texte non fiable (nom de joueur, nom de faction) sont
-     * débarrassées de tout '&'/'§' avant insertion, pour qu'un nom de faction ne puisse pas
-     * injecter de codes couleur dans le GUI affiché à un tiers.
+     * échappées (MiniMessage#escapeTags) avant insertion, pour qu'un nom de faction ne puisse pas
+     * injecter de balises MiniMessage dans le GUI affiché à un tiers.
      */
     private String placeholders(String text, ProfileData data) {
         if (text == null) return "";
@@ -143,14 +143,10 @@ public class ProfileGuiManager {
                 data.online() ? "En ligne" : "Hors ligne");
 
         return text
-                .replace("{player}", stripColors(name))
-                .replace("{status}", stripColors(status))
-                .replace("{money}", stripColors(data.money()))
-                .replace("{faction}", stripColors(data.faction()))
-                .replace("{bank}", stripColors(data.bank()));
-    }
-
-    private String stripColors(String s) {
-        return s == null ? "" : s.replace("&", "").replace("§", "");
+                .replace("{player}", Msg.escape(name))
+                .replace("{status}", Msg.escape(status))
+                .replace("{money}", Msg.escape(data.money()))
+                .replace("{faction}", Msg.escape(data.faction()))
+                .replace("{bank}", Msg.escape(data.bank()));
     }
 }

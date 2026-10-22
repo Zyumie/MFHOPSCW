@@ -79,7 +79,7 @@ public class MoneyCommand implements CommandExecutor, TabCompleter {
     private String fmt(double v)     { return String.format(Locale.ROOT, "%.2f", v); }
     private String prefix()          { return msg("messages.prefix"); }
 
-    private void send(CommandSender s, String legacy) {
-        Msg.send(s, prefix() + legacy);
+    private void send(CommandSender s, String message) {
+        Msg.send(s, prefix() + message);
     }
 }

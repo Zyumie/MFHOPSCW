@@ -57,12 +57,8 @@ public class HdvCommand implements CommandExecutor, TabCompleter {
         return List.of();
     }
 
-    private void send(Player p, String legacy) {
+    private void send(Player p, String message) {
         String prefix = plugin.getConfig().getString("messages.prefix", "");
-        p.sendMessage(MiniMessage.miniMessage().deserialize(
-                (prefix + legacy)
-                        .replace("&8","<dark_gray>").replace("&5","<dark_purple>")
-                        .replace("&a","<green>").replace("&c","<red>")
-                        .replace("&e","<yellow>").replace("&7","<gray>")));
+        p.sendMessage(MiniMessage.miniMessage().deserialize(prefix + message));
     }
 }

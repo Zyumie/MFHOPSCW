@@ -112,7 +112,7 @@ public class ItemRegistry {
         var sec = plugin.getConfig().getConfigurationSection("weapons.celestial-sword");
         if (sec == null) return null;
         ItemStack item = ItemBuilder.build(plugin, new MaceFakeCfg(sec), null, CELESTIAL_MACE,
-                sec.getString("mace-display-name", "&e&l⚒ Masse Céleste"),
+                sec.getString("mace-display-name", "<yellow><bold>⚒ Masse Céleste"),
                 sec.getStringList("mace-lore"));
         item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "celestialmace"));
         return item;

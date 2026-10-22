@@ -22,7 +22,7 @@ quests:
     target: ZOMBIE
     amount: 50
     reward-money: 500
-    reward-message: "&a+500 dans la bank de faction !"
+    reward-message: "<green>+500 dans la bank de faction !"
 
   - id: "w1_q2"
     week: 1

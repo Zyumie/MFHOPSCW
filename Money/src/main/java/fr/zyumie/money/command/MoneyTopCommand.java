@@ -54,7 +54,7 @@ public class MoneyTopCommand implements CommandExecutor, TabCompleter {
         }
 
         if (pageEntries.isEmpty()) {
-            send(sender, "&7Aucune entrée.");
+            send(sender, "<gray>Aucune entrée.");
         }
         return true;
     }
@@ -67,7 +67,7 @@ public class MoneyTopCommand implements CommandExecutor, TabCompleter {
     private String msg(String path) { return plugin.getConfig().getString(path, ""); }
     private String prefix()         { return msg("messages.prefix"); }
 
-    private void send(CommandSender s, String legacy) {
-        Msg.send(s, prefix() + legacy);
+    private void send(CommandSender s, String message) {
+        Msg.send(s, prefix() + message);
     }
 }

@@ -18,9 +18,9 @@ economy:
 physical-item:
   enabled: false
   material: GOLD_NUGGET
-  name: "&6Crédit"
+  name: "<gold>Crédit"
   lore:
-    - "&7Valeur: &e1 Crédit"
+    - "<gray>Valeur: <yellow>1 Crédit"
   # Valeur de 1 item en Crédits
   item-value: 1.0
 
@@ -32,21 +32,21 @@ moneytop:
   cache-seconds: 30
 
 messages:
-  prefix: "&8[&6Money&8] &7"
-  balance: "&7Ton solde: &e{amount} {currency}"
-  balance-other: "&7Solde de &e{player}&7: &e{amount} {currency}"
-  pay-success: "&aTu as payé &e{amount} {currency} &aà &e{player}&a."
-  pay-received: "&e{player} &at'a envoyé &e{amount} {currency}&a."
-  pay-self: "&cTu ne peux pas te payer toi-même."
-  pay-insufficient: "&cSolde insuffisant. Tu as &e{balance} {currency}&c."
-  pay-min: "&cMontant minimum: &e{min} {currency}&c."
-  pay-max-balance: "&cCe paiement dépasserait la limite de solde de &e{max} {currency}&c."
-  eco-give: "&a+{amount} {currency} &7donnés à &e{player}&7."
-  eco-take: "&c-{amount} {currency} &7retirés à &e{player}&7."
-  eco-set: "&7Solde de &e{player} &7fixé à &e{amount} {currency}&7."
-  player-not-found: "&cJoueur introuvable: &e{player}"
-  invalid-amount: "&cMontant invalide."
-  no-permission: "&cTu n'as pas la permission."
-  reload-success: "&aConfiguration Money rechargée."
-  moneytop-header: "&8─── &6Classement des richesses &8(page {page}/{max}) ───"
-  moneytop-entry: "  &7{rank}. &e{player} &7— &e{amount} {currency}"
+  prefix: "<dark_gray>[<gold>Money<dark_gray>] <gray>"
+  balance: "<gray>Ton solde: <yellow>{amount} {currency}"
+  balance-other: "<gray>Solde de <yellow>{player}<gray>: <yellow>{amount} {currency}"
+  pay-success: "<green>Tu as payé <yellow>{amount} {currency} <green>à <yellow>{player}<green>."
+  pay-received: "<yellow>{player} <green>t'a envoyé <yellow>{amount} {currency}<green>."
+  pay-self: "<red>Tu ne peux pas te payer toi-même."
+  pay-insufficient: "<red>Solde insuffisant. Tu as <yellow>{balance} {currency}<red>."
+  pay-min: "<red>Montant minimum: <yellow>{min} {currency}<red>."
+  pay-max-balance: "<red>Ce paiement dépasserait la limite de solde de <yellow>{max} {currency}<red>."
+  eco-give: "<green>+{amount} {currency} <gray>donnés à <yellow>{player}<gray>."
+  eco-take: "<red>-{amount} {currency} <gray>retirés à <yellow>{player}<gray>."
+  eco-set: "<gray>Solde de <yellow>{player} <gray>fixé à <yellow>{amount} {currency}<gray>."
+  player-not-found: "<red>Joueur introuvable: <yellow>{player}"
+  invalid-amount: "<red>Montant invalide."
+  no-permission: "<red>Tu n'as pas la permission."
+  reload-success: "<green>Configuration Money rechargée."
+  moneytop-header: "<dark_gray>─── <gold>Classement des richesses <dark_gray>(page {page}/{max}) ───"
+  moneytop-entry: "  <gray>{rank}. <yellow>{player} <gray>— <yellow>{amount} {currency}"

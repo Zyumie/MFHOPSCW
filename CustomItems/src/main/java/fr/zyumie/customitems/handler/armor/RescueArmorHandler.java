@@ -55,7 +55,7 @@ public class RescueArmorHandler {
         Location safe = SafeTeleport.findSafe(player.getLocation(), radius, 30);
 
         if (safe == null) {
-            send(player, "&cAucune position sûre trouvée à proximité !");
+            send(player, "<red>Aucune position sûre trouvée à proximité !");
             return;
         }
 
@@ -76,10 +76,8 @@ public class RescueArmorHandler {
         return false;
     }
 
-    private void send(Player p, String legacy) {
-        if (legacy == null || legacy.isEmpty()) return;
-        p.sendMessage(MiniMessage.miniMessage().deserialize(
-                legacy.replace("&8","<dark_gray>").replace("&a","<green>")
-                      .replace("&c","<red>").replace("&e","<yellow>").replace("&7","<gray>")));
+    private void send(Player p, String message) {
+        if (message == null || message.isEmpty()) return;
+        p.sendMessage(MiniMessage.miniMessage().deserialize(message));
     }
 }

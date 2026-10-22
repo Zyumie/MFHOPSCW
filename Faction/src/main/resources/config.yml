@@ -14,66 +14,66 @@ faction:
 grades:
   CHEF:
     display: "Chef"
-    color: "&c"
+    color: "<red>"
     permissions: [invite, kick, promote, demote, deposit, withdraw, delete]
   BRAS_DROIT:
     display: "Bras-Droit"
-    color: "&6"
+    color: "<gold>"
     permissions: [invite, kick, promote, demote, deposit, withdraw]
   MODO:
     display: "Modo"
-    color: "&e"
+    color: "<yellow>"
     permissions: [invite, kick, deposit]
   MEMBRE:
     display: "Membre"
-    color: "&a"
+    color: "<green>"
     permissions: [deposit]
   INVITE:
     display: "Invité"
-    color: "&7"
+    color: "<gray>"
     permissions: []
 
 messages:
-  prefix: "&8[&6Faction&8] &7"
-  no-permission: "&cTu n'as pas la permission d'effectuer cette action."
-  not-in-faction: "&cTu n'es dans aucune faction."
-  already-in-faction: "&cTu es déjà dans une faction."
-  faction-not-found: "&cFaction introuvable: &e{name}"
-  player-not-found: "&cJoueur introuvable: &e{name}"
-  player-not-in-faction: "&cCe joueur n'est pas dans ta faction."
+  prefix: "<dark_gray>[<gold>Faction<dark_gray>] <gray>"
+  no-permission: "<red>Tu n'as pas la permission d'effectuer cette action."
+  not-in-faction: "<red>Tu n'es dans aucune faction."
+  already-in-faction: "<red>Tu es déjà dans une faction."
+  faction-not-found: "<red>Faction introuvable: <yellow>{name}"
+  player-not-found: "<red>Joueur introuvable: <yellow>{name}"
+  player-not-in-faction: "<red>Ce joueur n'est pas dans ta faction."
 
-  create-success: "&aFaction &e{name} &acréée avec succès !"
-  create-already-exists: "&cUne faction nommée &e{name} &cexiste déjà."
-  create-name-invalid: "&cNom invalide. Max {max} caractères, pas d'espaces."
+  create-success: "<green>Faction <yellow>{name} <green>créée avec succès !"
+  create-already-exists: "<red>Une faction nommée <yellow>{name} <red>existe déjà."
+  create-name-invalid: "<red>Nom invalide. Max {max} caractères, pas d'espaces."
 
-  delete-success: "&aFaction &e{name} &adissoute."
-  delete-confirm: "&cTu es sur le point de dissoudre ta faction. Retape la commande dans les 10s pour confirmer."
+  delete-success: "<green>Faction <yellow>{name} <green>dissoute."
+  delete-confirm: "<red>Tu es sur le point de dissoudre ta faction. Retape la commande dans les 10s pour confirmer."
 
-  invite-sent: "&aInvitation envoyée à &e{player}&a."
-  invite-received: "&aLa faction &e{faction} &at'a invité ! Tape &b/f join {faction} &apour rejoindre."
-  invite-none: "&cAucune invitation en attente de cette faction."
+  invite-sent: "<green>Invitation envoyée à <yellow>{player}<green>."
+  invite-received: "<green>La faction <yellow>{faction} <green>t'a invité ! Tape <aqua>/f join {faction} <green>pour rejoindre."
+  invite-none: "<red>Aucune invitation en attente de cette faction."
 
-  join-success: "&aTu as rejoint la faction &e{faction}&a !"
-  join-broadcast: "&e{player} &aa rejoint la faction !"
+  join-success: "<green>Tu as rejoint la faction <yellow>{faction}<green> !"
+  join-broadcast: "<yellow>{player} <green>a rejoint la faction !"
 
-  leave-success: "&aTu as quitté la faction &e{faction}&a."
-  leave-chef: "&cTu es le chef. Transfère d'abord ton grade via /f promote, ou dissous la faction avec /f delete."
-  leave-broadcast: "&e{player} &aa quitté la faction."
+  leave-success: "<green>Tu as quitté la faction <yellow>{faction}<green>."
+  leave-chef: "<red>Tu es le chef. Transfère d'abord ton grade via /f promote, ou dissous la faction avec /f delete."
+  leave-broadcast: "<yellow>{player} <green>a quitté la faction."
 
-  kick-success: "&e{player} &aa été exclu de la faction."
-  kick-broadcast: "&e{player} &aa été exclu par &e{by}&a."
-  kick-self: "&cTu ne peux pas t'exclure toi-même."
-  kick-outranks: "&cTu ne peux pas exclure quelqu'un de rang supérieur ou égal."
+  kick-success: "<yellow>{player} <green>a été exclu de la faction."
+  kick-broadcast: "<yellow>{player} <green>a été exclu par <yellow>{by}<green>."
+  kick-self: "<red>Tu ne peux pas t'exclure toi-même."
+  kick-outranks: "<red>Tu ne peux pas exclure quelqu'un de rang supérieur ou égal."
 
-  promote-success: "&e{player} &aa été promu &6{grade}&a."
-  promote-max: "&e{player} &aest déjà au grade maximum."
-  promote-outranks: "&cTu ne peux pas promouvoir quelqu'un à ton rang ou au-dessus."
-  demote-success: "&e{player} &aa été rétrogradé à &6{grade}&a."
-  demote-min: "&e{player} &aest déjà au grade minimum."
+  promote-success: "<yellow>{player} <green>a été promu <gold>{grade}<green>."
+  promote-max: "<yellow>{player} <green>est déjà au grade maximum."
+  promote-outranks: "<red>Tu ne peux pas promouvoir quelqu'un à ton rang ou au-dessus."
+  demote-success: "<yellow>{player} <green>a été rétrogradé à <gold>{grade}<green>."
+  demote-min: "<yellow>{player} <green>est déjà au grade minimum."
 
-  bank-header: "&8─── &6Bank de {faction} &8───"
-  bank-balance: "&7Solde: &e{amount}"
-  deposit-success: "&aTu as déposé &e{amount} &adans la bank."
-  deposit-insufficient: "&cSolde personnel insuffisant."
-  withdraw-success: "&aTu as retiré &e{amount} &ade la bank."
-  withdraw-insufficient: "&cSolde de la bank insuffisant."
+  bank-header: "<dark_gray>─── <gold>Bank de {faction} <dark_gray>───"
+  bank-balance: "<gray>Solde: <yellow>{amount}"
+  deposit-success: "<green>Tu as déposé <yellow>{amount} <green>dans la bank."
+  deposit-insufficient: "<red>Solde personnel insuffisant."
+  withdraw-success: "<green>Tu as retiré <yellow>{amount} <green>de la bank."
+  withdraw-insufficient: "<red>Solde de la bank insuffisant."

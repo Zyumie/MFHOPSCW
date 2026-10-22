@@ -158,12 +158,8 @@ public class GuiListener implements Listener {
         }
     }
 
-    private void send(Player p, String legacy) {
+    private void send(Player p, String message) {
         String prefix = plugin.getConfig().getString("messages.prefix", "");
-        p.sendMessage(MiniMessage.miniMessage().deserialize(
-                (prefix + legacy)
-                        .replace("&8","<dark_gray>").replace("&6","<gold>")
-                        .replace("&e","<yellow>").replace("&a","<green>")
-                        .replace("&c","<red>").replace("&7","<gray>")));
+        p.sendMessage(MiniMessage.miniMessage().deserialize(prefix + message));
     }
 }

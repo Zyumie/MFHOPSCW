@@ -102,15 +102,10 @@ public class StormCommand implements CommandExecutor, TabCompleter {
     }
 
     private String prefix() {
-        return plugin.getConfig().getString("messages.prefix", "&8[&9⛈&8] &7");
+        return plugin.getConfig().getString("messages.prefix", "<dark_gray>[<blue>⛈<dark_gray>] <gray>");
     }
 
-    private void send(CommandSender s, String legacy) {
-        s.sendMessage(MiniMessage.miniMessage().deserialize(
-                (prefix() + legacy)
-                        .replace("&8","<dark_gray>").replace("&9","<blue>")
-                        .replace("&a","<green>").replace("&c","<red>")
-                        .replace("&e","<yellow>").replace("&7","<gray>")
-                        .replace("&6","<gold>").replace("&l","<bold>")));
+    private void send(CommandSender s, String message) {
+        s.sendMessage(MiniMessage.miniMessage().deserialize(prefix() + message));
     }
 }

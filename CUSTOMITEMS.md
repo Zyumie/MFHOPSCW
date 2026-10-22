@@ -60,11 +60,11 @@ armors:
   storm:
     enabled: true
     require-full-set: true          # false = 1 pièce suffit
-    display-name: "&9&lArmure Anti-Tempête"
+    display-name: "<blue><bold>Armure Anti-Tempête"
     lore:
-      - "&7Forgée dans l'œil d'une tempête millénaire."
+      - "<gray>Forgée dans l'œil d'une tempête millénaire."
       - ""
-      - "&9✦ Immunité totale à la tempête apocalyptique"
+      - "<blue>✦ Immunité totale à la tempête apocalyptique"
     helmet:
       material: DIAMOND_HELMET
       custom-model-data: 2001       # CMD legacy (si pas item_model)
@@ -81,8 +81,8 @@ armors:
       PROTECTION_ENVIRONMENTAL: 4
       DURABILITY: 3
     messages:
-      equipped:   "&9⛈ Armure anti-tempête enfilée. Tu es protégé."
-      unequipped: "&7L'armure anti-tempête a été retirée."
+      equipped:   "<blue>⛈ Armure anti-tempête enfilée. Tu es protégé."
+      unequipped: "<gray>L'armure anti-tempête a été retirée."
 ```
 
 ---
@@ -108,7 +108,7 @@ armors:
   ghost:
     enabled: true
     require-full-set: true
-    display-name: "&f&lArmure Fantôme"
+    display-name: "<white><bold>Armure Fantôme"
     helmet:
       material: LEATHER_HELMET
       custom-model-data: 2011
@@ -127,9 +127,9 @@ armors:
       color: "0x000000"
     reveal-duration-seconds: 5      # Durée de visibilité après un coup
     messages:
-      invisible:  "&f👻 Tu es invisible."
-      revealed:   "&c💥 Invisibilité brisée pendant &e{duration}s&c !"
-      restored:   "&f👻 Tu redeviens invisible."
+      invisible:  "<white>👻 Tu es invisible."
+      revealed:   "<red>💥 Invisibilité brisée pendant <yellow>{duration}s<red> !"
+      restored:   "<white>👻 Tu redeviens invisible."
 ```
 
 ---
@@ -163,7 +163,7 @@ armors:
   rescue:
     enabled: true
     require-full-set: false         # Une seule pièce suffit
-    display-name: "&a&lArmure de Sauvetage"
+    display-name: "<green><bold>Armure de Sauvetage"
     helmet:
       material: IRON_HELMET
       custom-model-data: 2021
@@ -180,8 +180,8 @@ armors:
     trigger-health: 2.0             # HP seuil (2.0 = 1 cœur)
     cooldown-seconds: 30            # Cooldown entre deux téléportations
     messages:
-      triggered: "&a⚡ Téléportation d'urgence ! Tu as été sauvé."
-      cooldown:  "&cCooldown actif encore &e{remaining}s&c."
+      triggered: "<green>⚡ Téléportation d'urgence ! Tu as été sauvé."
+      cooldown:  "<red>Cooldown actif encore <yellow>{remaining}s<red>."
 ```
 
 ---
@@ -215,7 +215,7 @@ armors:
   soul:
     enabled: true
     require-full-set: true
-    display-name: "&5&lArmure Voleuse d'Âmes"
+    display-name: "<dark_purple><bold>Armure Voleuse d'Âmes"
     helmet:
       material: NETHERITE_HELMET
       custom-model-data: 2031
@@ -231,9 +231,9 @@ armors:
     hp-per-kill: 4.0                # HP bonus par kill (4.0 = 2 cœurs)
     max-bonus-hp: 0                 # 0 = illimité
     messages:
-      kill-bonus:    "&5+2 cœurs ! &8[&5{total}&8 bonus actif(s)]"
-      reset-death:   "&5💀 Âmes perdues à la mort."
-      reset-unequip: "&5💔 Âmes libérées en retirant l'armure."
+      kill-bonus:    "<dark_purple>+2 cœurs ! <dark_gray>[<dark_purple>{total}<dark_gray> bonus actif(s)]"
+      reset-death:   "<dark_purple>💀 Âmes perdues à la mort."
+      reset-unequip: "<dark_purple>💔 Âmes libérées en retirant l'armure."
 ```
 
 ---
@@ -274,7 +274,7 @@ armors:
 weapons:
   celestial-sword:
     enabled: true
-    display-name: "&e&l✦ Épée Céleste"
+    display-name: "<yellow><bold>✦ Épée Céleste"
     material: DIAMOND_SWORD
     custom-model-data: 3001
     enchantments:
@@ -283,13 +283,13 @@ weapons:
       FIRE_ASPECT: 2
     launch-velocity: 2.5            # Vitesse verticale (~30 blocs)
     mace-material: MACE             # Material 1.21 natif
-    mace-display-name: "&e&l⚒ Masse Céleste"
+    mace-display-name: "<yellow><bold>⚒ Masse Céleste"
     mace-custom-model-data: 3002
     messages:
-      launch:       "&e⬆ Tu t'élèves vers les cieux !"
-      mace-form:    "&e⚒ La masse est prête. Frappe !"
-      kill-slam:    "&e💥 Impact céleste ! La cible est anéantie."
-      miss-landing: "&e✓ Atterrissage sans dégât."
+      launch:       "<yellow>⬆ Tu t'élèves vers les cieux !"
+      mace-form:    "<yellow>⚒ La masse est prête. Frappe !"
+      kill-slam:    "<yellow>💥 Impact céleste ! La cible est anéantie."
+      miss-landing: "<yellow>✓ Atterrissage sans dégât."
 ```
 
 ---
@@ -311,7 +311,7 @@ weapons:
 weapons:
   explosive-bow:
     enabled: true
-    display-name: "&c&l💥 Arc Explosif"
+    display-name: "<red><bold>💥 Arc Explosif"
     material: BOW
     custom-model-data: 3011
     enchantments:
@@ -322,7 +322,7 @@ weapons:
     real-explosion: false           # true = destruction de blocs
     explosion-particle: EXPLOSION_LARGE
     messages:
-      explosion: "&c💥 Explosion ! &e{hits} &ccibles touchées."
+      explosion: "<red>💥 Explosion ! <yellow>{hits} <red>cibles touchées."
 ```
 
 ---
@@ -348,7 +348,7 @@ ProjectileHitEvent (Arrow taguée "ender_bow", cible = Player)
 weapons:
   ender-bow:
     enabled: true
-    display-name: "&d&l🌀 Arc Ender"
+    display-name: "<light_purple><bold>🌀 Arc Ender"
     material: BOW
     custom-model-data: 3021
     enchantments:
@@ -357,7 +357,7 @@ weapons:
     teleport-offset: 2.0            # Blocs derrière la cible
     teleport-particle: PORTAL
     messages:
-      teleported: "&d🌀 Téléporté derrière &e{target}&d !"
+      teleported: "<light_purple>🌀 Téléporté derrière <yellow>{target}<light_purple> !"
 ```
 
 ---
@@ -388,7 +388,7 @@ PlayerInteractEvent (RIGHT_CLICK + HAND principal + berserk_sword en main)
 weapons:
   berserk-sword:
     enabled: true
-    display-name: "&4&l⚡ Épée Berserk"
+    display-name: "<dark_red><bold>⚡ Épée Berserk"
     material: NETHERITE_SWORD
     custom-model-data: 3031
     enchantments:
@@ -400,10 +400,10 @@ weapons:
     faction-buff-radius: 10.0       # Rayon du buff faction (blocs)
     attack-speed-value: 1024.0      # Valeur ATTACK_SPEED (supprime le cooldown)
     messages:
-      activated:      "&4⚡ MODE BERSERK ! &e{duration}s &4de fureur !"
-      faction-buffed: "&4⚡ &e{player} &4active le Berserk ! Tu es aussi en rage !"
-      ended:          "&7Berserk terminé."
-      cooldown:       "&cCooldown actif: &e{remaining}s &crestant(e)s."
+      activated:      "<dark_red>⚡ MODE BERSERK ! <yellow>{duration}s <dark_red>de fureur !"
+      faction-buffed: "<dark_red>⚡ <yellow>{player} <dark_red>active le Berserk ! Tu es aussi en rage !"
+      ended:          "<gray>Berserk terminé."
+      cooldown:       "<red>Cooldown actif: <yellow>{remaining}s <red>restant(e)s."
 ```
 
 ---
@@ -690,16 +690,16 @@ Si tu cibles des versions antérieures à 1.21.4, `setCustomModelData(int)` rest
 
 ```yaml
 general:
-  prefix: "&8[&6Items&8] &7"
+  prefix: "<dark_gray>[<gold>Items<dark_gray>] <gray>"
   block-container-storage: false    # Empêche le stockage dans des coffres (WIP)
   show-particles: true              # Particules lors des effets actifs
 
 messages:
-  no-permission:    "&cTu n'as pas la permission."
-  player-not-found: "&cJoueur introuvable: &e{player}"
-  item-not-found:   "&cItem inconnu: &e{item}"
-  give-success:     "&aItem &e{item} &adonné à &e{player}&a."
-  give-received:    "&aTu as reçu: &e{item}&a."
+  no-permission:    "<red>Tu n'as pas la permission."
+  player-not-found: "<red>Joueur introuvable: <yellow>{player}"
+  item-not-found:   "<red>Item inconnu: <yellow>{item}"
+  give-success:     "<green>Item <yellow>{item} <green>donné à <yellow>{player}<green>."
+  give-received:    "<green>Tu as reçu: <yellow>{item}<green>."
 ```
 
 ### Champs communs aux armures

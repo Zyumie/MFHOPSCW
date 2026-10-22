@@ -30,7 +30,7 @@ oxygen:
   check-interval-ticks: 20
 
 messages:
-  prefix: "&8[&bOxygène&8] &7"
-  surface-warning: "&c⚠ Tu n'as plus d'oxygène ! Rejoins la Surface... ou les profondeurs avant qu'il ne soit trop tard."
-  death-imminent: "&4&l☠ Mort imminente ! Tente de rejoindre la surface ou de redescendre sous terre !"
-  oxygen-restored: "&aTu respires à nouveau normalement."
+  prefix: "<dark_gray>[<aqua>Oxygène<dark_gray>] <gray>"
+  surface-warning: "<red>⚠ Tu n'as plus d'oxygène ! Rejoins la Surface... ou les profondeurs avant qu'il ne soit trop tard."
+  death-imminent: "<dark_red><bold>☠ Mort imminente ! Tente de rejoindre la surface ou de redescendre sous terre !"
+  oxygen-restored: "<green>Tu respires à nouveau normalement."

@@ -12,14 +12,14 @@ armors:
   storm:
     enabled: true
     require-full-set: true
-    display-name: "&9&lArmure Anti-Tempête"
+    display-name: "<blue><bold>Armure Anti-Tempête"
     lore:
-      - "&7Forgée dans l'œil d'une tempête millénaire."
+      - "<gray>Forgée dans l'œil d'une tempête millénaire."
       - ""
-      - "&9✦ Immunité totale à la tempête apocalyptique"
-      - "&9✦ Effets et dégâts de tempête annulés"
+      - "<blue>✦ Immunité totale à la tempête apocalyptique"
+      - "<blue>✦ Effets et dégâts de tempête annulés"
       - ""
-      - "&8ID: storm_armor"
+      - "<dark_gray>ID: storm_armor"
     # Trim appliqué à toutes les pièces du set (peut être surchargé par pièce)
     trim:
       enabled: true
@@ -50,21 +50,21 @@ armors:
       PROTECTION_ENVIRONMENTAL: 4
       DURABILITY: 3
     messages:
-      equipped:   "&9⛈ Armure anti-tempête enfilée. Tu es protégé."
-      unequipped: "&7L'armure anti-tempête a été retirée."
+      equipped:   "<blue>⛈ Armure anti-tempête enfilée. Tu es protégé."
+      unequipped: "<gray>L'armure anti-tempête a été retirée."
 
   # ── Armure Fantôme ───────────────────────────────────────
   ghost:
     enabled: true
     require-full-set: true
-    display-name: "&f&lArmure Fantôme"
+    display-name: "<white><bold>Armure Fantôme"
     lore:
-      - "&7L'âme de ceux qui voulaient disparaître..."
+      - "<gray>L'âme de ceux qui voulaient disparaître..."
       - ""
-      - "&f✦ Invisibilité totale (armure + pseudo masqués)"
-      - "&c✦ Un seul coup brise l'invisibilité 5 secondes"
+      - "<white>✦ Invisibilité totale (armure + pseudo masqués)"
+      - "<red>✦ Un seul coup brise l'invisibilité 5 secondes"
       - ""
-      - "&8ID: ghost_armor"
+      - "<dark_gray>ID: ghost_armor"
     trim:
       enabled: false      # Désactivé : le trim rendrait l'armure visible
       material: quartz
@@ -89,23 +89,23 @@ armors:
       PROTECTION_ENVIRONMENTAL: 2
     reveal-duration-seconds: 5
     messages:
-      invisible:  "&f👻 Tu es invisible."
-      revealed:   "&c💥 Invisibilité brisée pendant &e{duration}s&c !"
-      restored:   "&f👻 Tu redeviens invisible."
+      invisible:  "<white>👻 Tu es invisible."
+      revealed:   "<red>💥 Invisibilité brisée pendant <yellow>{duration}s<red> !"
+      restored:   "<white>👻 Tu redeviens invisible."
 
   # ── Armure de Sauvetage ──────────────────────────────────
   rescue:
     enabled: true
     require-full-set: false
-    display-name: "&a&lArmure de Sauvetage"
+    display-name: "<green><bold>Armure de Sauvetage"
     lore:
-      - "&7Conçue pour les situations désespérées."
+      - "<gray>Conçue pour les situations désespérées."
       - ""
-      - "&a✦ Téléportation d'urgence à &e1 cœur"
-      - "&a✦ Rayon aléatoire: &e{radius} blocs"
-      - "&7(Cooldown: &e{cooldown}s&7)"
+      - "<green>✦ Téléportation d'urgence à <yellow>1 cœur"
+      - "<green>✦ Rayon aléatoire: <yellow>{radius} blocs"
+      - "<gray>(Cooldown: <yellow>{cooldown}s<gray>)"
       - ""
-      - "&8ID: rescue_armor"
+      - "<dark_gray>ID: rescue_armor"
     trim:
       enabled: true
       material: emerald   # minecraft:emerald
@@ -133,21 +133,21 @@ armors:
     trigger-health: 2.0
     cooldown-seconds: 30
     messages:
-      triggered: "&a⚡ Téléportation d'urgence ! Tu as été sauvé."
-      cooldown:  "&cCooldown actif encore &e{remaining}s&c."
+      triggered: "<green>⚡ Téléportation d'urgence ! Tu as été sauvé."
+      cooldown:  "<red>Cooldown actif encore <yellow>{remaining}s<red>."
 
   # ── Armure Voleuse d'Âmes ────────────────────────────────
   soul:
     enabled: true
     require-full-set: true
-    display-name: "&5&lArmure Voleuse d'Âmes"
+    display-name: "<dark_purple><bold>Armure Voleuse d'Âmes"
     lore:
-      - "&7Chaque mort nourrit ta puissance..."
+      - "<gray>Chaque mort nourrit ta puissance..."
       - ""
-      - "&5✦ +2 cœurs par kill (cumulable)"
-      - "&c✦ Perte totale si pièce retirée ou mort"
+      - "<dark_purple>✦ +2 cœurs par kill (cumulable)"
+      - "<red>✦ Perte totale si pièce retirée ou mort"
       - ""
-      - "&8ID: soul_armor"
+      - "<dark_gray>ID: soul_armor"
     trim:
       enabled: true
       material: amethyst  # minecraft:amethyst
@@ -174,9 +174,9 @@ armors:
     hp-per-kill: 4.0
     max-bonus-hp: 0
     messages:
-      kill-bonus:    "&5+2 cœurs ! &8[&5{total}&8 bonus actif(s)]"
-      reset-death:   "&5💀 Âmes perdues à la mort."
-      reset-unequip: "&5💔 Âmes libérées en retirant l'armure."
+      kill-bonus:    "<dark_purple>+2 cœurs ! <dark_gray>[<dark_purple>{total}<dark_gray> bonus actif(s)]"
+      reset-death:   "<dark_purple>💀 Âmes perdues à la mort."
+      reset-unequip: "<dark_purple>💔 Âmes libérées en retirant l'armure."
 
 # ─────────────────────────────────────────────────────────
 #  ARMES CUSTOM
@@ -186,16 +186,16 @@ weapons:
 
   celestial-sword:
     enabled: true
-    display-name: "&e&l✦ Épée Céleste"
+    display-name: "<yellow><bold>✦ Épée Céleste"
     lore:
-      - "&7Forgée par les dieux pour punir les impies."
+      - "<gray>Forgée par les dieux pour punir les impies."
       - ""
-      - "&e✦ Kill → Propulsion &e30 blocs en hauteur"
-      - "&e✦ En chute → Masse céleste"
-      - "&e  ✗ Raté : 0 dégât de chute"
-      - "&e  ✓ Touché : One-shot + re-propulsion"
+      - "<yellow>✦ Kill → Propulsion <yellow>30 blocs en hauteur"
+      - "<yellow>✦ En chute → Masse céleste"
+      - "<yellow>  ✗ Raté : 0 dégât de chute"
+      - "<yellow>  ✓ Touché : One-shot + re-propulsion"
       - ""
-      - "&8ID: celestial_sword"
+      - "<dark_gray>ID: celestial_sword"
     material: DIAMOND_SWORD
     custom-model-data: 3001
     item-model: "celestialSword"
@@ -205,30 +205,30 @@ weapons:
       FIRE_ASPECT: 2
     launch-velocity: 2.5
     mace-material: MACE
-    mace-display-name: "&e&l⚒ Masse Céleste"
+    mace-display-name: "<yellow><bold>⚒ Masse Céleste"
     mace-lore:
-      - "&7La puissance du ciel concentrée."
+      - "<gray>La puissance du ciel concentrée."
       - ""
-      - "&e✦ Touche un joueur → One-shot + re-propulsion"
-      - "&e✦ Rate → Aucun dégât de chute"
+      - "<yellow>✦ Touche un joueur → One-shot + re-propulsion"
+      - "<yellow>✦ Rate → Aucun dégât de chute"
     mace-custom-model-data: 3002
     mace-item-model: "celestialMace"
     messages:
-      launch:       "&e⬆ Tu t'élèves vers les cieux !"
-      mace-form:    "&e⚒ La masse est prête. Frappe !"
-      kill-slam:    "&e💥 Impact céleste ! La cible est anéantie."
-      miss-landing: "&e✓ Atterrissage sans dégât."
+      launch:       "<yellow>⬆ Tu t'élèves vers les cieux !"
+      mace-form:    "<yellow>⚒ La masse est prête. Frappe !"
+      kill-slam:    "<yellow>💥 Impact céleste ! La cible est anéantie."
+      miss-landing: "<yellow>✓ Atterrissage sans dégât."
 
   explosive-bow:
     enabled: true
-    display-name: "&c&l💥 Arc Explosif"
+    display-name: "<red><bold>💥 Arc Explosif"
     lore:
-      - "&7L'artillerie du pauvre... mais efficace."
+      - "<gray>L'artillerie du pauvre... mais efficace."
       - ""
-      - "&c✦ Touche un joueur → Explosion de zone (AoE)"
-      - "&c✦ Rayon: &e{radius} &cblocs"
+      - "<red>✦ Touche un joueur → Explosion de zone (AoE)"
+      - "<red>✦ Rayon: <yellow>{radius} <red>blocs"
       - ""
-      - "&8ID: explosive_bow"
+      - "<dark_gray>ID: explosive_bow"
     material: BOW
     custom-model-data: 3011
     item-model: "ExplosiveBow"
@@ -240,17 +240,17 @@ weapons:
     real-explosion: false
     explosion-particle: EXPLOSION_LARGE
     messages:
-      explosion: "&c💥 Explosion ! &e{hits} &ccibles touchées."
+      explosion: "<red>💥 Explosion ! <yellow>{hits} <red>cibles touchées."
 
   ender-bow:
     enabled: true
-    display-name: "&d&l🌀 Arc Ender"
+    display-name: "<light_purple><bold>🌀 Arc Ender"
     lore:
-      - "&7La flèche qui dévore l'espace..."
+      - "<gray>La flèche qui dévore l'espace..."
       - ""
-      - "&d✦ Touche un joueur → Téléportation derrière la cible"
+      - "<light_purple>✦ Touche un joueur → Téléportation derrière la cible"
       - ""
-      - "&8ID: ender_bow"
+      - "<dark_gray>ID: ender_bow"
     material: BOW
     custom-model-data: 3021
     item-model: "EnderBow"
@@ -260,20 +260,20 @@ weapons:
     teleport-offset: 2.0
     teleport-particle: PORTAL
     messages:
-      teleported: "&d🌀 Téléporté derrière &e{target}&d !"
+      teleported: "<light_purple>🌀 Téléporté derrière <yellow>{target}<light_purple> !"
 
   berserk-sword:
     enabled: true
-    display-name: "&4&l⚡ Épée Berserk"
+    display-name: "<dark_red><bold>⚡ Épée Berserk"
     lore:
-      - "&7La rage distillée en acier..."
+      - "<gray>La rage distillée en acier..."
       - ""
-      - "&4✦ Clic-droit → Mode Berserk &e10s"
-      - "&7  ✦ Suppression du cooldown d'attaque (style 1.8)"
-      - "&7  ✦ Buff pour les membres de faction à &e10 blocs"
-      - "&7(Cooldown: &e5 minutes&7)"
+      - "<dark_red>✦ Clic-droit → Mode Berserk <yellow>10s"
+      - "<gray>  ✦ Suppression du cooldown d'attaque (style 1.8)"
+      - "<gray>  ✦ Buff pour les membres de faction à <yellow>10 blocs"
+      - "<gray>(Cooldown: <yellow>5 minutes<gray>)"
       - ""
-      - "&8ID: berserk_sword"
+      - "<dark_gray>ID: berserk_sword"
     material: NETHERITE_SWORD
     custom-model-data: 3031
     item-model: "BerserkSword"
@@ -286,22 +286,23 @@ weapons:
     faction-buff-radius: 10.0
     attack-speed-value: 1024.0
     messages:
-      activated:      "&4⚡ MODE BERSERK ! &e{duration}s &4de fureur !"
-      faction-buffed: "&4⚡ &e{player} &4active le Berserk ! Tu es aussi en rage !"
-      ended:          "&7Berserk terminé."
-      cooldown:       "&cCooldown actif: &e{remaining}s &crestant(e)s."
+      activated:      "<dark_red>⚡ MODE BERSERK ! <yellow>{duration}s <dark_red>de fureur !"
+      faction-buffed: "<dark_red>⚡ <yellow>{player} <dark_red>active le Berserk ! Tu es aussi en rage !"
+      ended:          "<gray>Berserk terminé."
+      cooldown:       "<red>Cooldown actif: <yellow>{remaining}s <red>restant(e)s."
+      already-active: "<red>Vous êtes déjà en mode Berserk !"
 
 # ─────────────────────────────────────────────────────────
 #  PARAMÈTRES GÉNÉRAUX
 # ─────────────────────────────────────────────────────────
 
 general:
-  prefix: "&8[&6Items&8] &7"
+  prefix: "<dark_gray>[<gold>Items<dark_gray>] <gray>"
   show-particles: true
 
 messages:
-  no-permission:    "&cTu n'as pas la permission."
-  player-not-found: "&cJoueur introuvable: &e{player}"
-  item-not-found:   "&cItem inconnu: &e{item}"
-  give-success:     "&aItem &e{item} &adonné à &e{player}&a."
-  give-received:    "&aTu as reçu: &e{item}&a."
+  no-permission:    "<red>Tu n'as pas la permission."
+  player-not-found: "<red>Joueur introuvable: <yellow>{player}"
+  item-not-found:   "<red>Item inconnu: <yellow>{item}"
+  give-success:     "<green>Item <yellow>{item} <green>donné à <yellow>{player}<green>."
+  give-received:    "<green>Tu as reçu: <yellow>{item}<green>."
