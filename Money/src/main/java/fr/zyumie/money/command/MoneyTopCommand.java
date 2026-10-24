@@ -24,6 +24,16 @@ public class MoneyTopCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        List<Map.Entry<String, Double>> all = manager.getTopBalances(1000);
+
+        // --- DEBUG CONSOLE ---
+        plugin.getLogger().info("[MoneyTop] Entrées trouvées : " + (all != null ? all.size() : "null"));
+
+        if (all == null || all.isEmpty()) {
+            send(sender, "<red>Aucun joueur trouvé dans le classement pour le moment.");
+            return true;
+        }
+
         int perPage = plugin.getConfig().getInt("moneytop.entries-per-page", 10);
         int page = 1;
         if (args.length >= 1) {
@@ -31,7 +41,6 @@ public class MoneyTopCommand implements CommandExecutor, TabCompleter {
         }
         page = Math.max(1, page);
 
-        List<Map.Entry<String, Double>> all = manager.getTopBalances(1000);
         int totalPages = Math.max(1, (int) Math.ceil(all.size() / (double) perPage));
         page = Math.min(page, totalPages);
 
@@ -40,22 +49,27 @@ public class MoneyTopCommand implements CommandExecutor, TabCompleter {
 
         String plural = plugin.getConfig().getString("economy.currency-plural", "Crédits");
 
-        send(sender, msg("messages.moneytop-header")
-                .replace("{page}", String.valueOf(page))
-                .replace("{max}", String.valueOf(totalPages)));
+        // Affichage de l'en-tête
+        String header = msg("messages.moneytop-header");
+        if (!header.isEmpty()) {
+            send(sender, header
+                    .replace("{page}", String.valueOf(page))
+                    .replace("{max}", String.valueOf(totalPages)));
+        }
 
+        // Affichage des lignes
         int rank = (page - 1) * perPage + 1;
+        String entryFormat = msg("messages.moneytop-entry");
         for (Map.Entry<String, Double> e : pageEntries) {
-            send(sender, msg("messages.moneytop-entry")
-                    .replace("{rank}", String.valueOf(rank++))
-                    .replace("{player}", e.getKey())
-                    .replace("{amount}", String.format(Locale.ROOT, "%.2f", e.getValue()))
-                    .replace("{currency}", plural));
+            if (!entryFormat.isEmpty()) {
+                send(sender, entryFormat
+                        .replace("{rank}", String.valueOf(rank++))
+                        .replace("{player}", e.getKey())
+                        .replace("{amount}", String.format(Locale.ROOT, "%.2f", e.getValue()))
+                        .replace("{currency}", plural));
+            }
         }
 
-        if (pageEntries.isEmpty()) {
-            send(sender, "<gray>Aucune entrée.");
-        }
         return true;
     }
 
