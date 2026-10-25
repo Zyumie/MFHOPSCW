@@ -1,6 +1,6 @@
 package fr.zyumie.faction.command;
 
-import fr.zyumie.faction.FactionManager;
+import fr.zyumie.faction.listener.FactionManager;
 import fr.zyumie.faction.Faction;
 import fr.zyumie.faction.GradeHelper;
 import fr.zyumie.faction.model.FactionGrade;
@@ -36,7 +36,6 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
         this.gradeHelper = gradeHelper;
     }
 
-    /** Lookup lazy — cherche à chaque appel si pas encore trouvé */
     private Economy economy() {
         RegisteredServiceProvider<Economy> rsp =
                 plugin.getServer().getServicesManager().getRegistration(Economy.class);
@@ -61,6 +60,7 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
             case "deposit"  -> cmdDeposit(player, args);
             case "withdraw" -> cmdWithdraw(player, args);
             case "bank"     -> cmdBank(player);
+            case "pvp"      -> cmdPvp(player, args);
             default         -> sendUsage(player);
         }
         return true;
@@ -178,7 +178,7 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
                     "{name}", args.length >= 2 ? args[1] : ""); return;
         }
         send(player, "<dark_gray>─── <gold><bold>" + f.getName() + "</bold> <dark_gray>───");
-        send(player, "<gray>Membres: <white>" + f.getMemberCount() + "  <gray>Bank: <yellow>" + fmt(f.getBankBalance()));
+        send(player, "<gray>Membres: <white>" + f.getMemberCount() + "  <gray>Bank: <yellow>" + fmt(f.getBankBalance()) + "  <gray>PvP: " + (f.isPvpEnabled() ? "<green>Activé" : "<red>Désactivé"));
         f.getMembers().forEach((uuid, grade) -> {
             String n = Bukkit.getOfflinePlayer(uuid).getName();
             if (n == null) n = uuid.toString().substring(0, 8);
@@ -234,16 +234,44 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
                 .replace("{amount}", fmt(f.getBankBalance()) + " " + unit));
     }
 
+    private void cmdPvp(Player player, String[] args) {
+        fr.zyumie.faction.model.Faction f = requireFaction(player); if (f == null) return;
+        FactionGrade myGrade = f.getGrade(player.getUniqueId());
+        if (!gradeHelper.hasPerm(myGrade, "pvp")) { sendMsg(player, "messages.no-permission"); return; }
+
+        boolean newState;
+        if (args.length >= 2) {
+            String sub = args[1].toLowerCase();
+            if (sub.equals("on") || sub.equals("true") || sub.equals("activer")) {
+                newState = true;
+            } else if (sub.equals("off") || sub.equals("false") || sub.equals("desactiver")) {
+                newState = false;
+            } else {
+                send(player, "<red>Usage: /f pvp <on/off>");
+                return;
+            }
+        } else {
+            newState = !f.isPvpEnabled();
+        }
+
+        manager.setPvp(f, newState);
+        String statusText = newState ? "<green>activé" : "<red>désactivé";
+        sendMsg(player, "messages.pvp-success", "{status}", statusText);
+        broadcastFaction(f, player.getUniqueId(), plugin.getConfig().getString("messages.pvp-broadcast", "")
+                .replace("{status}", statusText).replace("{player}", player.getName()));
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length == 1)
             return List.of("create","delete","invite","join","leave","kick",
-                    "promote","demote","info","list","deposit","withdraw","bank");
+                    "promote","demote","info","list","deposit","withdraw","bank","pvp");
         if (args.length == 2)
             return switch (args[0].toLowerCase()) {
                 case "join","info" -> manager.getAllFactions().stream().map(fr.zyumie.faction.model.Faction::getName).toList();
                 case "invite","kick","promote","demote" -> Bukkit.getOnlinePlayers().stream()
                         .map(Player::getName).toList();
+                case "pvp" -> List.of("on", "off");
                 default -> List.of();
             };
         return List.of();
@@ -256,6 +284,7 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
     }
 
     private void broadcastFaction(fr.zyumie.faction.model.Faction f, UUID exclude, String msg) {
+        if (msg == null || msg.isEmpty()) return;
         f.getMembers().keySet().stream()
                 .filter(u -> !u.equals(exclude))
                 .map(Bukkit::getPlayer).filter(p -> p != null)
@@ -289,6 +318,6 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendUsage(Player p) {
-        send(p, "<gold>/f <gray>create|delete|invite|join|leave|kick|promote|demote|info|list|deposit|withdraw|bank");
+        send(p, "<gold>/f <gray>create|delete|invite|join|leave|kick|promote|demote|info|list|deposit|withdraw|bank|pvp");
     }
 }

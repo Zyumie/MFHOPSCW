@@ -1,6 +1,6 @@
 package fr.zyumie.faction.api;
 
-import fr.zyumie.faction.FactionManager;
+import fr.zyumie.faction.listener.FactionManager;
 import fr.zyumie.faction.model.Faction;
 
 import java.util.UUID;

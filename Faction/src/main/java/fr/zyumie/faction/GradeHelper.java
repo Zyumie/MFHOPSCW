@@ -28,6 +28,13 @@ public final class GradeHelper {
     }
 
     public boolean hasPerm(FactionGrade grade, String permission) {
+        if (grade == null) return false;
+
+        // Le CHEF a toutes les permissions automatiquement
+        if (grade == FactionGrade.CHEF) {
+            return true;
+        }
+
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("grades." + grade.name());
         if (section == null) return false;
         List<String> perms = section.getStringList("permissions");

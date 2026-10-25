@@ -12,19 +12,22 @@ public class Faction {
     private final String name;
     private final Map<UUID, FactionGrade> members = new HashMap<>();
     private double bankBalance;
-    // UUIDs des joueurs invités (en attente d'acceptation)
+    private boolean pvpEnabled; // Faux par défaut
     private final Set<UUID> pendingInvites = new HashSet<>();
 
+    // Création d'une faction (fondateur)
     public Faction(String name, UUID founderUuid) {
         this.name = name;
         this.bankBalance = 0.0;
+        this.pvpEnabled = false;
         this.members.put(founderUuid, FactionGrade.CHEF);
     }
 
-    // Reconstruction depuis la persistance
-    public Faction(String name, double bankBalance, Map<UUID, FactionGrade> members) {
+    // Reconstruction depuis la persistance (chargement)
+    public Faction(String name, double bankBalance, boolean pvpEnabled, Map<UUID, FactionGrade> members) {
         this.name = name;
         this.bankBalance = bankBalance;
+        this.pvpEnabled = pvpEnabled;
         this.members.putAll(members);
     }
 
@@ -37,6 +40,10 @@ public class Faction {
         bankBalance -= amount;
         return true;
     }
+
+    // --- PvP ---
+    public boolean isPvpEnabled() { return pvpEnabled; }
+    public void setPvpEnabled(boolean pvpEnabled) { this.pvpEnabled = pvpEnabled; }
 
     // --- Membres ---
     public Map<UUID, FactionGrade> getMembers() { return Collections.unmodifiableMap(members); }

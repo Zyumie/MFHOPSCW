@@ -2,6 +2,8 @@ package fr.zyumie.faction;
 
 import fr.zyumie.faction.api.FactionAPI;
 import fr.zyumie.faction.command.FactionCommand;
+import fr.zyumie.faction.listener.FactionManager;
+import fr.zyumie.faction.listener.FactionPvpListener;
 import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.module.Module;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -36,7 +38,7 @@ public class Faction extends JavaPlugin implements Module {
         FactionCommand cmd = new FactionCommand(this, factionManager, gradeHelper);
         getCommand("f").setExecutor(cmd);
         getCommand("f").setTabCompleter(cmd);
-
+        getServer().getPluginManager().registerEvents(new FactionPvpListener(factionManager), this);
         getLogger().info("FactionModule activé.");
     }
 

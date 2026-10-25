@@ -4,8 +4,28 @@ main: fr.zyumie.faction.Faction
 api-version: '1.21'
 author: Zyumie
 depend: [Main, Vault]
+description: Plugin de gestion de factions avancé avec économie et gestion des grades.
 
 commands:
   f:
-    description: Commandes de faction
-    usage: /f <create|delete|invite|kick|join|leave|promote|demote|info|list|deposit|withdraw|bank>
+    description: Commande principale de gestion des factions.
+    permission: faction.use
+    permission-message: Tu n'as pas la permission d'utiliser les commandes de faction.
+    usage: |
+      /f create <nom> - Crée une nouvelle faction.
+      /f delete - Dissout ta faction (confirmation requise).
+      /f invite <joueur> - Invite un joueur dans ta faction.
+      /f join <nom> - Rejoint une faction après une invitation.
+      /f leave - Quitte ta faction actuelle.
+      /f kick <joueur> - Exclut un joueur de la faction.
+      /f promote <joueur> - Promeut un membre au grade supérieur.
+      /f demote <joueur> - Rétrograde un membre au grade inférieur.
+      /f info [nom] - Affiche les informations d'une faction.
+      /f list - Liste toutes les factions existantes.
+      /f deposit <montant> - Dépose de l'argent dans le coffre de faction.
+      /f withdraw <montant> - Retire de l'argent du coffre de faction.
+      /f bank - Affiche le solde du coffre de faction.
+      /f pvp <on/off> - Active ou désactive le PvP entre membres de la faction.
+    aliases:
+      - faction
+      - factions

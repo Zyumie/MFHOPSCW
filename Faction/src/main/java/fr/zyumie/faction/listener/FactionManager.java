@@ -1,4 +1,4 @@
-package fr.zyumie.faction;
+package fr.zyumie.faction.listener;
 
 import fr.zyumie.faction.model.Faction;
 import fr.zyumie.faction.model.FactionGrade;
@@ -15,33 +15,25 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FactionManager {
 
     private static final String NS_FACTION = "faction";
-    // namespace secondaire: UUID joueur -> nom de faction
-    private static final String NS_MEMBER  = "faction_member";
 
     private final JavaPlugin plugin;
-    // Clé: nom faction (lowercase) -> Faction
     private final Map<String, Faction> factions = new ConcurrentHashMap<>();
-    // Clé: UUID joueur -> nom faction (lowercase)
     private final Map<UUID, String> memberIndex = new ConcurrentHashMap<>();
 
     public FactionManager(JavaPlugin plugin) {
         this.plugin = plugin;
     }
 
-    // ─────────────────────────────── Persistence ───────────────────────────────
-
-    /** Chargement au démarrage du plugin depuis le DataStore. */
     public void loadAll() {
         DataStore store = MainAPI.get().getDataStore();
 
-        // Charge chaque faction
         for (String key : store.listKeys(NS_FACTION)) {
             Map<String, Object> raw = store.load(NS_FACTION, key);
             if (raw == null) continue;
 
             double bank = raw.get("bank") instanceof Number n ? n.doubleValue() : 0.0;
+            boolean pvp = raw.get("pvp") instanceof Boolean b ? b : false;
 
-            // Membres: stockés comme "member.<uuid>" = "GRADE"
             Map<UUID, FactionGrade> members = new HashMap<>();
             for (Map.Entry<String, Object> e : raw.entrySet()) {
                 if (!e.getKey().startsWith("member.")) continue;
@@ -53,7 +45,7 @@ public class FactionManager {
             }
 
             if (members.isEmpty()) continue;
-            Faction faction = new Faction(key, bank, members);
+            Faction faction = new Faction(key, bank, pvp, members);
             factions.put(key.toLowerCase(), faction);
             members.keySet().forEach(uuid -> memberIndex.put(uuid, key.toLowerCase()));
         }
@@ -64,6 +56,7 @@ public class FactionManager {
         Map<String, Object> data = new HashMap<>();
         data.put("name", faction.getName());
         data.put("bank", faction.getBankBalance());
+        data.put("pvp", faction.isPvpEnabled());
         for (Map.Entry<UUID, FactionGrade> e : faction.getMembers().entrySet()) {
             data.put("member." + e.getKey(), e.getValue().name());
         }
@@ -77,8 +70,6 @@ public class FactionManager {
     public void saveAll() {
         factions.values().forEach(this::saveFaction);
     }
-
-    // ─────────────────────────────── CRUD ───────────────────────────────
 
     public Faction create(String name, UUID founderUuid) {
         Faction f = new Faction(name, founderUuid);
@@ -111,7 +102,10 @@ public class FactionManager {
         saveFaction(faction);
     }
 
-    // ─────────────────────────────── Lookups ───────────────────────────────
+    public void setPvp(Faction faction, boolean pvp) {
+        faction.setPvpEnabled(pvp);
+        saveFaction(faction);
+    }
 
     public Faction getFaction(String name) {
         return factions.get(name.toLowerCase());

@@ -77,3 +77,6 @@ messages:
   deposit-insufficient: "<red>Solde personnel insuffisant."
   withdraw-success: "<green>Tu as retiré <yellow>{amount} <green>de la bank."
   withdraw-insufficient: "<red>Solde de la bank insuffisant."
+
+  pvp-success: "<green>Le PvP interne de la faction a été {status}."
+  pvp-broadcast: "<yellow>{player} a {status} le PvP de la faction."
