@@ -37,7 +37,7 @@ public class KillListener implements Listener {
         }
 
         // Armure d'Âmes → +HP
-        plugin.getSoulHandler().onKill(killer);
+        plugin.getSoulHandler().onKill(killer, event.getEntity());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

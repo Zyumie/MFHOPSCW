@@ -6,6 +6,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,7 +17,7 @@ import java.util.UUID;
 
 /**
  * Armure Voleuse d'Âmes :
- * - Kill → +2 cœurs (via AttributeModifier sur MAX_HEALTH, cumulable)
+ * - Kill de joueur → +2 cœurs (via AttributeModifier sur MAX_HEALTH, cumulable)
  * - Pièce retirée ou mort → reset immédiat de tout le bonus
  */
 public class SoulArmorHandler {
@@ -31,10 +32,13 @@ public class SoulArmorHandler {
         this.plugin = plugin;
     }
 
-    /** Appelé à chaque kill d'entité (mob ou joueur) */
-    public void onKill(Player player) {
+    /** Appelé à chaque kill d'un autre joueur */
+    public void onKill(Player player, Entity victim) {
         if (!plugin.getConfig().getBoolean("armors.soul.enabled", true)) return;
         if (!wearingFullSet(player)) return;
+
+        // 🛡️ SÉCURITÉ SMP : Ignore les mobs pour empêcher l'abus en ferme à mobs
+        if (!(victim instanceof Player)) return;
 
         double hpPerKill = plugin.getConfig().getDouble("armors.soul.hp-per-kill", 4.0);
         double maxBonus  = plugin.getConfig().getDouble("armors.soul.max-bonus-hp", 0);
@@ -74,16 +78,13 @@ public class SoulArmorHandler {
         var attr = player.getAttribute(Attribute.MAX_HEALTH);
         if (attr == null) return;
 
-        // Retire l'ancien modificateur s'il existe
         NamespacedKey key = new NamespacedKey(plugin, MOD_NAME);
         attr.getModifiers().stream()
                 .filter(m -> m.key().equals(key))
                 .toList()
                 .forEach(attr::removeModifier);
 
-        // Applique le nouveau modificateur
         attr.addModifier(new AttributeModifier(key, bonus, AttributeModifier.Operation.ADD_NUMBER));
-        // S'assure que le HP actuel ne dépasse pas le nouveau max
         if (player.getHealth() > attr.getValue()) player.setHealth(attr.getValue());
     }
 
@@ -96,7 +97,6 @@ public class SoulArmorHandler {
                 .filter(m -> m.key().equals(key))
                 .toList()
                 .forEach(attr::removeModifier);
-        // Reclampe la vie si elle dépasse le nouveau max
         if (player.getHealth() > attr.getValue()) player.setHealth(attr.getValue());
     }
 
@@ -110,5 +110,9 @@ public class SoulArmorHandler {
     private void send(Player p, String message) {
         if (message == null || message.isEmpty()) return;
         p.sendMessage(MiniMessage.miniMessage().deserialize(message));
+    }
+
+    public void cleanup(Player player) {
+        resetBonus(player);
     }
 }
