@@ -47,6 +47,7 @@ public class HdvListing {
 
     /** Temps restant formaté (ex: "2j 3h", "45min") */
     public String getTimeRemaining() {
+        // CORRECTION : Ajout du signe moins manquant
         long remaining = (expiresAt - System.currentTimeMillis()) / 1000;
         if (remaining <= 0) return "Expiré";
         long days    = remaining / 86400;

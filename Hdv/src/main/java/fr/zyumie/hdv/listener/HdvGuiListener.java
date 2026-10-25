@@ -55,7 +55,7 @@ public class HdvGuiListener implements Listener {
             if (hand.getType().isAir()) { send(player, "<red>Tiens l'item à vendre en main principale."); return; }
             int defDur = plugin.getConfig().getInt("hdv.default-duration-hours", 48);
             double minP = plugin.getConfig().getDouble("hdv.min-price", 1.0);
-            HdvHolder createHolder = gui.openCreate(player, hand, minP, defDur);
+            gui.openCreate(player, hand, minP, defDur);
             return;
         }
         if (slot == 3) {
@@ -104,11 +104,7 @@ public class HdvGuiListener implements Listener {
 
     private void handleConfirm(Player player, int slot, HdvHolder holder) {
         if (slot == 11) {
-            // Annuler
-            gui.openMain(player, holder.isMyListings(), holder.getPage()); return;
-        }
-        if (slot == 15) {
-            // Confirmer achat
+            // Confirmer l'achat
             HdvListing listing = holder.getPendingListing();
             var result = manager.buy(player, listing.getId());
             String currency = manager.getEconomy() != null ? manager.getEconomy().currencyNamePlural() : "";
@@ -122,6 +118,9 @@ public class HdvGuiListener implements Listener {
                 default -> send(player, plugin.getConfig().getString("messages.listing-not-found", ""));
             }
             gui.openMain(player, false, 0);
+        } else if (slot == 15) {
+            // Annuler / Retour au menu principal
+            gui.openMain(player, holder.isMyListings(), holder.getPage());
         }
     }
 
@@ -135,15 +134,17 @@ public class HdvGuiListener implements Listener {
 
         boolean refresh = true;
         switch (slot) {
-            case 0  -> holder.setPendingDuration(Math.max(1,    holder.getPendingDuration() - 1));
-            case 2  -> holder.setPendingDuration(Math.min(maxDur, holder.getPendingDuration() + 1));
-            case 6  -> holder.setPendingPrice(Math.max(minP, holder.getPendingPrice() - step));
-            case 8  -> holder.setPendingPrice(Math.min(maxP, holder.getPendingPrice() + step));
-            case 18 -> { gui.openMain(player, false, 0); return; }
-            case 26 -> {
+            case 9  -> holder.setPendingDuration(Math.max(1, holder.getPendingDuration() - 1)); // -1h
+            case 11 -> holder.setPendingDuration(Math.min(maxDur, holder.getPendingDuration() + 1)); // +1h
+            case 18 -> holder.setPendingPrice(Math.max(minP, holder.getPendingPrice() - step)); // -Prix
+            case 20 -> holder.setPendingPrice(Math.min(maxP, holder.getPendingPrice() + step)); // +Prix
+            case 22 -> { gui.openMain(player, false, 0); return; } // Annuler (Slot 22)
+            case 24 -> { // Confirmer la mise en vente (Slot 24)
                 var hand = player.getInventory().getItemInMainHand();
                 if (hand.getType().isAir() || !hand.isSimilar(holder.getPendingItem())) {
-                    send(player, "<red>Item introuvable en main principale."); return;
+                    send(player, "<red>Item introuvable en main principale.");
+                    player.closeInventory();
+                    return;
                 }
                 var result = manager.createListing(player, hand,
                         holder.getPendingPrice(), holder.getPendingDuration());
@@ -169,6 +170,8 @@ public class HdvGuiListener implements Listener {
                     case INVALID_PRICE -> send(player, plugin.getConfig().getString("messages.invalid-price", "")
                             .replace("{min}", String.valueOf(minP)).replace("{max}", String.valueOf(maxP)));
                 }
+                player.closeInventory();
+                return;
             }
             default -> refresh = false;
         }

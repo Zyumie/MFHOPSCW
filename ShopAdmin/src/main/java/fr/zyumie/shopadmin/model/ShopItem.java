@@ -59,10 +59,12 @@ public class ShopItem {
     }
 
     public void removeStock(int amount) {
-        if (!isUnlimitedStock()) stock = Math.max(0, stock - amount);
+        if (!isUnlimitedStock()) {
+            stock = Math.max(0, stock - amount);
+        }
     }
-
     public void addStock(int amount) {
-        if (!isUnlimitedStock()) stock += amount;
+        if (!isUnlimitedStock())
+            stock += amount;
     }
 }
