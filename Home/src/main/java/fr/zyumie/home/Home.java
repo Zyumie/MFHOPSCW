@@ -28,7 +28,7 @@ public class Home extends JavaPlugin implements Module {
 
     @Override
     public void onModuleEnable() {
-        getServer().getPluginManager().registerEvents(new HomeListener(homeManager), this);
+        getServer().getPluginManager().registerEvents(new HomeListener(this, homeManager), this);
         HomeCommands cmds = new HomeCommands(this, homeManager);
         getCommand("home").setExecutor(cmds);
         getCommand("sethome").setExecutor(cmds);

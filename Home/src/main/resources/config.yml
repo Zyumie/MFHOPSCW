@@ -3,16 +3,27 @@
 # =========================================
 
 home:
-  # Cooldown (en secondes) pendant lequel /home et /tpa sont bloqués après une mort
-  death-cooldown-seconds: 300
+  # Délai d'attente (en secondes) avant la téléportation vers un home (0 pour instantané)
+  teleport-delay-seconds: 20
 
 messages:
   prefix: "<dark_gray>[<aqua>Home<dark_gray>] <gray>"
-  set-success: "<green>Home défini !"
-  set-requires-death: "<red>Tu dois mourir au moins une fois avant de pouvoir définir un home."
-  del-success: "<green>Home supprimé."
-  del-none: "<red>Tu n'as pas de home défini."
-  tp-success: "<green>Téléportation au home..."
-  tp-none: "<red>Aucun home défini. Utilise /sethome après ta prochaine mort."
-  tp-cooldown: "<red>Tu dois attendre <yellow>{remaining}s <red>avant de pouvoir te téléporter (après ta mort)."
-  no-permission: "<red>Tu n'as pas la permission."
+
+  # Messages de définition de Home
+  set-success: "<green>Home <yellow>{home} <green>défini avec succès !"
+  max-limit: "<red>Tu as atteint ton nombre maximum de homes autorisés (<yellow>{max}<red>)."
+
+  # Messages de suppression de Home
+  del-success: "<green>Home <yellow>{home} <green>supprimé."
+  del-none: "<red>Tu n'as pas de home défini avec ce nom."
+
+  # Messages de téléportation et délai
+  tp-success: "<green>Téléportation au home effectuée !"
+  tp-none: "<red>Aucun home défini. Utilise <yellow>/sethome [nom]<red> pour en créer un."
+  tp-none-named: "<red>Le home <yellow>{home} <red>n'existe pas."
+  tp-delay-start: "<green>Téléportation dans <yellow>{seconds} secondes<green>. Ne bouge pas !"
+  tp-cancelled: "<red>Téléportation annulée : tu as bougé ou subi des dégâts."
+
+  # Erreurs générales & Interface
+  no-permission: "<red>Tu n'as pas la permission d'effectuer cette action."
+  gui-title: "<dark_gray>Gestion de vos Homes"

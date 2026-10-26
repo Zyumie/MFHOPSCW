@@ -7,11 +7,31 @@ depend: [Main]
 
 commands:
   sethome:
-    description: Définit ton home (utilisable uniquement après une mort)
-    usage: /sethome
+    description: Définit un home à ta position actuelle
+    usage: /sethome [nom]
+    permission: home.command.sethome
   home:
-    description: Téléporte au home (cooldown 5min après mort)
-    usage: /home
+    description: Te téléporte à un home ou ouvre le menu GUI (/home list)
+    usage: /home [nom|list]
+    permission: home.command.home
   delhome:
-    description: Supprime ton home
-    usage: /delhome
+    description: Supprime un de tes homes
+    usage: /delhome [nom]
+    permission: home.command.delhome
+
+permissions:
+  home.max.1:
+    description: Autorise 1 home maximum
+    default: true
+  home.max.2:
+    description: Autorise 2 homes maximum
+    default: op
+  home.max.3:
+    description: Autorise 3 homes maximum
+    default: op
+  home.max.4:
+    description: Autorise 4 homes maximum
+    default: op
+  home.max.5:
+    description: Autorise 5 homes maximum
+    default: op

@@ -1,11 +1,13 @@
 package fr.zyumie.home;
 
+import fr.zyumie.home.model.HomeData;
 import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.storage.DataStore;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,94 +19,186 @@ public class HomeManager {
     private static final String NAMESPACE = "home";
 
     private final Home plugin;
-    // UUID -> Home location (null si pas de home)
-    private final Map<UUID, Location> homes = new ConcurrentHashMap<>();
-    // UUID -> timestamp de la dernière mort (ms). -1 = jamais mort.
-    private final Map<UUID, Long> deathTimestamps = new ConcurrentHashMap<>();
-    // UUID -> true si le joueur a déjà eu au moins une mort (débloque /sethome)
-    private final Map<UUID, Boolean> hasDied = new ConcurrentHashMap<>();
+    // UUID -> (Nom du home en minuscules -> HomeData)
+    private final Map<UUID, Map<String, HomeData>> homes = new ConcurrentHashMap<>();
+
+    // Gestion des téléportations en cours (UUID -> BukkitTask)
+    private final Map<UUID, BukkitTask> teleportTasks = new ConcurrentHashMap<>();
+    // Stockage de la position initiale pour annuler si le joueur bouge
+    private final Map<UUID, Location> teleportLocations = new ConcurrentHashMap<>();
 
     public HomeManager(Home plugin) {
         this.plugin = plugin;
     }
 
-    // ---------- Persistence ----------
+    // ---------- Persistence & Migration ----------
 
     public void loadPlayer(UUID uuid) {
         DataStore store = MainAPI.get().getDataStore();
         Map<String, Object> raw = store.load(NAMESPACE, uuid.toString());
         if (raw == null) return;
 
-        // Home location
+        Map<String, HomeData> playerHomes = new ConcurrentHashMap<>();
+
+        // Migration rétrocompatible de l'ancien format (single home) vers le multi-home
         if (raw.containsKey("world")) {
             World world = Bukkit.getWorld(String.valueOf(raw.get("world")));
             if (world != null) {
-                double x = raw.get("x") instanceof Number n ? n.doubleValue() : 0;
-                double y = raw.get("y") instanceof Number n ? n.doubleValue() : 64;
-                double z = raw.get("z") instanceof Number n ? n.doubleValue() : 0;
-                homes.put(uuid, new Location(world, x, y, z));
+                double x = getDouble(raw, "x", 0);
+                double y = getDouble(raw, "y", 64);
+                double z = getDouble(raw, "z", 0);
+                float yaw = getFloat(raw, "yaw", 0f);
+                float pitch = getFloat(raw, "pitch", 0f);
+                long setTime = raw.containsKey("set-time") ? ((Number) raw.get("set-time")).longValue() : System.currentTimeMillis();
+                playerHomes.put("default", new HomeData(new Location(world, x, y, z, yaw, pitch), setTime));
             }
         }
-        if (raw.containsKey("hasDied"))
-            hasDied.put(uuid, Boolean.parseBoolean(String.valueOf(raw.get("hasDied"))));
-        if (raw.containsKey("lastDeath"))
-            deathTimestamps.put(uuid, ((Number) raw.get("lastDeath")).longValue());
+
+        // Chargement du nouveau format multi-homes
+        if (raw.containsKey("homes") && raw.get("homes") instanceof Map<?, ?> homesMap) {
+            for (Map.Entry<?, ?> entry : homesMap.entrySet()) {
+                String homeName = String.valueOf(entry.getKey()).toLowerCase();
+                if (entry.getValue() instanceof Map<?, ?> hData) {
+                    World world = Bukkit.getWorld(String.valueOf(hData.get("world")));
+                    if (world != null) {
+                        double x = getDouble(hData, "x", 0);
+                        double y = getDouble(hData, "y", 64);
+                        double z = getDouble(hData, "z", 0);
+                        float yaw = getFloat(hData, "yaw", 0f);
+                        float pitch = getFloat(hData, "pitch", 0f);
+                        long setTime = hData.containsKey("set-time") ? ((Number) hData.get("set-time")).longValue() : System.currentTimeMillis();
+                        playerHomes.put(homeName, new HomeData(new Location(world, x, y, z, yaw, pitch), setTime));
+                    }
+                }
+            }
+        }
+
+        if (!playerHomes.isEmpty()) {
+            homes.put(uuid, playerHomes);
+        }
     }
 
     public void savePlayer(UUID uuid) {
         Map<String, Object> data = new HashMap<>();
-        Location home = homes.get(uuid);
-        if (home != null && home.getWorld() != null) {
-            data.put("world", home.getWorld().getName());
-            data.put("x", home.getX());
-            data.put("y", home.getY());
-            data.put("z", home.getZ());
+        Map<String, HomeData> playerHomes = homes.get(uuid);
+
+        if (playerHomes != null && !playerHomes.isEmpty()) {
+            Map<String, Object> homesMap = new HashMap<>();
+            for (Map.Entry<String, HomeData> entry : playerHomes.entrySet()) {
+                HomeData hd = entry.getValue();
+                Location loc = hd.getLocation();
+                if (loc.getWorld() != null) {
+                    Map<String, Object> hMap = new HashMap<>();
+                    hMap.put("world", loc.getWorld().getName());
+                    hMap.put("x", loc.getX());
+                    hMap.put("y", loc.getY());
+                    hMap.put("z", loc.getZ());
+                    hMap.put("yaw", loc.getYaw());
+                    hMap.put("pitch", loc.getPitch());
+                    hMap.put("set-time", hd.getSetTime());
+                    homesMap.put(entry.getKey(), hMap);
+                }
+            }
+            data.put("homes", homesMap);
         }
-        data.put("hasDied", hasDied.getOrDefault(uuid, false));
-        data.put("lastDeath", deathTimestamps.getOrDefault(uuid, -1L));
+
         MainAPI.get().getDataStore().save(NAMESPACE, uuid.toString(), data);
     }
 
     public void unloadPlayer(UUID uuid) {
+        cancelTeleport(uuid);
         savePlayer(uuid);
         homes.remove(uuid);
-        deathTimestamps.remove(uuid);
-        hasDied.remove(uuid);
     }
 
-    // ---------- Home ----------
+    // ---------- Gestion des Homes ----------
 
-    public boolean hasHome(UUID uuid) { return homes.containsKey(uuid); }
-    public Location getHome(UUID uuid) { return homes.get(uuid); }
-    public void setHome(UUID uuid, Location loc) { homes.put(uuid, loc); }
-    public void deleteHome(UUID uuid) { homes.remove(uuid); }
-
-    // ---------- Mort / cooldown ----------
-
-    public boolean hasDiedOnce(UUID uuid) { return hasDied.getOrDefault(uuid, false); }
-
-    public void recordDeath(UUID uuid) {
-        hasDied.put(uuid, true);
-        deathTimestamps.put(uuid, System.currentTimeMillis());
+    public Map<String, HomeData> getHomes(UUID uuid) {
+        return homes.getOrDefault(uuid, new HashMap<>());
     }
 
-    /**
-     * Secondes restantes du cooldown post-mort. 0 si cooldown expiré ou jamais mort.
-     */
-    public long getRemainingCooldownSeconds(UUID uuid) {
-        long deathTime = deathTimestamps.getOrDefault(uuid, -1L);
-        if (deathTime < 0) return 0;
-        int cooldown = plugin.getConfig().getInt("home.death-cooldown-seconds", 300);
-        long elapsed = (System.currentTimeMillis() - deathTime) / 1000;
-        long remaining = cooldown - elapsed;
-        return Math.max(0, remaining);
+    public boolean hasHome(UUID uuid, String name) {
+        Map<String, HomeData> playerHomes = homes.get(uuid);
+        return playerHomes != null && playerHomes.containsKey(name.toLowerCase());
     }
 
-    public boolean isCooldownActive(UUID uuid) {
-        return getRemainingCooldownSeconds(uuid) > 0;
+    public Location getHome(UUID uuid, String name) {
+        Map<String, HomeData> playerHomes = homes.get(uuid);
+        if (playerHomes == null) return null;
+        HomeData hd = playerHomes.get(name.toLowerCase());
+        return hd != null ? hd.getLocation() : null;
+    }
+
+    public void setHome(UUID uuid, String name, Location loc) {
+        homes.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>())
+                .put(name.toLowerCase(), new HomeData(loc, System.currentTimeMillis()));
+    }
+
+    public void deleteHome(UUID uuid, String name) {
+        Map<String, HomeData> playerHomes = homes.get(uuid);
+        if (playerHomes != null) {
+            playerHomes.remove(name.toLowerCase());
+            if (playerHomes.isEmpty()) {
+                homes.remove(uuid);
+            }
+        }
+    }
+
+    public int getHomeCount(UUID uuid) {
+        Map<String, HomeData> playerHomes = homes.get(uuid);
+        return playerHomes != null ? playerHomes.size() : 0;
+    }
+
+    // ---------- Permissions Max Homes (1 à 5) ----------
+
+    public int getMaxHomes(Player player) {
+        for (int i = 5; i >= 1; i--) {
+            if (player.hasPermission("home.max." + i)) {
+                return i;
+            }
+        }
+        return 1; // Par défaut, 1 home maximum
+    }
+
+    // ---------- Gestion du Cooldown de Téléportation ----------
+
+    public boolean isTeleporting(UUID uuid) {
+        return teleportTasks.containsKey(uuid);
+    }
+
+    public void setTeleportTask(UUID uuid, BukkitTask task, Location loc) {
+        cancelTeleport(uuid);
+        teleportTasks.put(uuid, task);
+        teleportLocations.put(uuid, loc);
+    }
+
+    public void cancelTeleport(UUID uuid) {
+        BukkitTask task = teleportTasks.remove(uuid);
+        if (task != null) {
+            task.cancel();
+        }
+        teleportLocations.remove(uuid);
+    }
+
+    public boolean hasMoved(Player player) {
+        Location initial = teleportLocations.get(player.getUniqueId());
+        if (initial == null || initial.getWorld() != player.getWorld()) return true;
+        return initial.distanceSquared(player.getLocation()) > 0.25; // Tolérance minime pour les micro-mouvements de tête
     }
 
     public void saveAll() {
-        for (UUID uuid : homes.keySet()) savePlayer(uuid);
+        for (UUID uuid : homes.keySet()) {
+            savePlayer(uuid);
+        }
+    }
+
+    private double getDouble(Map<?, ?> map, String key, double def) {
+        Object val = map.get(key);
+        return val instanceof Number n ? n.doubleValue() : def;
+    }
+
+    private float getFloat(Map<?, ?> map, String key, float def) {
+        Object val = map.get(key);
+        return val instanceof Number n ? n.floatValue() : def;
     }
 }
