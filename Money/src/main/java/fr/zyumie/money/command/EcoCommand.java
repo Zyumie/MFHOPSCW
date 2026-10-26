@@ -40,7 +40,7 @@ public class EcoCommand implements CommandExecutor, TabCompleter {
         try { amount = Double.parseDouble(args[2].replace(",", ".")); }
         catch (NumberFormatException e) { send(sender, msg("messages.invalid-amount")); return true; }
 
-        if (amount < 0) { send(sender, msg("messages.invalid-amount")); return true; }
+        if (!MoneyManager.isValidAmount(amount)) { send(sender, msg("messages.invalid-amount")); return true; }
 
         // Cherche online d'abord, puis offline
         OfflinePlayer target = Bukkit.getPlayer(targetName);

@@ -296,7 +296,7 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
         return op != null ? op.getUniqueId() : null;
     }
 
-    private double parseAmount(String s) { try { return Double.parseDouble(s); } catch (NumberFormatException e) { return -1; } }
+    private double parseAmount(String s) { try { double v = Double.parseDouble(s); return Double.isFinite(v) ? v : -1; } catch (NumberFormatException e) { return -1; } }
     private String fmt(double v)   { return String.format("%.2f", v); }
     private String prefix()        { return plugin.getConfig().getString("messages.prefix", ""); }
 
