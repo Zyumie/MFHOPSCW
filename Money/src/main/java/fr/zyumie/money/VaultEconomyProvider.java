@@ -53,7 +53,7 @@ public class VaultEconomyProvider implements Economy {
 
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer player, double amount) {
-        if (amount < 0) return fail(amount, player, "Montant négatif");
+        if (!MoneyManager.isValidAmount(amount)) return fail(amount, player, "Montant invalide");
         boolean ok = manager.deposit(player.getUniqueId(), amount);
         if (!ok) return fail(amount, player, "Dépôt dépasserait le solde maximum");
         return ok(amount, player);
@@ -67,7 +67,7 @@ public class VaultEconomyProvider implements Economy {
 
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer player, double amount) {
-        if (amount < 0) return fail(amount, player, "Montant négatif");
+        if (!MoneyManager.isValidAmount(amount)) return fail(amount, player, "Montant invalide");
         boolean ok = manager.withdraw(player.getUniqueId(), amount);
         if (!ok) return fail(amount, player, "Solde insuffisant");
         return ok(amount, player);

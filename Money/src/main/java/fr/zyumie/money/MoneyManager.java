@@ -28,7 +28,7 @@ public class MoneyManager {
         Map<String, Object> raw = store.load(NS, uuid.toString());
         double starting = plugin.getConfig().getDouble("economy.starting-balance", 500.0);
         if (raw != null && raw.get("balance") instanceof Number n) {
-            cache.put(uuid, n.doubleValue());
+            cache.put(uuid, sanitize(n.doubleValue()));
         } else {
             cache.put(uuid, starting);
             save(uuid);
@@ -48,13 +48,18 @@ public class MoneyManager {
             Map<String, Object> raw = store.load(NS, uuid.toString());
             double starting = plugin.getConfig().getDouble("economy.starting-balance", 500.0);
             boolean isNew = !(raw != null && raw.get("balance") instanceof Number);
-            double value = isNew ? starting : ((Number) raw.get("balance")).doubleValue();
+            double value = isNew ? starting : sanitize(((Number) raw.get("balance")).doubleValue());
 
             Bukkit.getScheduler().runTask(plugin, () -> {
                 cache.put(uuid, value);
                 if (isNew) save(uuid); // écrit le solde de départ pour un tout nouveau joueur
             });
         });
+    }
+
+    /** Un solde corrompu (NaN/Infinity/négatif) sur disque est ramené à 0 plutôt que propagé. */
+    private static double sanitize(double v) {
+        return Double.isFinite(v) && v >= 0 ? v : 0.0;
     }
 
     public void save(UUID uuid) {
@@ -79,11 +84,18 @@ public class MoneyManager {
         return cache.getOrDefault(uuid, 0.0);
     }
 
+    /** Montant utilisable pour une transaction : fini (ni NaN ni ±Infinity) et positif ou nul. */
+    public static boolean isValidAmount(double amount) {
+        return Double.isFinite(amount) && amount >= 0;
+    }
+
     public boolean has(UUID uuid, double amount) {
+        if (!isValidAmount(amount)) return false;
         return getBalance(uuid) >= amount;
     }
 
     public boolean deposit(UUID uuid, double amount) {
+        if (!isValidAmount(amount)) return false;
         double max = plugin.getConfig().getDouble("economy.max-balance", 999_999_999.0);
         double current = getBalance(uuid);
         if (current + amount > max) return false;
@@ -93,6 +105,7 @@ public class MoneyManager {
     }
 
     public boolean withdraw(UUID uuid, double amount) {
+        if (!isValidAmount(amount)) return false;
         double current = getBalance(uuid);
         if (current < amount) return false;
         cache.put(uuid, current - amount);
@@ -101,6 +114,7 @@ public class MoneyManager {
     }
 
     public void set(UUID uuid, double amount) {
+        if (!Double.isFinite(amount)) return;
         double max = plugin.getConfig().getDouble("economy.max-balance", 999_999_999.0);
         cache.put(uuid, Math.max(0, Math.min(max, amount)));
         save(uuid);
@@ -150,7 +164,7 @@ public class MoneyManager {
                 Map<String, Object> raw = store.load(NS, key);
                 if (raw != null && raw.get("balance") instanceof Number n) {
                     String name = nameOf(uuid);
-                    all.put(name, n.doubleValue());
+                    all.put(name, sanitize(n.doubleValue()));
                 }
             } catch (IllegalArgumentException ignored) {}
         }

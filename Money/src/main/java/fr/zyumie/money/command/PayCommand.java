@@ -36,6 +36,8 @@ public class PayCommand implements CommandExecutor, TabCompleter {
         try { amount = Double.parseDouble(args[1].replace(",", ".")); }
         catch (NumberFormatException e) { send(player, msg("messages.invalid-amount")); return true; }
 
+        if (!MoneyManager.isValidAmount(amount)) { send(player, msg("messages.invalid-amount")); return true; }
+
         double min = plugin.getConfig().getDouble("economy.min-transaction", 0.5);
         double max = plugin.getConfig().getDouble("economy.max-balance", 999_999_999.0);
 
@@ -55,8 +57,15 @@ public class PayCommand implements CommandExecutor, TabCompleter {
                     .replace("{max}", fmt(max)).replace("{currency}", plural())); return true;
         }
 
-        manager.withdraw(player.getUniqueId(), amount);
-        manager.deposit(target.getUniqueId(), amount);
+        if (!manager.withdraw(player.getUniqueId(), amount)) {
+            send(player, msg("messages.pay-insufficient")
+                    .replace("{balance}", fmt(manager.getBalance(player.getUniqueId()))).replace("{currency}", plural())); return true;
+        }
+        if (!manager.deposit(target.getUniqueId(), amount)) {
+            manager.deposit(player.getUniqueId(), amount); // rembourse : le destinataire ne peut pas recevoir
+            send(player, msg("messages.pay-max-balance")
+                    .replace("{max}", fmt(max)).replace("{currency}", plural())); return true;
+        }
 
         String amountStr = fmt(amount);
         send(player, msg("messages.pay-success")
