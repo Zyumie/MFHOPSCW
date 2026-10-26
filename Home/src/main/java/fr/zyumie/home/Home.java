@@ -4,6 +4,7 @@ import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.module.Module;
 import fr.zyumie.home.command.HomeCommands;
 import fr.zyumie.home.listener.HomeListener;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -33,6 +34,12 @@ public class Home extends JavaPlugin implements Module {
         getCommand("home").setExecutor(cmds);
         getCommand("sethome").setExecutor(cmds);
         getCommand("delhome").setExecutor(cmds);
+
+        // Cas /reload ou module réactivé : charge (et migre) les joueurs déjà connectés
+        for (Player online : getServer().getOnlinePlayers()) {
+            homeManager.loadPlayer(online.getUniqueId());
+        }
+
         getLogger().info("HomeModule activé.");
     }
 
