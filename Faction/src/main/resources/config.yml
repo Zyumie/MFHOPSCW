@@ -8,18 +8,23 @@ faction:
   # Nombre max de membres par faction (0 = illimité)
   max-members: 0
 
+  # Cooldown global entre les commandes /f (en secondes)
+  cooldown-seconds: 5
+  # Délai avant d'être téléporté au /f home (en secondes)
+  teleport-delay-seconds: 10
+
 # Grades disponibles, dans l'ordre hiérarchique (Chef en premier = rang le plus haut).
 # "permissions" liste ce que ce grade peut faire.
-# Valeurs possibles: invite, kick, promote, demote, deposit, withdraw, delete
+# Valeurs possibles: invite, kick, promote, demote, deposit, withdraw, delete, pvp, sethome
 grades:
   CHEF:
     display: "Chef"
     color: "<red>"
-    permissions: [invite, kick, promote, demote, deposit, withdraw, delete]
+    permissions: [invite, kick, promote, demote, deposit, withdraw, delete, pvp, sethome]
   BRAS_DROIT:
     display: "Bras-Droit"
     color: "<gold>"
-    permissions: [invite, kick, promote, demote, deposit, withdraw]
+    permissions: [invite, kick, promote, demote, deposit, withdraw, pvp, sethome]
   MODO:
     display: "Modo"
     color: "<yellow>"
@@ -63,7 +68,7 @@ messages:
   kick-success: "<yellow>{player} <green>a été exclu de la faction."
   kick-broadcast: "<yellow>{player} <green>a été exclu par <yellow>{by}<green>."
   kick-self: "<red>Tu ne peux pas t'exclure toi-même."
-  kick-outranks: "<red>Tu ne peux pas exclure quelqu'un de rang supérieur ou égal."
+  kick-outranks: "<red>Tu ne me peux pas exclure quelqu'un de rang supérieur ou égal."
 
   promote-success: "<yellow>{player} <green>a été promu <gold>{grade}<green>."
   promote-max: "<yellow>{player} <green>est déjà au grade maximum."
@@ -80,3 +85,12 @@ messages:
 
   pvp-success: "<green>Le PvP interne de la faction a été {status}."
   pvp-broadcast: "<yellow>{player} a {status} le PvP de la faction."
+
+  sethome-success: "<green>Le home de la faction a été défini avec succès !"
+  sethome-broadcast: "<yellow>{player} a mis à jour le home de la faction."
+  home-not-set: "<red>Votre faction n'a pas encore défini de home."
+  home-invalid: "<red>Le monde où se situe le home de la faction est introuvable."
+  home-teleport-success: "<green>Téléportation au home de la faction effectuée !"
+  teleport-start: "<yellow>Téléportation dans {seconds} seconde(s)... Ne bougez pas !"
+  teleport-cancelled: "<red>Téléportation annulée car vous avez bougé ou pris des dégâts."
+  cooldown-active: "<red>Veuillez attendre {seconds} seconde(s) avant de réutiliser une commande de faction."

@@ -1,12 +1,12 @@
 package fr.zyumie.customitems.handler.armor;
 
+import fr.zyumie.customitems.CustomItems;
 import fr.zyumie.customitems.ItemRegistry;
 import fr.zyumie.customitems.util.ItemBuilder;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
@@ -19,30 +19,30 @@ import java.util.UUID;
 /**
  * Armure Fantôme :
  * - Set complet → Invisibilité permanente + nametag caché
- * - Réception d'un coup → visible pendant N secondes puis re-invisible
+ * - Réception d'un coup → visible pendant N secondes puis re-invisible (sauf si constant-invisibility est activé)
  */
 public class GhostArmorHandler {
 
     private static final String TEAM_NAME = "ghost_invis";
 
-    private final JavaPlugin plugin;
+    private final CustomItems plugin;
     // Joueurs actuellement invisibles grâce à l'armure
     private final Set<UUID> invisible = new HashSet<>();
     // Joueurs en phase "révélé" (attendent de redevenir invisibles)
     private final Set<UUID> revealed  = new HashSet<>();
 
-    public GhostArmorHandler(JavaPlugin plugin) {
+    public GhostArmorHandler(CustomItems plugin) {
         this.plugin = plugin;
         ensureTeam();
     }
 
     /** Appelé à chaque tick de vérification d'armure */
     public void onArmorTick(Player player) {
-        if (!plugin.getConfig().getBoolean("armors.ghost.enabled", true)) return;
+        if (!plugin.getCustomArmorConfig().getBoolean("armors.ghost.enabled", true)) return;
         boolean wearing = wearingFullSet(player);
 
         if (wearing && !invisible.contains(player.getUniqueId())
-                    && !revealed.contains(player.getUniqueId())) {
+                && !revealed.contains(player.getUniqueId())) {
             makeInvisible(player);
         } else if (!wearing && invisible.contains(player.getUniqueId())) {
             makeVisible(player, false);
@@ -52,10 +52,17 @@ public class GhostArmorHandler {
     /** Appelé quand le joueur reçoit des dégâts */
     public void onHit(Player player) {
         if (!invisible.contains(player.getUniqueId())) return;
-        int duration = plugin.getConfig().getInt("armors.ghost.reveal-duration-seconds", 5);
+
+        // Vérifie si l'invisibilité est constante (ne se désactive pas quand on est touché)
+        boolean constant = plugin.getCustomArmorConfig().getBoolean("armors.ghost.constant-invisibility", false);
+        if (constant) {
+            return;
+        }
+
+        int duration = plugin.getCustomArmorConfig().getInt("armors.ghost.reveal-duration-seconds", 5);
         makeVisible(player, true);
 
-        send(player, plugin.getConfig().getString("armors.ghost.messages.revealed", "")
+        send(player, plugin.getCustomArmorConfig().getString("armors.ghost.messages.revealed", "")
                 .replace("{duration}", String.valueOf(duration)));
 
         // Redevient invisible après N secondes
@@ -83,7 +90,7 @@ public class GhostArmorHandler {
         player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY,
                 Integer.MAX_VALUE, 1, false, false, false));
         hideNameTag(player);
-        send(player, plugin.getConfig().getString("armors.ghost.messages.invisible", ""));
+        send(player, plugin.getCustomArmorConfig().getString("armors.ghost.messages.invisible", ""));
     }
 
     private void makeVisible(Player player, boolean isRevealed) {
@@ -92,7 +99,7 @@ public class GhostArmorHandler {
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
         showNameTag(player);
         if (!isRevealed)
-            send(player, plugin.getConfig().getString("armors.ghost.messages.restored", ""));
+            send(player, plugin.getCustomArmorConfig().getString("armors.ghost.messages.restored", ""));
     }
 
     private void hideNameTag(Player player) {

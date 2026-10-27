@@ -26,6 +26,8 @@ commands:
       /f withdraw <montant> - Retire de l'argent du coffre de faction.
       /f bank - Affiche le solde du coffre de faction.
       /f pvp <on/off> - Active ou désactive le PvP entre membres de la faction.
+      /f home - Se téléporte au home de la faction.
+      /f sethome - Définit le home de la faction à la position actuelle.
     aliases:
       - faction
       - factions

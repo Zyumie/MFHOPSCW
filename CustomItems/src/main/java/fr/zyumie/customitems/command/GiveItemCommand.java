@@ -24,32 +24,46 @@ public class GiveItemCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!sender.hasPermission("customitems.admin")) {
-            send(sender, plugin.getConfig().getString("messages.no-permission", "")); return true;
+            send(sender, plugin.getConfig().getString("messages.no-permission", "<red>Tu n'as pas la permission."));
+            return true;
         }
+
+        // ── Commande : /items reload ──────────────────────────────────────
+        if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
+            plugin.reloadCustomConfigs();
+            send(sender, "<green>Configurations (<yellow>config.yml, CustomArmor.yml, Weapon.yml<green>) rechargées avec succès !");
+            return true;
+        }
+
+        // ── Commande : /items give <joueur> <item> ────────────────────────
         if (args.length < 3 || !args[0].equalsIgnoreCase("give")) {
-            send(sender, "<gold>/items give <joueur> <item>"); return true;
+            send(sender, "<gold>/items give <joueur> <item>");
+            send(sender, "<gold>/items reload");
+            return true;
         }
 
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            send(sender, plugin.getConfig().getString("messages.player-not-found", "")
-                    .replace("{player}", args[1])); return true;
+            send(sender, plugin.getConfig().getString("messages.player-not-found", "<red>Joueur introuvable.")
+                    .replace("{player}", args[1]));
+            return true;
         }
 
         String itemName = args[2].toLowerCase();
         ItemStack[] items = plugin.getItemRegistry().resolveGiveItems(itemName);
         if (items == null) {
-            send(sender, plugin.getConfig().getString("messages.item-not-found", "")
-                    .replace("{item}", itemName)); return true;
+            send(sender, plugin.getConfig().getString("messages.item-not-found", "<red>Item inconnu.")
+                    .replace("{item}", itemName));
+            return true;
         }
 
         for (ItemStack item : items) {
             if (item != null) target.getInventory().addItem(item);
         }
 
-        send(sender, plugin.getConfig().getString("messages.give-success", "")
+        send(sender, plugin.getConfig().getString("messages.give-success", "<green>Item donné.")
                 .replace("{item}", itemName).replace("{player}", target.getName()));
-        send(target, plugin.getConfig().getString("messages.give-received", "")
+        send(target, plugin.getConfig().getString("messages.give-received", "<green>Tu as reçu un item.")
                 .replace("{item}", itemName));
         return true;
     }
@@ -57,12 +71,27 @@ public class GiveItemCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         if (!sender.hasPermission("customitems.admin")) return List.of();
-        if (args.length == 1) return List.of("give");
-        if (args.length == 2) return Bukkit.getOnlinePlayers().stream()
-                .map(Player::getName)
-                .filter(n -> n.toLowerCase().startsWith(args[1].toLowerCase())).toList();
-        if (args.length == 3) return new ArrayList<>(plugin.getItemRegistry().getGiveNames())
-                .stream().filter(n -> n.startsWith(args[2].toLowerCase())).sorted().toList();
+
+        if (args.length == 1) {
+            return List.of("give", "reload").stream()
+                    .filter(s -> s.toLowerCase().startsWith(args[0].toLowerCase()))
+                    .toList();
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("give")) {
+            return Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .filter(n -> n.toLowerCase().startsWith(args[1].toLowerCase()))
+                    .toList();
+        }
+
+        if (args.length == 3 && args[0].equalsIgnoreCase("give")) {
+            return new ArrayList<>(plugin.getItemRegistry().getGiveNames()).stream()
+                    .filter(n -> n.startsWith(args[2].toLowerCase()))
+                    .sorted()
+                    .toList();
+        }
+
         return List.of();
     }
 

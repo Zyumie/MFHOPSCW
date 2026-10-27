@@ -1,5 +1,6 @@
 package fr.zyumie.customitems.handler.armor;
 
+import fr.zyumie.customitems.CustomItems;
 import fr.zyumie.customitems.ItemRegistry;
 import fr.zyumie.customitems.util.ItemBuilder;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -9,7 +10,6 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,35 +24,39 @@ public class SoulArmorHandler {
 
     private static final String MOD_NAME = "soul_armor_bonus";
 
-    private final JavaPlugin plugin;
+    // 💡 Changement ici : CustomItems au lieu de JavaPlugin
+    private final CustomItems plugin;
+
     // UUID → nombre de kills accumulés
     private final Map<UUID, Integer> kills = new HashMap<>();
 
-    public SoulArmorHandler(JavaPlugin plugin) {
+    // 💡 Changement ici : CustomItems dans le constructeur
+    public SoulArmorHandler(CustomItems plugin) {
         this.plugin = plugin;
     }
 
     /** Appelé à chaque kill d'un autre joueur */
     public void onKill(Player player, Entity victim) {
-        if (!plugin.getConfig().getBoolean("armors.soul.enabled", true)) return;
+        if (!plugin.getCustomArmorConfig().getBoolean("armors.soul.enabled", true)) return;
         if (!wearingFullSet(player)) return;
 
         // 🛡️ SÉCURITÉ SMP : Ignore les mobs pour empêcher l'abus en ferme à mobs
         if (!(victim instanceof Player)) return;
 
-        double hpPerKill = plugin.getConfig().getDouble("armors.soul.hp-per-kill", 4.0);
-        double maxBonus  = plugin.getConfig().getDouble("armors.soul.max-bonus-hp", 0);
+        double hpPerKill = plugin.getCustomArmorConfig().getDouble("armors.soul.hp-per-kill", 4.0);
+        int maxHearts    = plugin.getCustomArmorConfig().getInt("armors.soul.max-bonus-hearts", 10);
+        double maxBonusHP = maxHearts > 0 ? maxHearts * 2.0 : 0; // 1 cœur = 2 PV
 
         int count = kills.merge(player.getUniqueId(), 1, Integer::sum);
         double totalBonus = count * hpPerKill;
 
-        if (maxBonus > 0 && totalBonus > maxBonus) {
-            totalBonus = maxBonus;
-            kills.put(player.getUniqueId(), (int)(maxBonus / hpPerKill));
+        if (maxBonusHP > 0 && totalBonus > maxBonusHP) {
+            totalBonus = maxBonusHP;
+            kills.put(player.getUniqueId(), (int)(maxBonusHP / hpPerKill));
         }
 
         applyBonus(player, totalBonus);
-        send(player, plugin.getConfig().getString("armors.soul.messages.kill-bonus", "")
+        send(player, plugin.getCustomArmorConfig().getString("armors.soul.messages.kill-bonus", "")
                 .replace("{total}", String.valueOf(count)));
     }
 
@@ -60,7 +64,7 @@ public class SoulArmorHandler {
     public void onUnequip(Player player) {
         if (kills.containsKey(player.getUniqueId())) {
             resetBonus(player);
-            send(player, plugin.getConfig().getString("armors.soul.messages.reset-unequip", ""));
+            send(player, plugin.getCustomArmorConfig().getString("armors.soul.messages.reset-unequip", ""));
         }
     }
 
@@ -68,7 +72,7 @@ public class SoulArmorHandler {
     public void onDeath(Player player) {
         if (kills.containsKey(player.getUniqueId())) {
             resetBonus(player);
-            send(player, plugin.getConfig().getString("armors.soul.messages.reset-death", ""));
+            send(player, plugin.getCustomArmorConfig().getString("armors.soul.messages.reset-death", ""));
         }
     }
 

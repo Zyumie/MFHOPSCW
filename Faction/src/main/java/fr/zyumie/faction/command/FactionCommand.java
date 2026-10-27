@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,6 +16,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +31,12 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
 
     private final Map<UUID, Long> deleteConfirm = new HashMap<>();
     private static final long CONFIRM_WINDOW_MS = 10_000;
+
+    // Gestion du cooldown des commandes
+    private final Map<UUID, Long> commandCooldowns = new HashMap<>();
+
+    // Gestion des téléportations en attente
+    private final Map<UUID, BukkitTask> pendingTeleports = new HashMap<>();
 
     public FactionCommand(Faction plugin, FactionManager manager, GradeHelper gradeHelper) {
         this.plugin      = plugin;
@@ -46,6 +54,28 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!(sender instanceof Player player)) { sender.sendMessage("Commande réservée aux joueurs."); return true; }
         if (args.length == 0) { sendUsage(player); return true; }
+
+        UUID uuid = player.getUniqueId();
+        long now = System.currentTimeMillis();
+
+        // ── VERIFICATION COOLDOWN COMMANDES ──
+        int cooldownSec = plugin.getConfig().getInt("faction.cooldown-seconds", 5);
+        if (cooldownSec > 0) {
+            Long lastUse = commandCooldowns.get(uuid);
+            if (lastUse != null) {
+                long elapsedSeconds = (now - lastUse) / 1000;
+                if (elapsedSeconds < cooldownSec) {
+                    long remaining = cooldownSec - elapsedSeconds;
+                    sendMsg(player, "messages.cooldown-active", "{seconds}", String.valueOf(remaining));
+                    return true;
+                }
+            }
+        }
+
+        // Mettre à jour le timestamp du cooldown
+        commandCooldowns.put(uuid, now);
+
+        // Exécution des sous-commandes
         switch (args[0].toLowerCase()) {
             case "create"   -> cmdCreate(player, args);
             case "delete"   -> cmdDelete(player);
@@ -61,6 +91,8 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
             case "withdraw" -> cmdWithdraw(player, args);
             case "bank"     -> cmdBank(player);
             case "pvp"      -> cmdPvp(player, args);
+            case "sethome"  -> cmdSetHome(player);
+            case "home"     -> cmdHome(player);
             default         -> sendUsage(player);
         }
         return true;
@@ -179,6 +211,7 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
         }
         send(player, "<dark_gray>─── <gold><bold>" + f.getName() + "</bold> <dark_gray>───");
         send(player, "<gray>Membres: <white>" + f.getMemberCount() + "  <gray>Bank: <yellow>" + fmt(f.getBankBalance()) + "  <gray>PvP: " + (f.isPvpEnabled() ? "<green>Activé" : "<red>Désactivé"));
+        send(player, "<gray>Home: " + (f.hasHome() ? "<green>Défini" : "<red>Non défini"));
         f.getMembers().forEach((uuid, grade) -> {
             String n = Bukkit.getOfflinePlayer(uuid).getName();
             if (n == null) n = uuid.toString().substring(0, 8);
@@ -261,11 +294,69 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
                 .replace("{status}", statusText).replace("{player}", player.getName()));
     }
 
+    private void cmdSetHome(Player player) {
+        fr.zyumie.faction.model.Faction f = requireFaction(player); if (f == null) return;
+        FactionGrade myGrade = f.getGrade(player.getUniqueId());
+        if (!gradeHelper.hasPerm(myGrade, "sethome")) { sendMsg(player, "messages.no-permission"); return; }
+
+        manager.setHome(f, player.getLocation());
+        sendMsg(player, "messages.sethome-success");
+        broadcastFaction(f, player.getUniqueId(), plugin.getConfig().getString("messages.sethome-broadcast", "")
+                .replace("{player}", player.getName()));
+    }
+
+    private void cmdHome(Player player) {
+        fr.zyumie.faction.model.Faction f = requireFaction(player); if (f == null) return;
+        if (!f.hasHome()) { sendMsg(player, "messages.home-not-set"); return; }
+
+        Location target = f.getHome();
+        if (target == null) { sendMsg(player, "messages.home-invalid"); return; }
+
+        int delay = plugin.getConfig().getInt("faction.teleport-delay-seconds", 10);
+        UUID uuid = player.getUniqueId();
+
+        // Si aucun délai n'est configuré, téléportation directe
+        if (delay <= 0) {
+            player.teleport(target);
+            sendMsg(player, "messages.home-teleport-success");
+            return;
+        }
+
+        // Annuler une téléportation préexistante s'il y en avait une
+        cancelPendingTeleport(uuid, false);
+
+        sendMsg(player, "messages.teleport-start", "{seconds}", String.valueOf(delay));
+
+        // Programmer le timer de téléportation
+        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            pendingTeleports.remove(uuid);
+            if (player.isOnline()) {
+                player.teleport(target);
+                sendMsg(player, "messages.home-teleport-success");
+            }
+        }, delay * 20L);
+
+        pendingTeleports.put(uuid, task);
+    }
+
+    public void cancelPendingTeleport(UUID uuid, boolean notifyPlayer) {
+        BukkitTask task = pendingTeleports.remove(uuid);
+        if (task != null) {
+            task.cancel();
+            if (notifyPlayer) {
+                Player p = Bukkit.getPlayer(uuid);
+                if (p != null) {
+                    sendMsg(p, "messages.teleport-cancelled");
+                }
+            }
+        }
+    }
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         if (args.length == 1)
             return List.of("create","delete","invite","join","leave","kick",
-                    "promote","demote","info","list","deposit","withdraw","bank","pvp");
+                    "promote","demote","info","list","deposit","withdraw","bank","pvp","home","sethome");
         if (args.length == 2)
             return switch (args[0].toLowerCase()) {
                 case "join","info" -> manager.getAllFactions().stream().map(fr.zyumie.faction.model.Faction::getName).toList();
@@ -296,7 +387,7 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
         return op != null ? op.getUniqueId() : null;
     }
 
-    private double parseAmount(String s) { try { double v = Double.parseDouble(s); return Double.isFinite(v) ? v : -1; } catch (NumberFormatException e) { return -1; } }
+    private double parseAmount(String s) { try { return Double.parseDouble(s); } catch (NumberFormatException e) { return -1; } }
     private String fmt(double v)   { return String.format("%.2f", v); }
     private String prefix()        { return plugin.getConfig().getString("messages.prefix", ""); }
 
@@ -318,6 +409,6 @@ public class FactionCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendUsage(Player p) {
-        send(p, "<gold>/f <gray>create|delete|invite|join|leave|kick|promote|demote|info|list|deposit|withdraw|bank|pvp");
+        send(p, "<gold>/f <gray>create|delete|invite|join|leave|kick|promote|demote|info|list|deposit|withdraw|bank|pvp|home|sethome");
     }
 }

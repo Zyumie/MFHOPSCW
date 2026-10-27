@@ -4,6 +4,7 @@ import fr.zyumie.faction.model.Faction;
 import fr.zyumie.faction.model.FactionGrade;
 import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.storage.DataStore;
+import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Collection;
@@ -46,6 +47,18 @@ public class FactionManager {
 
             if (members.isEmpty()) continue;
             Faction faction = new Faction(key, bank, pvp, members);
+
+            // Chargement du home
+            if (raw.containsKey("home.world")) {
+                String world = String.valueOf(raw.get("home.world"));
+                double x = ((Number) raw.get("home.x")).doubleValue();
+                double y = ((Number) raw.get("home.y")).doubleValue();
+                double z = ((Number) raw.get("home.z")).doubleValue();
+                float yaw = ((Number) raw.get("home.yaw")).floatValue();
+                float pitch = ((Number) raw.get("home.pitch")).floatValue();
+                faction.setHomeRaw(world, x, y, z, yaw, pitch);
+            }
+
             factions.put(key.toLowerCase(), faction);
             members.keySet().forEach(uuid -> memberIndex.put(uuid, key.toLowerCase()));
         }
@@ -57,10 +70,28 @@ public class FactionManager {
         data.put("name", faction.getName());
         data.put("bank", faction.getBankBalance());
         data.put("pvp", faction.isPvpEnabled());
+
+        if (faction.hasHome()) {
+            Location loc = faction.getHome();
+            if (loc != null && loc.getWorld() != null) {
+                data.put("home.world", loc.getWorld().getName());
+                data.put("home.x", loc.getX());
+                data.put("home.y", loc.getY());
+                data.put("home.z", loc.getZ());
+                data.put("home.yaw", loc.getYaw());
+                data.put("home.pitch", loc.getPitch());
+            }
+        }
+
         for (Map.Entry<UUID, FactionGrade> e : faction.getMembers().entrySet()) {
             data.put("member." + e.getKey(), e.getValue().name());
         }
         MainAPI.get().getDataStore().save(NS_FACTION, faction.getName().toLowerCase(), data);
+    }
+
+    public void setHome(Faction faction, Location loc) {
+        faction.setHome(loc);
+        saveFaction(faction);
     }
 
     public void deleteFaction(Faction faction) {

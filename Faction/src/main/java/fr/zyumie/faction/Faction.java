@@ -4,6 +4,7 @@ import fr.zyumie.faction.api.FactionAPI;
 import fr.zyumie.faction.command.FactionCommand;
 import fr.zyumie.faction.listener.FactionManager;
 import fr.zyumie.faction.listener.FactionPvpListener;
+import fr.zyumie.faction.listener.FactionTeleportListener;
 import fr.zyumie.main.api.MainAPI;
 import fr.zyumie.main.module.Module;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -39,6 +40,7 @@ public class Faction extends JavaPlugin implements Module {
         getCommand("f").setExecutor(cmd);
         getCommand("f").setTabCompleter(cmd);
         getServer().getPluginManager().registerEvents(new FactionPvpListener(factionManager), this);
+        getServer().getPluginManager().registerEvents(new FactionTeleportListener(cmd), this);
         getLogger().info("FactionModule activé.");
     }
 

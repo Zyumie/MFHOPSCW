@@ -1,5 +1,9 @@
 package fr.zyumie.faction.model;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +18,11 @@ public class Faction {
     private double bankBalance;
     private boolean pvpEnabled; // Faux par défaut
     private final Set<UUID> pendingInvites = new HashSet<>();
+
+    // Propriétés du Home
+    private String homeWorld;
+    private double homeX, homeY, homeZ;
+    private float homeYaw, homePitch;
 
     // Création d'une faction (fondateur)
     public Faction(String name, UUID founderUuid) {
@@ -44,6 +53,38 @@ public class Faction {
     // --- PvP ---
     public boolean isPvpEnabled() { return pvpEnabled; }
     public void setPvpEnabled(boolean pvpEnabled) { this.pvpEnabled = pvpEnabled; }
+
+    // --- Home ---
+    public boolean hasHome() { return homeWorld != null; }
+
+    public Location getHome() {
+        if (!hasHome()) return null;
+        World w = Bukkit.getWorld(homeWorld);
+        if (w == null) return null;
+        return new Location(w, homeX, homeY, homeZ, homeYaw, homePitch);
+    }
+
+    public void setHome(Location loc) {
+        if (loc == null || loc.getWorld() == null) {
+            this.homeWorld = null;
+            return;
+        }
+        this.homeWorld = loc.getWorld().getName();
+        this.homeX = loc.getX();
+        this.homeY = loc.getY();
+        this.homeZ = loc.getZ();
+        this.homeYaw = loc.getYaw();
+        this.homePitch = loc.getPitch();
+    }
+
+    public void setHomeRaw(String world, double x, double y, double z, float yaw, float pitch) {
+        this.homeWorld = world;
+        this.homeX = x;
+        this.homeY = y;
+        this.homeZ = z;
+        this.homeYaw = yaw;
+        this.homePitch = pitch;
+    }
 
     // --- Membres ---
     public Map<UUID, FactionGrade> getMembers() { return Collections.unmodifiableMap(members); }

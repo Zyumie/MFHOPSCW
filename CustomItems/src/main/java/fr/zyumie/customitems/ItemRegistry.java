@@ -5,7 +5,6 @@ import io.papermc.paper.datacomponent.DataComponentTypes;
 import net.kyori.adventure.key.Key;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,12 +13,6 @@ import java.util.Set;
 /**
  * Registre central de tous les items custom.
  * Fabrique les ItemStacks et expose les ID attendus.
- *
- * Modifications v0.5.1 :
- *  - TOOLTIP_STYLE appliqué sur chaque item (conservé depuis ta version)
- *  - Armor Trim lu depuis config.yml et appliqué via ItemBuilder
- *  - DataComponentTypes.HIDE_ADDITIONAL_TOOLTIP supprimé du constructeur
- *    (géré ici directement pour plus de contrôle)
  */
 public class ItemRegistry {
 
@@ -37,7 +30,7 @@ public class ItemRegistry {
 
     public static final String[] ARMOR_SLOTS = {"helmet", "chestplate", "leggings", "boots"};
 
-    private final JavaPlugin plugin;
+    private final CustomItems plugin;
 
     private static final Map<String, String> GIVE_NAMES = new HashMap<>();
     static {
@@ -59,15 +52,15 @@ public class ItemRegistry {
         GIVE_NAMES.put("berserk",         BERSERK_SWORD);
     }
 
-    public ItemRegistry(JavaPlugin plugin) {
+    public ItemRegistry(CustomItems plugin) {
         this.plugin = plugin;
     }
 
-    // ── Armures ───────────────────────────────────────────────────────────
+    // ── Armures (Lit CustomArmor.yml) ─────────────────────────────────────
 
     public ItemStack[] buildArmorSet(String armorKey, String itemId) {
         ConfigurationSection sec =
-                plugin.getConfig().getConfigurationSection("armors." + armorKey);
+                plugin.getCustomArmorConfig().getConfigurationSection("armors." + armorKey);
 
         if (sec == null) {
             return new ItemStack[4];
@@ -76,32 +69,24 @@ public class ItemRegistry {
         ItemStack[] pieces = new ItemStack[4];
         for (int i = 0; i < ARMOR_SLOTS.length; i++) {
 
-            // Construit la pièce (avec trim intégré dans ItemBuilder)
             pieces[i] = ItemBuilder.buildArmorPiece(plugin, sec, ARMOR_SLOTS[i], itemId);
 
             if (pieces[i] == null) {
                 continue;
             }
 
-            // ─────────────────────────────────────────────
-            // Tooltip personnalisé de l'armure
-            //
-            // Exemple pour Ghost :
-            // customitems:ghost/ghost
-            // ─────────────────────────────────────────────
-
             pieces[i].setData(
-                DataComponentTypes.TOOLTIP_STYLE,
-                Key.key("customitems", armorKey + "/" + armorKey)
+                    DataComponentTypes.TOOLTIP_STYLE,
+                    Key.key("customitems", armorKey + "/" + armorKey)
             );
         }
         return pieces;
     }
 
-    // ── Armes (ta version conservée intégralement) ────────────────────────
+    // ── Armes (Lit Weapon.yml) ────────────────────────────────────────────
 
     public ItemStack buildCelestialSword() {
-        var sec = plugin.getConfig().getConfigurationSection("weapons.celestial-sword");
+        var sec = plugin.getWeaponConfig().getConfigurationSection("weapons.celestial-sword");
         if (sec == null) return null;
         ItemStack item = ItemBuilder.buildWeapon(plugin, sec, CELESTIAL_SWORD);
         item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "celestialsword"));
@@ -109,7 +94,7 @@ public class ItemRegistry {
     }
 
     public ItemStack buildCelestialMace() {
-        var sec = plugin.getConfig().getConfigurationSection("weapons.celestial-sword");
+        var sec = plugin.getWeaponConfig().getConfigurationSection("weapons.celestial-sword");
         if (sec == null) return null;
         ItemStack item = ItemBuilder.build(plugin, new MaceFakeCfg(sec), null, CELESTIAL_MACE,
                 sec.getString("mace-display-name", "<yellow><bold>⚒ Masse Céleste"),
@@ -119,7 +104,7 @@ public class ItemRegistry {
     }
 
     public ItemStack buildExplosiveBow() {
-        var sec = plugin.getConfig().getConfigurationSection("weapons.explosive-bow");
+        var sec = plugin.getWeaponConfig().getConfigurationSection("weapons.explosive-bow");
         if (sec == null) return null;
         ItemStack item = ItemBuilder.buildWeapon(plugin, sec, EXPLOSIVE_BOW);
         item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "explosivebow"));
@@ -127,7 +112,7 @@ public class ItemRegistry {
     }
 
     public ItemStack buildEnderBow() {
-        var sec = plugin.getConfig().getConfigurationSection("weapons.ender-bow");
+        var sec = plugin.getWeaponConfig().getConfigurationSection("weapons.ender-bow");
         if (sec == null) return null;
         ItemStack item = ItemBuilder.buildWeapon(plugin, sec, ENDER_BOW);
         item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "enderbow"));
@@ -135,7 +120,7 @@ public class ItemRegistry {
     }
 
     public ItemStack buildBerserkSword() {
-        var sec = plugin.getConfig().getConfigurationSection("weapons.berserk-sword");
+        var sec = plugin.getWeaponConfig().getConfigurationSection("weapons.berserk-sword");
         if (sec == null) return null;
         ItemStack item = ItemBuilder.buildWeapon(plugin, sec, BERSERK_SWORD);
         item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "berserksword"));
