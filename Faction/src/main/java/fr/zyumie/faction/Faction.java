@@ -16,6 +16,10 @@ public class Faction extends JavaPlugin implements Module {
 
     @Override
     public void onEnable() {
+
+        this.factionManager = new FactionManager(this);
+        this.factionManager.loadAll();
+
         saveDefaultConfig();
         factionManager = new FactionManager(this);
         gradeHelper    = new GradeHelper(this);

@@ -95,12 +95,12 @@ public class ProfileCommand implements CommandExecutor, TabCompleter {
     /**
      * Résout argent/faction/banque une seule fois pour ce /profile. Le résultat est ensuite
      * utilisé aussi bien par l'affichage chat que par le GUI, pour ne jamais interroger
-     * Vault/FactionPlugin deux fois pour la même commande.
+     * Vault/Faction deux fois pour la même commande.
      */
     private ProfileData computeProfileData(OfflinePlayer target) {
-        fr.zyumie.faction.Faction factionPlugin = getFactionPlugin();
-        fr.zyumie.faction.model.Faction faction = (factionPlugin != null)
-                ? factionPlugin.getFactionManager().getFactionOf(target.getUniqueId())
+        fr.zyumie.faction.listener.FactionManager factionManager = fr.zyumie.faction.listener.FactionManager.getInstance();
+        fr.zyumie.faction.model.Faction faction = (factionManager != null)
+                ? factionManager.getFactionOf(target.getUniqueId())
                 : null;
         Economy eco = getEconomy();
 
@@ -116,7 +116,7 @@ public class ProfileCommand implements CommandExecutor, TabCompleter {
 
         String factionName;
         boolean factionFallback;
-        if (factionPlugin == null) {
+        if (faction == null) {
             factionName = msg("messages.no-faction-module");
             factionFallback = true;
         } else if (faction == null) {
@@ -129,7 +129,7 @@ public class ProfileCommand implements CommandExecutor, TabCompleter {
 
         String bank;
         boolean bankFallback;
-        if (factionPlugin == null) {
+        if (faction == null) {
             bank = msg("messages.no-faction-bank");
             bankFallback = true;
         } else if (faction == null) {

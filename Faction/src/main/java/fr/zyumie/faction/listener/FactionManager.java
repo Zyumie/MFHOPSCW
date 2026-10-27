@@ -16,14 +16,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FactionManager {
 
     private static final String NS_FACTION = "faction";
+    private static FactionManager instance;
 
     private final JavaPlugin plugin;
     private final Map<String, Faction> factions = new ConcurrentHashMap<>();
     private final Map<UUID, String> memberIndex = new ConcurrentHashMap<>();
-
-    public FactionManager(JavaPlugin plugin) {
-        this.plugin = plugin;
-    }
 
     public void loadAll() {
         DataStore store = MainAPI.get().getDataStore();
@@ -136,6 +133,15 @@ public class FactionManager {
     public void setPvp(Faction faction, boolean pvp) {
         faction.setPvpEnabled(pvp);
         saveFaction(faction);
+    }
+
+    public FactionManager(JavaPlugin plugin) {
+        this.plugin = plugin;
+        instance = this; // Enregistrement de l'instance
+    }
+
+    public static FactionManager getInstance() {
+        return instance;
     }
 
     public Faction getFaction(String name) {
