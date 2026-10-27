@@ -25,46 +25,77 @@ public class PayCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (!(sender instanceof Player player)) { sender.sendMessage("Commande réservée aux joueurs."); return true; }
-        if (args.length < 2) { send(player, "<red>Usage: /pay <joueur> <montant>"); return true; }
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Commande réservée aux joueurs.");
+            return true;
+        }
+
+        // Vérification de la permission en code (vous pouvez l'enlever si tout le monde doit y avoir accès)
+        if (!player.hasPermission("money.pay")) {
+            send(player, "<red>Vous n'avez pas la permission d'utiliser cette commande.");
+            return true;
+        }
+
+        if (args.length < 2) {
+            send(player, "<red>Usage: /pay <joueur> <montant>");
+            return true;
+        }
 
         Player target = Bukkit.getPlayer(args[0]);
-        if (target == null) { send(player, msg("messages.player-not-found").replace("{player}", args[0])); return true; }
-        if (target.equals(player)) { send(player, msg("messages.pay-self")); return true; }
+        if (target == null) {
+            send(player, msg("messages.player-not-found").replace("{player}", args[0]));
+            return true;
+        }
+        if (target.equals(player)) {
+            send(player, msg("messages.pay-self"));
+            return true;
+        }
 
         double amount;
-        try { amount = Double.parseDouble(args[1].replace(",", ".")); }
-        catch (NumberFormatException e) { send(player, msg("messages.invalid-amount")); return true; }
+        try {
+            amount = Double.parseDouble(args[1].replace(",", "."));
+        } catch (NumberFormatException e) {
+            send(player, msg("messages.invalid-amount"));
+            return true;
+        }
 
-        if (!MoneyManager.isValidAmount(amount)) { send(player, msg("messages.invalid-amount")); return true; }
+        if (!MoneyManager.isValidAmount(amount)) {
+            send(player, msg("messages.invalid-amount"));
+            return true;
+        }
 
         double min = plugin.getConfig().getDouble("economy.min-transaction", 0.5);
         double max = plugin.getConfig().getDouble("economy.max-balance", 999_999_999.0);
 
         if (amount < min) {
-            send(player, msg("messages.pay-min").replace("{min}", fmt(min)).replace("{currency}", plural())); return true;
+            send(player, msg("messages.pay-min").replace("{min}", fmt(min)).replace("{currency}", plural()));
+            return true;
         }
 
         double senderBalance = manager.getBalance(player.getUniqueId());
         if (senderBalance < amount) {
             send(player, msg("messages.pay-insufficient")
-                    .replace("{balance}", fmt(senderBalance)).replace("{currency}", plural())); return true;
+                    .replace("{balance}", fmt(senderBalance)).replace("{currency}", plural()));
+            return true;
         }
 
         double targetBalance = manager.getBalance(target.getUniqueId());
         if (targetBalance + amount > max) {
             send(player, msg("messages.pay-max-balance")
-                    .replace("{max}", fmt(max)).replace("{currency}", plural())); return true;
+                    .replace("{max}", fmt(max)).replace("{currency}", plural()));
+            return true;
         }
 
         if (!manager.withdraw(player.getUniqueId(), amount)) {
             send(player, msg("messages.pay-insufficient")
-                    .replace("{balance}", fmt(manager.getBalance(player.getUniqueId()))).replace("{currency}", plural())); return true;
+                    .replace("{balance}", fmt(manager.getBalance(player.getUniqueId()))).replace("{currency}", plural()));
+            return true;
         }
         if (!manager.deposit(target.getUniqueId(), amount)) {
             manager.deposit(player.getUniqueId(), amount); // rembourse : le destinataire ne peut pas recevoir
             send(player, msg("messages.pay-max-balance")
-                    .replace("{max}", fmt(max)).replace("{currency}", plural())); return true;
+                    .replace("{max}", fmt(max)).replace("{currency}", plural()));
+            return true;
         }
 
         String amountStr = fmt(amount);

@@ -10,14 +10,17 @@ commands:
     description: Voir ton solde
     usage: /money
     aliases: [balance, bal]
+    permission: money.money
   pay:
     description: Payer un joueur
     usage: /pay <joueur> <montant>
+    permission: money.pay
   moneytop:
     description: Classement des joueurs les plus riches
     usage: /moneytop [page]
     aliases: [baltop]
+    permission: money.moneytop
   eco:
     description: Commandes administrateur d'économie
     usage: /eco <give|set|take> <joueur> <montant>
-    permission: money.admin
+    permission: money.eco
