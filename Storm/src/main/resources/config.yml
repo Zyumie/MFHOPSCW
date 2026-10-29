@@ -8,11 +8,11 @@ worlds:
 
 # ── Cycle hebdomadaire ────────────────────────────────────────────────
 cycle:
-  # Durées possibles en jours (tirage aléatoire parmi cette liste)
-  possible-durations: [1, 2, 3, 4, 5]
-  # Heure de déclenchement de la tempête (format 24h: "HH:mm")
+  # Durées possibles pour les tempêtes aléatoires de la semaine (m = minutes, h = heures, d = jours)
+  possible-durations: ["30m", "1h", "2h", "6h", "12h", "1d", "2d"]
+  # Heure de déclenchement (format 24h: "HH:mm")
   trigger-time: "20:00"
-  # Fuseau horaire pour le cycle hebdomadaire (ex: Europe/Paris, UTC)
+  # Fuseau horaire
   timezone: "Europe/Paris"
 
 # ── Effets environnementaux ───────────────────────────────────────────

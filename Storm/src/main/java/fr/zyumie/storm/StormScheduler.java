@@ -9,16 +9,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.*;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Gère le cycle hebdomadaire de la tempête :
- *  - Génère aléatoirement la durée D et le jour de départ J pour la semaine
- *  - Persiste l'état dans storm_state.json
- *  - Vérifie chaque minute si la tempête doit commencer ou finir
+ * Gère le cycle de la tempête avec support des minutes, heures et jours.
  */
 public class StormScheduler {
 
@@ -32,19 +28,15 @@ public class StormScheduler {
     public StormScheduler(Storm plugin) {
         this.plugin    = plugin;
         this.gson      = new GsonBuilder().setPrettyPrinting().create();
-        this.stateFile = new File(plugin.getDataFolder(), "storm_state.json");
+        this.stateFile = new File(plugin.getCustomDataFolder(), "storm_state.json");
         this.random    = new Random();
     }
-
-    // ── Initialisation ────────────────────────────────────────────────
 
     public void init() {
         loadState();
         ensureWeekScheduled();
         startMinuteCheck();
     }
-
-    // ── Persistance ───────────────────────────────────────────────────
 
     private void loadState() {
         if (!stateFile.exists()) {
@@ -70,84 +62,59 @@ public class StormScheduler {
         }
     }
 
-    // ── Génération hebdomadaire ───────────────────────────────────────
-
-    /**
-     * Si aucun état n'existe ou si l'état appartient à une semaine passée,
-     * génère un nouveau planning pour la semaine actuelle.
-     */
     private void ensureWeekScheduled() {
-        LocalDate today    = LocalDate.now(getZone());
-        LocalDate monday   = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate today  = LocalDate.now(getZone());
+        LocalDate monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
         if (currentState != null && monday.equals(currentState.getWeekStart())) {
-            // L'état est déjà pour cette semaine — on l'applique si nécessaire
             plugin.getLogger().info("Planning de tempête pour la semaine déjà en place.");
             applyRestoredState();
             return;
         }
 
-        // Nouvelle semaine → générer un nouveau planning
         generateWeeklyStorm(monday);
     }
 
-    /**
-     * Algorithme de génération :
-     *  1. Tire D ∈ {possible-durations} aléatoirement
-     *  2. Liste les jours J valides : J + D - 1 ≤ 7 (dimanche = jour 7)
-     *  3. Tire J aléatoirement parmi les jours valides
-     */
     private void generateWeeklyStorm(LocalDate monday) {
-        List<Integer> durations = plugin.getConfig().getIntegerList("cycle.possible-durations");
-        if (durations.isEmpty()) durations = List.of(1, 2, 3, 4, 5);
+        List<String> rawDurations = plugin.getConfig().getStringList("cycle.possible-durations");
+        if (rawDurations.isEmpty()) rawDurations = List.of("2h", "6h", "1d", "2d");
 
-        // Tire la durée au sort
-        int d = durations.get(random.nextInt(durations.size()));
+        // Tire une durée aléatoire sous forme de texte (ex: "30m", "2h", "1d")
+        String randomDurationStr = rawDurations.get(random.nextInt(rawDurations.size()));
+        Duration duration = parseDuration(randomDurationStr);
 
-        // Jours valides : J ∈ [1, 7-D+1] (lundi=1, dimanche=7)
-        int maxStartDay = 7 - d + 1; // ex: D=5 → maxStartDay=3 (mercredi)
-        int startDayOffset = random.nextInt(maxStartDay); // 0-indexed
+        // Choisit un jour aléatoire dans la semaine (lundi à dimanche) et l'heure de déclenchement
+        int randomDayOffset = random.nextInt(7);
+        LocalDate stormDate = monday.plusDays(randomDayOffset);
+        LocalTime triggerTime = getTriggerTime();
 
-        LocalDate startDate = monday.plusDays(startDayOffset);
-        LocalDate endDate   = startDate.plusDays(d); // exclusif
+        LocalDateTime startDateTime = LocalDateTime.of(stormDate, triggerTime);
+        LocalDateTime endDateTime   = startDateTime.plus(duration);
 
-        currentState = new StormState(monday, startDate, endDate);
+        currentState = new StormState(monday, startDateTime, endDateTime);
         saveState();
 
         plugin.getLogger().info(String.format(
-                "Nouvelle tempête planifiée : début=%s, fin=%s (%d jour(s))",
-                startDate, endDate.minusDays(1), d));
+                "Nouvelle tempête planifiée : début=%s, fin=%s (%s)",
+                startDateTime, endDateTime, randomDurationStr));
     }
 
-    /**
-     * À la restauration du serveur : si l'état dit que la tempête est active,
-     * on la redémarre immédiatement.
-     */
     private void applyRestoredState() {
         if (currentState.isActive()) {
             plugin.getLogger().info("Restauration d'une tempête active — redémarrage des effets.");
-            plugin.getStormManager().startStorm(false); // false = pas d'annonce broadcast
+            plugin.getStormManager().startStorm(false);
         }
     }
 
-    // ── Vérification periodique ───────────────────────────────────────
-
-    /**
-     * Tâche qui vérifie chaque minute si la tempête doit changer d'état.
-     * Utilise l'heure locale configurée pour le déclenchement.
-     */
     private void startMinuteCheck() {
         plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
             if (currentState == null) return;
 
-            LocalDate today = LocalDate.now(getZone());
-            LocalTime now   = LocalTime.now(getZone());
-            LocalTime trigger = getTriggerTime();
-
-            // Nouvelle semaine ?
+            LocalDateTime now = LocalDateTime.now(getZone());
+            LocalDate today = now.toLocalDate();
             LocalDate monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
             if (!monday.equals(currentState.getWeekStart())) {
-                // Si la tempête était active, on l'arrête proprement
                 if (currentState.isActive()) {
                     plugin.getStormManager().stopStorm(true);
                 }
@@ -155,45 +122,39 @@ public class StormScheduler {
                 return;
             }
 
-            boolean shouldBeActive = today.compareTo(currentState.getStartDate()) >= 0
-                    && today.isBefore(currentState.getEndDate())
-                    && now.compareTo(trigger) >= 0;
+            boolean shouldBeActive = !now.isBefore(currentState.getStartDate())
+                    && now.isBefore(currentState.getEndDate());
 
             if (shouldBeActive && !currentState.isActive() && !currentState.isTriggered()) {
-                // Heure de démarrage
                 currentState.setActive(true);
                 currentState.setTriggered(true);
                 saveState();
                 plugin.getStormManager().startStorm(true);
 
             } else if (!shouldBeActive && currentState.isActive()) {
-                // Heure d'arrêt (fin de la durée ou fin de journée de déclenchement)
-                boolean stormDone = today.compareTo(currentState.getEndDate()) >= 0;
-                if (stormDone) {
+                if (!now.isBefore(currentState.getEndDate())) {
                     currentState.setActive(false);
                     saveState();
                     plugin.getStormManager().stopStorm(true);
                 }
             }
 
-        }, 20L, 20L * 60L); // vérifie toutes les minutes (1200 ticks)
+        }, 20L, 20L * 60L);
     }
 
-    // ── API publique ──────────────────────────────────────────────────
+    /** Permet de forcer une tempête avec une durée flexible (ex: "30m", "2h", "1d") */
+    public void forceStart(String durationStr) {
+        Duration duration = parseDuration(durationStr);
+        LocalDateTime now = LocalDateTime.now(getZone());
+        LocalDate monday = now.toLocalDate().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDateTime end = now.plus(duration);
 
-    /** Force le démarrage manuel de la tempête. */
-    public void forceStart(int durationDays) {
-        LocalDate today  = LocalDate.now(getZone());
-        LocalDate monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDate end    = today.plusDays(durationDays);
-
-        currentState = new StormState(monday, today, end);
+        currentState = new StormState(monday, now, end);
         currentState.setActive(true);
         currentState.setTriggered(true);
         saveState();
     }
 
-    /** Force l'arrêt manuel. */
     public void forceStop() {
         if (currentState != null) {
             currentState.setActive(false);
@@ -203,7 +164,30 @@ public class StormScheduler {
 
     public StormState getCurrentState() { return currentState; }
 
-    // ── Helpers ───────────────────────────────────────────────────────
+    /** Analyse une chaîne de caractères de durée (ex: 30m, 2h, 1d) */
+    public static Duration parseDuration(String input) {
+        if (input == null || input.isEmpty()) return Duration.ofHours(1);
+        input = input.toLowerCase().trim();
+        char unit = input.charAt(input.length() - 1);
+        String numberPart = input.substring(0, input.length() - 1);
+        try {
+            long val = Long.parseLong(numberPart);
+            return switch (unit) {
+                case 's' -> Duration.ofSeconds(val);
+                case 'm' -> Duration.ofMinutes(val);
+                case 'h' -> Duration.ofHours(val);
+                case 'd' -> Duration.ofDays(val);
+                default -> Duration.ofHours(Long.parseLong(input));
+            };
+        } catch (NumberFormatException e) {
+            try {
+                long val = Long.parseLong(input);
+                return Duration.ofHours(val);
+            } catch (NumberFormatException ex) {
+                return Duration.ofHours(1);
+            }
+        }
+    }
 
     private ZoneId getZone() {
         String tz = plugin.getConfig().getString("cycle.timezone", "Europe/Paris");

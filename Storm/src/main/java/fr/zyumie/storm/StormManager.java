@@ -1,6 +1,7 @@
 package fr.zyumie.storm;
 
 import fr.zyumie.main.api.events.StormStateChangeEvent;
+import fr.zyumie.storm.data.StormState;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -26,22 +27,15 @@ public class StormManager {
 
     private final ConcurrentHashMap<UUID, Long> warningCooldown = new ConcurrentHashMap<>();
 
-    /**
-     * Checker d'immunité injecté par CustomItems via réflexion.
-     * Par défaut : personne n'est immunisé.
-     */
     private Predicate<Player> immunityChecker = p -> false;
 
     public StormManager(Storm plugin) {
         this.plugin = plugin;
     }
 
-    /** Appelé par CustomItems pour brancher l'armure anti-tempête. */
     public void setImmunityChecker(Predicate<Player> checker) {
         this.immunityChecker = checker != null ? checker : p -> false;
     }
-
-    // ── Démarrage / Arrêt ─────────────────────────────────────────────
 
     public void startStorm(boolean broadcast) {
         if (stormActive) return;
@@ -52,7 +46,7 @@ public class StormManager {
         if (plugin.getConfig().getBoolean("environment.eternal-night", true)) {
             long nightTime = plugin.getConfig().getLong("environment.night-time", 18000L);
             nightLockTask = Bukkit.getScheduler().runTaskTimer(plugin, () ->
-                getAffectedWorlds().forEach(w -> w.setFullTime(nightTime)), 0L, 20L);
+                    getAffectedWorlds().forEach(w -> w.setFullTime(nightTime)), 0L, 20L);
         }
 
         long checkInterval = plugin.getConfig().getLong("exposure.check-interval-ticks", 20L);
@@ -60,7 +54,7 @@ public class StormManager {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (!isAffectedWorld(player.getWorld())) continue;
                 if (shouldIgnore(player)) continue;
-                if (immunityChecker.test(player)) continue; // ← Armure anti-tempête
+                if (immunityChecker.test(player)) continue;
                 if (isExposedToSky(player)) {
                     applyExposureEffects(player);
                     maybeLightning(player);
@@ -74,7 +68,7 @@ public class StormManager {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (!isAffectedWorld(player.getWorld())) continue;
                 if (player.getGameMode() == GameMode.SPECTATOR) continue;
-                if (immunityChecker.test(player)) continue; // ← Armure anti-tempête
+                if (immunityChecker.test(player)) continue;
                 if (!isExposedToSky(player)) continue;
                 player.setNoDamageTicks(0);
                 player.damage(dmgAmount);
@@ -84,7 +78,6 @@ public class StormManager {
         if (broadcast) broadcastLines("messages.storm-start");
         plugin.getLogger().info("⛈ Tempête démarrée.");
 
-        // Notifie le reste de l'écosystème (ex: storm-lockout du Main) que la tempête démarre.
         Bukkit.getPluginManager().callEvent(new StormStateChangeEvent(true));
     }
 
@@ -100,15 +93,13 @@ public class StormManager {
         if (broadcast) broadcastLines("messages.storm-end");
         plugin.getLogger().info("☀ Tempête terminée.");
 
-        // Notifie le reste de l'écosystème (ex: storm-lockout du Main) que la tempête se termine.
         Bukkit.getPluginManager().callEvent(new StormStateChangeEvent(false));
     }
 
-    // ── Environnement ─────────────────────────────────────────────────
-
     private void activateWeather(World world) {
-        world.setGameRule(GameRules.ADVANCE_TIME, false);
-        world.setGameRule(GameRules.ADVANCE_WEATHER,  false);
+        // CORRECTION : Utilisation de GameRule au lieu de GameRules
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false);
+        world.setGameRule(GameRule.DO_WEATHER_CYCLE, false);
         if (plugin.getConfig().getBoolean("environment.thunderstorm", true)) {
             world.setStorm(true);
             world.setThundering(true);
@@ -118,13 +109,12 @@ public class StormManager {
     }
 
     private void deactivateWeather(World world) {
-        world.setGameRule(GameRules.ADVANCE_TIME, true);
-        world.setGameRule(GameRules.ADVANCE_WEATHER,  true);
+        // CORRECTION : Utilisation de GameRule au lieu de GameRules
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, true);
+        world.setGameRule(GameRule.DO_WEATHER_CYCLE, true);
         world.setStorm(false);
         world.setThundering(false);
     }
-
-    // ── Détection surface ─────────────────────────────────────────────
 
     private boolean isExposedToSky(Player player) {
         var loc  = player.getEyeLocation();
@@ -137,8 +127,6 @@ public class StormManager {
         }
         return true;
     }
-
-    // ── Effets joueurs ────────────────────────────────────────────────
 
     private void applyExposureEffects(Player player) {
         int dur      = plugin.getConfig().getInt("exposure.effect-duration-ticks", 60);
@@ -173,12 +161,10 @@ public class StormManager {
             player.getWorld().strikeLightning(player.getLocation());
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────
-
     private boolean shouldIgnore(Player player) {
         if (plugin.getConfig().getBoolean("exposure.ignore-creative", true)
                 && (player.getGameMode() == GameMode.CREATIVE
-                 || player.getGameMode() == GameMode.SPECTATOR)) return true;
+                || player.getGameMode() == GameMode.SPECTATOR)) return true;
         if (plugin.getConfig().getBoolean("exposure.use-bypass-permission", true)
                 && player.hasPermission("storm.bypass")) return true;
         return false;
@@ -199,15 +185,14 @@ public class StormManager {
 
     private void broadcastLines(String path) {
         List<String> lines = plugin.getConfig().getStringList(path);
-        String endDate = plugin.getScheduler().getCurrentState() != null
-                ? plugin.getScheduler().getCurrentState().getEndDateFormatted() : "N/A";
-        long dur = plugin.getScheduler().getCurrentState() != null
-                ? plugin.getScheduler().getCurrentState().getDurationDays() : 1L;
+        StormState state = plugin.getScheduler().getCurrentState();
+        String endDate = state != null ? state.getEndDateFormatted() : "N/A";
+        String dur = state != null ? state.getFormattedDuration() : "1h";
         for (Player p : Bukkit.getOnlinePlayers())
             for (String line : lines)
                 p.sendMessage(mm(prefix() + line
                         .replace("{end-date}", endDate)
-                        .replace("{duration}", String.valueOf(dur))));
+                        .replace("{duration}", dur)));
     }
 
     private String prefix() {

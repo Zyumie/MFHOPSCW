@@ -29,16 +29,15 @@ public class StormCommand implements CommandExecutor, TabCompleter {
         switch (args[0].toLowerCase()) {
 
             case "start" -> {
-                // /storm start [duree]
-                int duration = 1;
+                // /storm start [durée ex: 30m, 2h, 1d]
+                String durationArg = "2h";
                 if (args.length >= 2) {
-                    try { duration = Math.max(1, Math.min(5, Integer.parseInt(args[1]))); }
-                    catch (NumberFormatException e) { send(sender, "<red>Durée invalide (1-5)."); return true; }
+                    durationArg = args[1];
                 }
                 if (plugin.getStormManager().isStormActive()) {
                     send(sender, "<red>Une tempête est déjà en cours."); return true;
                 }
-                plugin.getScheduler().forceStart(duration);
+                plugin.getScheduler().forceStart(durationArg);
                 plugin.getStormManager().startStorm(true);
                 send(sender, plugin.getConfig().getString("messages.admin-start", ""));
             }
@@ -63,18 +62,17 @@ public class StormCommand implements CommandExecutor, TabCompleter {
                 } else {
                     send(sender, plugin.getConfig().getString("messages.scheduled", "")
                             .replace("{start-date}", state.getStartDateFormatted())
-                            .replace("{duration}", String.valueOf(state.getDurationDays())));
+                            .replace("{duration}", state.getFormattedDuration()));
                 }
             }
 
             case "schedule" -> {
-                // Force la regénération du planning de la semaine
                 plugin.getScheduler().init();
                 StormState state = plugin.getScheduler().getCurrentState();
                 if (state != null) {
                     send(sender, plugin.getConfig().getString("messages.scheduled", "")
                             .replace("{start-date}", state.getStartDateFormatted())
-                            .replace("{duration}", String.valueOf(state.getDurationDays())));
+                            .replace("{duration}", state.getFormattedDuration()));
                 }
             }
 
@@ -93,12 +91,12 @@ public class StormCommand implements CommandExecutor, TabCompleter {
         if (!sender.hasPermission("storm.admin")) return List.of();
         if (args.length == 1) return List.of("start", "stop", "status", "schedule", "reload");
         if (args.length == 2 && args[0].equalsIgnoreCase("start"))
-            return List.of("1", "2", "3", "4", "5");
+            return List.of("30m", "1h", "2h", "6h", "12h", "1d", "2d");
         return List.of();
     }
 
     private void sendUsage(CommandSender s) {
-        send(s, "<gold>/storm <gray>start [durée] | stop | status | schedule | reload");
+        send(s, "<gold>/storm <gray>start [durée ex: 30m/2h/1d] | stop | status | schedule | reload");
     }
 
     private String prefix() {

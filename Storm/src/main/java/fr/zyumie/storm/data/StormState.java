@@ -1,76 +1,71 @@
 package fr.zyumie.storm.data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.Locale;
 
 /**
  * Représente l'état complet de la tempête pour la semaine en cours.
- * Sérialisé en JSON dans storm_state.json pour survivre aux redémarrages.
+ * Supporte désormais une précision à la minute (LocalDateTime).
  */
 public class StormState {
 
-    // Format ISO 8601 (yyyy-MM-dd) pour la sérialisation
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final DateTimeFormatter FMT = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    /** Lundi de la semaine concernée — sert à détecter un changement de semaine */
-    private String weekStart;
-
-    /** Jour de début de la tempête (inclus) */
-    private String startDate;
-
-    /** Jour de fin de la tempête (EXCLUSIF — la tempête s'arrête au début de ce jour) */
-    private String endDate;
-
-    /** true si la tempête est actuellement active */
+    private String weekStart; // Format ISO LocalDate (yyyy-MM-dd)
+    private String startDate; // Format ISO LocalDateTime
+    private String endDate;   // Format ISO LocalDateTime
     private boolean active;
-
-    /** true si la tempête a déjà été déclenchée cette semaine
-     *  (évite de la reprogrammer si elle a été annulée manuellement) */
     private boolean triggered;
-
-    // ── Constructeurs ─────────────────────────────────────────────────
 
     public StormState() {}
 
-    public StormState(LocalDate weekStart, LocalDate startDate, LocalDate endDate) {
-        this.weekStart = weekStart.format(FMT);
+    public StormState(LocalDate weekStart, LocalDateTime startDate, LocalDateTime endDate) {
+        this.weekStart = weekStart.format(DateTimeFormatter.ISO_LOCAL_DATE);
         this.startDate = startDate.format(FMT);
         this.endDate   = endDate.format(FMT);
         this.active    = false;
         this.triggered = false;
     }
 
-    // ── Accès typés ───────────────────────────────────────────────────
-
-    public LocalDate getWeekStart() { return weekStart != null ? LocalDate.parse(weekStart, FMT) : null; }
-    public LocalDate getStartDate() { return startDate != null ? LocalDate.parse(startDate, FMT) : null; }
-    public LocalDate getEndDate()   { return endDate   != null ? LocalDate.parse(endDate,   FMT) : null; }
+    public LocalDate getWeekStart() { return weekStart != null ? LocalDate.parse(weekStart) : null; }
+    public LocalDateTime getStartDate() { return startDate != null ? LocalDateTime.parse(startDate, FMT) : null; }
+    public LocalDateTime getEndDate()   { return endDate   != null ? LocalDateTime.parse(endDate, FMT)   : null; }
     public boolean isActive()       { return active; }
     public boolean isTriggered()    { return triggered; }
 
     public void setActive(boolean b)    { this.active    = b; }
     public void setTriggered(boolean b) { this.triggered = b; }
 
-    /** Durée de la tempête en jours */
-    public long getDurationDays() {
+    /** Durée totale en minutes */
+    public long getDurationMinutes() {
         if (startDate == null || endDate == null) return 0;
-        return java.time.temporal.ChronoUnit.DAYS.between(getStartDate(), getEndDate());
+        return java.time.temporal.ChronoUnit.MINUTES.between(getStartDate(), getEndDate());
     }
 
-    /** Fin formatée pour l'affichage (ex: "Mercredi 02/07") */
+    /** Durée formatée pour l'affichage (ex: "2 heure(s)", "30 minute(s)") */
+    public String getFormattedDuration() {
+        long mins = getDurationMinutes();
+        if (mins < 60) return mins + " minute(s)";
+        long hours = mins / 60;
+        if (hours < 24) return hours + " heure(s)";
+        long days = hours / 24;
+        return days + " jour(s)";
+    }
+
     public String getEndDateFormatted() {
         if (endDate == null) return "N/A";
-        LocalDate end = getEndDate().minusDays(1); // dernier jour inclus
-        return end.getDayOfWeek().getDisplayName(
-                java.time.format.TextStyle.FULL, java.util.Locale.FRENCH)
-                + " " + end.format(DateTimeFormatter.ofPattern("dd/MM"));
+        LocalDateTime end = getEndDate();
+        return end.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.FRENCH)
+                + " " + end.format(DateTimeFormatter.ofPattern("dd/MM à HH:mm"));
     }
 
     public String getStartDateFormatted() {
         if (startDate == null) return "N/A";
-        LocalDate start = getStartDate();
-        return start.getDayOfWeek().getDisplayName(
-                java.time.format.TextStyle.FULL, java.util.Locale.FRENCH)
-                + " " + start.format(DateTimeFormatter.ofPattern("dd/MM"));
+        LocalDateTime start = getStartDate();
+        return start.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.FRENCH)
+                + " " + start.format(DateTimeFormatter.ofPattern("dd/MM à HH:mm"));
     }
 }
