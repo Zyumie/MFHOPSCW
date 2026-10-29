@@ -48,17 +48,13 @@ public class CelestialSwordHandler implements Listener {
             @Override
             public void run() {
                 if (inFlight.isEmpty()) return;
-
                 long now = System.currentTimeMillis();
-
                 for (UUID uuid : new ArrayList<>(inFlight.keySet())) {
                     Player player = plugin.getServer().getPlayer(uuid);
-
                     if (player == null || !player.isOnline()) {
                         inFlight.remove(uuid);
                         continue;
                     }
-
                     Long launchTime = inFlight.get(uuid);
                     if (launchTime == null) continue;
 
@@ -80,7 +76,6 @@ public class CelestialSwordHandler implements Listener {
         long currentLaunchTime = System.currentTimeMillis();
         inFlight.put(player.getUniqueId(), currentLaunchTime);
 
-        // Correction : getWeaponConfig()
         double velocity = plugin.getWeaponConfig().getDouble("weapons.celestial-sword.launch-velocity", 2.5);
         Vector v = player.getVelocity();
         v.setY(velocity);
@@ -108,7 +103,6 @@ public class CelestialSwordHandler implements Listener {
 
     public void onFallLanding(Player player) {
         if (inFlight.remove(player.getUniqueId()) == null) return;
-
         clearOwnedMaces(player);
         equipSword(player);
         send(player, plugin.getWeaponConfig().getString("weapons.celestial-sword.messages.miss-landing", ""));
@@ -123,35 +117,28 @@ public class CelestialSwordHandler implements Listener {
         if (!isMace(attacker.getInventory().getItemInMainHand())) return;
 
         event.setCancelled(true);
-
         if (target instanceof Player pTarget) pTarget.setHealth(0);
         else target.damage(target.getMaxHealth() * 10);
 
         send(attacker, plugin.getWeaponConfig().getString("weapons.celestial-sword.messages.kill-slam", ""));
-
         launchPlayer(attacker);
     }
 
     @EventHandler
     public void onFallDamage(EntityDamageEvent event) {
         if (event.getCause() == EntityDamageEvent.DamageCause.FALL && event.getEntity() instanceof Player player) {
-            if (inFlight.containsKey(player.getUniqueId())) {
-                event.setCancelled(true);
-            }
+            if (inFlight.containsKey(player.getUniqueId())) event.setCancelled(true);
         }
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
-        removeFromFlight(event.getPlayer());
-    }
+    public void onQuit(PlayerQuitEvent event) { removeFromFlight(event.getPlayer()); }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onDrop(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
         if (!inFlight.containsKey(player.getUniqueId())) return;
         if (!isMace(event.getItemDrop().getItemStack())) return;
-
         event.setCancelled(true);
         send(player, "<red>Impossible de lâcher la masse en plein vol !");
     }
@@ -159,83 +146,59 @@ public class CelestialSwordHandler implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player) || !inFlight.containsKey(player.getUniqueId())) return;
-
-        if (isMace(event.getCurrentItem()) || isMace(event.getCursor())) {
-            event.setCancelled(true);
-        }
+        if (isMace(event.getCurrentItem()) || isMace(event.getCursor())) event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryDrag(InventoryDragEvent event) {
         if (!(event.getWhoClicked() instanceof Player player) || !inFlight.containsKey(player.getUniqueId())) return;
-
-        if (isMace(event.getOldCursor()) || isMace(event.getCursor())) {
-            event.setCancelled(true);
-        }
+        if (isMace(event.getOldCursor()) || isMace(event.getCursor())) event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onSwapHand(PlayerSwapHandItemsEvent event) {
         Player player = event.getPlayer();
         if (!inFlight.containsKey(player.getUniqueId())) return;
-
-        if (isMace(event.getMainHandItem()) || isMace(event.getOffHandItem())) {
-            event.setCancelled(true);
-        }
+        if (isMace(event.getMainHandItem()) || isMace(event.getOffHandItem())) event.setCancelled(true);
     }
 
     private void equipMace(Player player) {
         ItemStack mace = plugin.getItemRegistry().buildCelestialMace();
         if (mace == null) return;
-
         var meta = mace.getItemMeta();
-        meta.getPersistentDataContainer().set(
-                new NamespacedKey(plugin, OWNER_KEY),
-                PersistentDataType.STRING,
-                player.getUniqueId().toString());
+        meta.getPersistentDataContainer().set(new NamespacedKey(plugin, OWNER_KEY), PersistentDataType.STRING, player.getUniqueId().toString());
         mace.setItemMeta(meta);
-
         player.getInventory().setItemInMainHand(mace);
     }
 
     private void equipSword(Player player) {
         removeMacesFromInventory(player);
         ItemStack sword = plugin.getItemRegistry().buildCelestialSword();
-        if (sword != null) {
-            player.getInventory().setItemInMainHand(sword);
-        }
+        if (sword != null) player.getInventory().setItemInMainHand(sword);
     }
 
     private void removeMacesFromInventory(Player player) {
         ItemStack[] contents = player.getInventory().getContents();
         boolean hasChanged = false;
-
         for (int i = 0; i < contents.length; i++) {
             if (isMace(contents[i])) {
                 contents[i] = null;
                 hasChanged = true;
             }
         }
-
-        if (hasChanged) {
-            player.getInventory().setContents(contents);
-        }
+        if (hasChanged) player.getInventory().setContents(contents);
     }
 
     private void clearOwnedMaces(Player player) {
         UUID ownerUuid = player.getUniqueId();
         NamespacedKey ownerKey = new NamespacedKey(plugin, OWNER_KEY);
-
         player.getWorld().getNearbyEntitiesByType(Item.class, player.getLocation(), 20).stream()
                 .filter(itemEntity -> {
                     ItemStack stack = itemEntity.getItemStack();
                     if (!isMace(stack)) return false;
-                    String storedUuid = stack.getItemMeta()
-                            .getPersistentDataContainer()
-                            .get(ownerKey, PersistentDataType.STRING);
+                    String storedUuid = stack.getItemMeta().getPersistentDataContainer().get(ownerKey, PersistentDataType.STRING);
                     return ownerUuid.toString().equals(storedUuid);
-                })
-                .forEach(Entity::remove);
+                }).forEach(Entity::remove);
     }
 
     private boolean isMace(ItemStack item) {
@@ -243,6 +206,7 @@ public class CelestialSwordHandler implements Listener {
         return ItemBuilder.isCustomItem(plugin, item, ItemRegistry.CELESTIAL_MACE);
     }
 
+    // Corrigé avec 'F' majuscule pour correspondre à DamageListener
     public boolean isInFlight(Player player) {
         return inFlight.containsKey(player.getUniqueId());
     }

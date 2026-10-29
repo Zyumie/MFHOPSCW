@@ -55,8 +55,18 @@ public class GiveItemCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (items.length == 0 || items[0] == null) {
+            send(sender, "<red>Erreur : L'item '<yellow>" + itemName + "<red>' n'a pas pu être généré (Vérifie sa config).");
+            return true;
+        }
+
         for (ItemStack item : items) {
-            if (item != null) target.getInventory().addItem(item);
+            if (item != null) {
+                var leftovers = target.getInventory().addItem(item);
+                for (ItemStack leftover : leftovers.values()) {
+                    target.getWorld().dropItem(target.getLocation(), leftover);
+                }
+            }
         }
 
         send(sender, plugin.getMainConfig().getString("messages.give-success", "<green>Item donné.")

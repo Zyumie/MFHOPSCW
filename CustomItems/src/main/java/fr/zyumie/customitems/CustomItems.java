@@ -31,14 +31,13 @@ public class CustomItems extends JavaPlugin implements Module {
     private ItemRegistry  itemRegistry;
     private ArmorListener armorListener;
 
-    // Fichiers de configuration dans plugins/Main/CustomItems
     private FileConfiguration mainConfig;
     private FileConfiguration customArmorConfig;
     private FileConfiguration weaponConfig;
 
     @Override
     public void onEnable() {
-        createCustomConfigs(); // Charge les fichiers dans plugins/Main/CustomItems
+        createCustomConfigs();
 
         initHandlers();
         itemRegistry = new ItemRegistry(this);
@@ -63,12 +62,12 @@ public class CustomItems extends JavaPlugin implements Module {
     @Override
     public void onModuleEnable() {
         armorListener = new ArmorListener(this);
-        getServer().getPluginManager().registerEvents(armorListener,              this);
-        getServer().getPluginManager().registerEvents(new DamageListener(this),   this);
-        getServer().getPluginManager().registerEvents(new KillListener(this),     this);
+        getServer().getPluginManager().registerEvents(armorListener,               this);
+        getServer().getPluginManager().registerEvents(new DamageListener(this),    this);
+        getServer().getPluginManager().registerEvents(new KillListener(this),      this);
         getServer().getPluginManager().registerEvents(new ProjectileListener(this),this);
-        getServer().getPluginManager().registerEvents(new InteractListener(this),  this);
-        getServer().getPluginManager().registerEvents(celestialHandler, this);
+        getServer().getPluginManager().registerEvents(new InteractListener(this),   this);
+        getServer().getPluginManager().registerEvents(celestialHandler,  this);
         getServer().getPluginManager().registerEvents(new ItemProtectionListener(this), this);
 
         armorListener.startTask();
@@ -89,10 +88,7 @@ public class CustomItems extends JavaPlugin implements Module {
         getLogger().info("CustomItemsModule désactivé.");
     }
 
-    // ── Gestion du dossier personnalisé plugins/Main/CustomItems ───────────
-
     public File getCustomDataFolder() {
-        // Remonte d'un niveau depuis plugins/CustomItems pour aller dans plugins/Main/CustomItems
         return new File(getDataFolder().getParentFile(), "Main/CustomItems");
     }
 
@@ -102,21 +98,18 @@ public class CustomItems extends JavaPlugin implements Module {
             customFolder.mkdirs();
         }
 
-        // 1. config.yml général
         File configFile = new File(customFolder, "config.yml");
         if (!configFile.exists()) {
             saveResourceToFile("config.yml", configFile);
         }
         mainConfig = YamlConfiguration.loadConfiguration(configFile);
 
-        // 2. CustomArmor.yml
         File customArmorFile = new File(customFolder, "CustomArmor.yml");
         if (!customArmorFile.exists()) {
             saveResourceToFile("CustomArmor.yml", customArmorFile);
         }
         customArmorConfig = YamlConfiguration.loadConfiguration(customArmorFile);
 
-        // 3. Weapon.yml
         File weaponFile = new File(customFolder, "Weapon.yml");
         if (!weaponFile.exists()) {
             saveResourceToFile("Weapon.yml", weaponFile);
@@ -138,53 +131,31 @@ public class CustomItems extends JavaPlugin implements Module {
         File customFolder = getCustomDataFolder();
 
         File configFile = new File(customFolder, "config.yml");
-        if (configFile.exists()) {
-            mainConfig = YamlConfiguration.loadConfiguration(configFile);
-        }
+        if (configFile.exists()) mainConfig = YamlConfiguration.loadConfiguration(configFile);
 
         File customArmorFile = new File(customFolder, "CustomArmor.yml");
-        if (customArmorFile.exists()) {
-            customArmorConfig = YamlConfiguration.loadConfiguration(customArmorFile);
-        }
+        if (customArmorFile.exists()) customArmorConfig = YamlConfiguration.loadConfiguration(customArmorFile);
 
         File weaponFile = new File(customFolder, "Weapon.yml");
-        if (weaponFile.exists()) {
-            weaponConfig = YamlConfiguration.loadConfiguration(weaponFile);
-        }
+        if (weaponFile.exists()) weaponConfig = YamlConfiguration.loadConfiguration(weaponFile);
     }
 
-    public FileConfiguration getMainConfig() {
-        return mainConfig;
-    }
-
-    public FileConfiguration getCustomArmorConfig() {
-        return customArmorConfig;
-    }
-
-    public FileConfiguration getWeaponConfig() {
-        return weaponConfig;
-    }
-
-    // ── Hook Storm ────────────────────────────────────────────────────────
+    public FileConfiguration getMainConfig()       { return mainConfig; }
+    public FileConfiguration getCustomArmorConfig(){ return customArmorConfig; }
+    public FileConfiguration getWeaponConfig()     { return weaponConfig; }
 
     private void hookStorm() {
         var stormPlugin = Bukkit.getPluginManager().getPlugin("Storm");
         if (stormPlugin == null) return;
         try {
-            Object manager = stormPlugin.getClass()
-                    .getMethod("getStormManager").invoke(stormPlugin);
-            java.util.function.Predicate<org.bukkit.entity.Player> checker =
-                    p -> stormHandler.isImmune(p);
-            manager.getClass()
-                    .getMethod("setImmunityChecker", java.util.function.Predicate.class)
-                    .invoke(manager, checker);
+            Object manager = stormPlugin.getClass().getMethod("getStormManager").invoke(stormPlugin);
+            java.util.function.Predicate<org.bukkit.entity.Player> checker = p -> stormHandler.isImmune(p);
+            manager.getClass().getMethod("setImmunityChecker", java.util.function.Predicate.class).invoke(manager, checker);
             getLogger().info("Intégration Storm ✔");
         } catch (Exception e) {
             getLogger().warning("Hook Storm échoué : " + e.getMessage());
         }
     }
-
-    // ── Init ──────────────────────────────────────────────────────────────
 
     private void initHandlers() {
         stormHandler        = new StormArmorHandler(this);
@@ -196,8 +167,6 @@ public class CustomItems extends JavaPlugin implements Module {
         enderBowHandler     = new EnderBowHandler(this);
         berserkHandler      = new BerserkSwordHandler(this);
     }
-
-    // ── Accesseurs ────────────────────────────────________________________
 
     public StormArmorHandler     getStormHandler()       { return stormHandler; }
     public GhostArmorHandler     getGhostHandler()       { return ghostHandler; }

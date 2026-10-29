@@ -44,7 +44,7 @@ public class Money extends JavaPlugin implements Module {
         getServer().getServicesManager().unregisterAll(this);
     }
 
-    @Override public String getId()          { return "money"; }
+    @Override public String getId()          { return "Money"; }
     @Override public String getDisplayName() { return "Money"; }
 
     @Override
