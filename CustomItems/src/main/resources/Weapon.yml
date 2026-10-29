@@ -16,7 +16,7 @@ weapons:
       - "<yellow>  ✓ Touché : One-shot + re-propulsion"
       - ""
       - "<dark_gray>ID: celestial_sword"
-    material: DIAMOND_SWORD
+    material: NETHERITE_SWORD
     custom-model-data: 3001
     item-model: "celestialSword"
     enchantments:
@@ -34,10 +34,10 @@ weapons:
     mace-custom-model-data: 3002
     mace-item-model: "celestialMace"
     messages:
-      launch:       "<yellow>⬆ Tu t'élèves vers les cieux !"
-      mace-form:    "<yellow>⚒ La masse est prête. Frappe !"
-      kill-slam:    "<yellow>💥 Impact céleste ! La cible est anéantie."
-      miss-landing: "<yellow>✓ Atterrissage sans dégât."
+      launch:       ""
+      mace-form:    ""
+      kill-slam:    "<yellow>Écrasé."
+      miss-landing: ""
 
   explosive-bow:
     enabled: true
@@ -60,7 +60,7 @@ weapons:
     real-explosion: false
     explosion-particle: EXPLOSION_LARGE
     messages:
-      explosion: "<red>💥 Explosion ! <yellow>{hits} <red>cibles touchées."
+      explosion: "<yellow>{hits} <red>touché(s)."
 
   ender-bow:
     enabled: true
@@ -80,34 +80,33 @@ weapons:
     teleport-offset: 2.0
     teleport-particle: PORTAL
     messages:
-      teleported: "<light_purple>🌀 Téléporté derrière <yellow>{target}<light_purple> !"
+      teleported: ""
 
-berserk-sword:
-  enabled: true
-  display-name: "<dark_red><bold>⚡ Épée Berserk"
-  lore:
-    - "<gray>La rage distillée en acier..."
-    - ""
-    - "<dark_red>✦ Clic-droit → Mode Berserk <yellow>20s"
-    - "<gray>  ✦ Suppression du cooldown d'attaque (style 1.8)"
-    - "<gray>  ✦ Buff pour les membres de faction à <yellow>10 blocs"
-    - "<gray>(Cooldown: <yellow>3 minutes<gray>)"
-    - ""
-    - "<dark_gray>ID: berserk_sword"
-  material: NETHERITE_SWORD
-  custom-model-data: 3031
-  item-model: "BerserkSword"
-  enchantments:
-    DAMAGE_ALL: 5
-    DURABILITY: 3
-    LOOTING: 3
-  berserk-duration-seconds: 20
-  cooldown-seconds: 180
-  faction-buff-radius: 10.0
-  attack-speed-value: 1024.0
-  messages:
-    activated:      "<dark_red>⚡ MODE BERSERK ! <yellow>{duration}s <dark_red>de fureur !"
-    faction-buffed: "<dark_red>⚡ <yellow>{player} <dark_red>active le Berserk ! Tu es aussi en rage !"
-    ended:          "<gray>Berserk terminé."
-    cooldown:       "<red>Cooldown actif: <yellow>{remaining}s <red>restant(e)s."
-    already-active: "<red>Vous êtes déjà en mode Berserk !"
+  berserk-sword:
+    enabled: true
+    display-name: "<dark_red><bold>⚡ Épée Berserk"
+    lore:
+      - "<gray>La rage distillée en acier..."
+      - ""
+      - "<dark_red>✦ Clic-droit → Mode Berserk <yellow>20s"
+      - "<gray>  ✦ Effet Force II et Speed I"
+      - "<gray>  ✦ Buff pour les membres de faction à <yellow>10 blocs"
+      - "<gray>(Cooldown: <yellow>3 minutes<gray>)"
+      - ""
+      - "<dark_gray>ID: berserk_sword"
+    material: NETHERITE_SWORD
+    custom-model-data: 3031
+    item-model: "BerserkSword"
+    enchantments:
+      DAMAGE_ALL: 5
+      DURABILITY: 3
+      LOOTING: 3
+    berserk-duration-seconds: 20
+    cooldown-seconds: 180
+    faction-buff-radius: 10.0
+    messages:
+      activated:      "<dark_red>⚡ MODE BERSERK ! <yellow>{duration}s <dark_red>de fureur !"
+      faction-buffed: "<dark_red>⚡ <yellow>{player} <dark_red>active le Berserk ! Tu reçois Force II et Vitesse !"
+      ended:          "<gray>Berserk terminé."
+      cooldown:       "<red>Cooldown actif: <yellow>{remaining}s <red>restant(e)s."
+      already-active: "<red>Vous êtes déjà en mode Berserk !"
