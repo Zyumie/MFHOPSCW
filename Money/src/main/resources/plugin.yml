@@ -14,7 +14,7 @@ commands:
   pay:
     description: Payer un joueur
     usage: /pay <joueur> <montant>
-    permission: money.pay
+    # La ligne 'permission: money.pay' a été retirée pour éviter le blocage natif de Spigot/Vault
   moneytop:
     description: Classement des joueurs les plus riches
     usage: /moneytop [page]

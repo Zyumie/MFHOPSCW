@@ -13,6 +13,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class CustomItems extends JavaPlugin implements Module {
 
@@ -29,14 +31,14 @@ public class CustomItems extends JavaPlugin implements Module {
     private ItemRegistry  itemRegistry;
     private ArmorListener armorListener;
 
-    // Fichiers de configuration séparés
+    // Fichiers de configuration dans plugins/Main/CustomItems
+    private FileConfiguration mainConfig;
     private FileConfiguration customArmorConfig;
     private FileConfiguration weaponConfig;
 
     @Override
     public void onEnable() {
-        saveDefaultConfig();
-        createCustomConfigs(); // Charge CustomArmor.yml et Weapon.yml
+        createCustomConfigs(); // Charge les fichiers dans plugins/Main/CustomItems
 
         initHandlers();
         itemRegistry = new ItemRegistry(this);
@@ -60,32 +62,24 @@ public class CustomItems extends JavaPlugin implements Module {
 
     @Override
     public void onModuleEnable() {
-        // ── Listeners ───────────────────────────────────────────────────
         armorListener = new ArmorListener(this);
         getServer().getPluginManager().registerEvents(armorListener,              this);
         getServer().getPluginManager().registerEvents(new DamageListener(this),   this);
         getServer().getPluginManager().registerEvents(new KillListener(this),     this);
         getServer().getPluginManager().registerEvents(new ProjectileListener(this),this);
         getServer().getPluginManager().registerEvents(new InteractListener(this),  this);
-
-        // CelestialSwordHandler est aussi un Listener (PlayerDropItemEvent)
         getServer().getPluginManager().registerEvents(celestialHandler, this);
-
-        // Bloque toute modification des items custom (enclume, forge, meule, etc.)
         getServer().getPluginManager().registerEvents(new ItemProtectionListener(this), this);
 
-        // ── Tâche armures ────────────────────────────────────────────────
         armorListener.startTask();
 
-        // ── Commandes ────────────────────────────────────────────────────
         GiveItemCommand giveCmd = new GiveItemCommand(this);
         getCommand("items").setExecutor(giveCmd);
         getCommand("items").setTabCompleter(giveCmd);
 
-        // ── Hook Storm ───────────────────────────────────────────────────
         hookStorm();
 
-        getLogger().info("CustomItemsModule activé.");
+        getLogger().info("CustomItemsModule activé (Dossier : plugins/Main/CustomItems).");
     }
 
     @Override
@@ -95,22 +89,72 @@ public class CustomItems extends JavaPlugin implements Module {
         getLogger().info("CustomItemsModule désactivé.");
     }
 
-    // ── Gestion des fichiers CustomArmor.yml et Weapon.yml ────────────────
+    // ── Gestion du dossier personnalisé plugins/Main/CustomItems ───────────
+
+    public File getCustomDataFolder() {
+        // Remonte d'un niveau depuis plugins/CustomItems pour aller dans plugins/Main/CustomItems
+        return new File(getDataFolder().getParentFile(), "Main/CustomItems");
+    }
 
     private void createCustomConfigs() {
-        File customArmorFile = new File(getDataFolder(), "CustomArmor.yml");
+        File customFolder = getCustomDataFolder();
+        if (!customFolder.exists()) {
+            customFolder.mkdirs();
+        }
+
+        // 1. config.yml général
+        File configFile = new File(customFolder, "config.yml");
+        if (!configFile.exists()) {
+            saveResourceToFile("config.yml", configFile);
+        }
+        mainConfig = YamlConfiguration.loadConfiguration(configFile);
+
+        // 2. CustomArmor.yml
+        File customArmorFile = new File(customFolder, "CustomArmor.yml");
         if (!customArmorFile.exists()) {
-            customArmorFile.getParentFile().mkdirs();
-            saveResource("CustomArmor.yml", false);
+            saveResourceToFile("CustomArmor.yml", customArmorFile);
         }
         customArmorConfig = YamlConfiguration.loadConfiguration(customArmorFile);
 
-        File weaponFile = new File(getDataFolder(), "Weapon.yml");
+        // 3. Weapon.yml
+        File weaponFile = new File(customFolder, "Weapon.yml");
         if (!weaponFile.exists()) {
-            weaponFile.getParentFile().mkdirs();
-            saveResource("Weapon.yml", false);
+            saveResourceToFile("Weapon.yml", weaponFile);
         }
         weaponConfig = YamlConfiguration.loadConfiguration(weaponFile);
+    }
+
+    private void saveResourceToFile(String resourcePath, File targetFile) {
+        try (var in = getResource(resourcePath)) {
+            if (in != null) {
+                Files.copy(in, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (Exception e) {
+            getLogger().warning("Impossible de copier la ressource " + resourcePath + " : " + e.getMessage());
+        }
+    }
+
+    public void reloadCustomConfigs() {
+        File customFolder = getCustomDataFolder();
+
+        File configFile = new File(customFolder, "config.yml");
+        if (configFile.exists()) {
+            mainConfig = YamlConfiguration.loadConfiguration(configFile);
+        }
+
+        File customArmorFile = new File(customFolder, "CustomArmor.yml");
+        if (customArmorFile.exists()) {
+            customArmorConfig = YamlConfiguration.loadConfiguration(customArmorFile);
+        }
+
+        File weaponFile = new File(customFolder, "Weapon.yml");
+        if (weaponFile.exists()) {
+            weaponConfig = YamlConfiguration.loadConfiguration(weaponFile);
+        }
+    }
+
+    public FileConfiguration getMainConfig() {
+        return mainConfig;
     }
 
     public FileConfiguration getCustomArmorConfig() {
@@ -153,23 +197,7 @@ public class CustomItems extends JavaPlugin implements Module {
         berserkHandler      = new BerserkSwordHandler(this);
     }
 
-    // ── Rechargement des configurations ──────────────────────────────────
-
-    public void reloadCustomConfigs() {
-        reloadConfig(); // Recharge le config.yml par défaut
-
-        File customArmorFile = new File(getDataFolder(), "CustomArmor.yml");
-        if (customArmorFile.exists()) {
-            customArmorConfig = YamlConfiguration.loadConfiguration(customArmorFile);
-        }
-
-        File weaponFile = new File(getDataFolder(), "Weapon.yml");
-        if (weaponFile.exists()) {
-            weaponConfig = YamlConfiguration.loadConfiguration(weaponFile);
-        }
-    }
-
-    // ── Accesseurs ────────────────────────────────────────────────────────
+    // ── Accesseurs ────────────────────────────────________________________
 
     public StormArmorHandler     getStormHandler()       { return stormHandler; }
     public GhostArmorHandler     getGhostHandler()       { return ghostHandler; }

@@ -24,18 +24,16 @@ public class GiveItemCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (!sender.hasPermission("customitems.admin")) {
-            send(sender, plugin.getConfig().getString("messages.no-permission", "<red>Tu n'as pas la permission."));
+            send(sender, plugin.getMainConfig().getString("messages.no-permission", "<red>Tu n'as pas la permission."));
             return true;
         }
 
-        // ── Commande : /items reload ──────────────────────────────────────
         if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
             plugin.reloadCustomConfigs();
             send(sender, "<green>Configurations (<yellow>config.yml, CustomArmor.yml, Weapon.yml<green>) rechargées avec succès !");
             return true;
         }
 
-        // ── Commande : /items give <joueur> <item> ────────────────────────
         if (args.length < 3 || !args[0].equalsIgnoreCase("give")) {
             send(sender, "<gold>/items give <joueur> <item>");
             send(sender, "<gold>/items reload");
@@ -44,7 +42,7 @@ public class GiveItemCommand implements CommandExecutor, TabCompleter {
 
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            send(sender, plugin.getConfig().getString("messages.player-not-found", "<red>Joueur introuvable.")
+            send(sender, plugin.getMainConfig().getString("messages.player-not-found", "<red>Joueur introuvable.")
                     .replace("{player}", args[1]));
             return true;
         }
@@ -52,7 +50,7 @@ public class GiveItemCommand implements CommandExecutor, TabCompleter {
         String itemName = args[2].toLowerCase();
         ItemStack[] items = plugin.getItemRegistry().resolveGiveItems(itemName);
         if (items == null) {
-            send(sender, plugin.getConfig().getString("messages.item-not-found", "<red>Item inconnu.")
+            send(sender, plugin.getMainConfig().getString("messages.item-not-found", "<red>Item inconnu.")
                     .replace("{item}", itemName));
             return true;
         }
@@ -61,9 +59,9 @@ public class GiveItemCommand implements CommandExecutor, TabCompleter {
             if (item != null) target.getInventory().addItem(item);
         }
 
-        send(sender, plugin.getConfig().getString("messages.give-success", "<green>Item donné.")
+        send(sender, plugin.getMainConfig().getString("messages.give-success", "<green>Item donné.")
                 .replace("{item}", itemName).replace("{player}", target.getName()));
-        send(target, plugin.getConfig().getString("messages.give-received", "<green>Tu as reçu un item.")
+        send(target, plugin.getMainConfig().getString("messages.give-received", "<green>Tu as reçu un item.")
                 .replace("{item}", itemName));
         return true;
     }
@@ -96,7 +94,7 @@ public class GiveItemCommand implements CommandExecutor, TabCompleter {
     }
 
     private void send(CommandSender s, String message) {
-        String prefix = plugin.getConfig().getString("general.prefix", "<dark_gray>[<gold>Items<dark_gray>] <gray>");
+        String prefix = plugin.getMainConfig().getString("general.prefix", "<dark_gray>[<gold>Items<dark_gray>] <gray>");
         s.sendMessage(MiniMessage.miniMessage().deserialize(prefix + message));
     }
 }

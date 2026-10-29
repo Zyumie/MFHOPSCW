@@ -43,8 +43,6 @@ public class CelestialSwordHandler implements Listener {
         startFlightTickTask();
     }
 
-    // ── Logique Principale ────────────────────────────────────────────────
-
     private void startFlightTickTask() {
         new BukkitRunnable() {
             @Override
@@ -64,13 +62,11 @@ public class CelestialSwordHandler implements Listener {
                     Long launchTime = inFlight.get(uuid);
                     if (launchTime == null) continue;
 
-                    // Délai minimal (300 ms) après l'impulsion pour décoller du sol initial
                     if (now - launchTime > 300) {
                         boolean isOnGround = ((Entity) player).isOnGround();
                         boolean inLiquid = player.isSwimming() || player.getLocation().getBlock().isLiquid();
                         boolean hasBlockBelow = !player.getLocation().subtract(0, 0.1, 0).getBlock().isPassable();
 
-                        // Retrait instantané dès le moindre contact avec un bloc
                         if (isOnGround || inLiquid || hasBlockBelow) {
                             onFallLanding(player);
                         }
@@ -84,25 +80,24 @@ public class CelestialSwordHandler implements Listener {
         long currentLaunchTime = System.currentTimeMillis();
         inFlight.put(player.getUniqueId(), currentLaunchTime);
 
-        double velocity = plugin.getConfig().getDouble("weapons.celestial-sword.launch-velocity", 2.5);
+        // Correction : getWeaponConfig()
+        double velocity = plugin.getWeaponConfig().getDouble("weapons.celestial-sword.launch-velocity", 2.5);
         Vector v = player.getVelocity();
         v.setY(velocity);
         player.setVelocity(v);
         player.setFallDistance(-9999);
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_FIREWORK_ROCKET_LAUNCH, 1f, 0.5f);
-        send(player, plugin.getConfig().getString("weapons.celestial-sword.messages.launch", ""));
+        send(player, plugin.getWeaponConfig().getString("weapons.celestial-sword.messages.launch", ""));
 
-        // Équipement de la masse
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             Long activeSession = inFlight.get(player.getUniqueId());
             if (activeSession != null && activeSession == currentLaunchTime) {
                 equipMace(player);
-                send(player, plugin.getConfig().getString("weapons.celestial-sword.messages.mace-form", ""));
+                send(player, plugin.getWeaponConfig().getString("weapons.celestial-sword.messages.mace-form", ""));
             }
         }, 10L);
 
-        // Sécurité anti-blocage (30 secondes)
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             Long activeSession = inFlight.get(player.getUniqueId());
             if (activeSession != null && activeSession == currentLaunchTime) {
@@ -116,10 +111,8 @@ public class CelestialSwordHandler implements Listener {
 
         clearOwnedMaces(player);
         equipSword(player);
-        send(player, plugin.getConfig().getString("weapons.celestial-sword.messages.miss-landing", ""));
+        send(player, plugin.getWeaponConfig().getString("weapons.celestial-sword.messages.miss-landing", ""));
     }
-
-    // ── Events ────────────────────────────────────────────────────────────
 
     public void onKillWithSword(Player player) {
         launchPlayer(player);
@@ -134,7 +127,7 @@ public class CelestialSwordHandler implements Listener {
         if (target instanceof Player pTarget) pTarget.setHealth(0);
         else target.damage(target.getMaxHealth() * 10);
 
-        send(attacker, plugin.getConfig().getString("weapons.celestial-sword.messages.kill-slam", ""));
+        send(attacker, plugin.getWeaponConfig().getString("weapons.celestial-sword.messages.kill-slam", ""));
 
         launchPlayer(attacker);
     }
@@ -190,8 +183,6 @@ public class CelestialSwordHandler implements Listener {
             event.setCancelled(true);
         }
     }
-
-    // ── Manipulation des Items ────────────────────────────────────────────
 
     private void equipMace(Player player) {
         ItemStack mace = plugin.getItemRegistry().buildCelestialMace();
@@ -252,8 +243,6 @@ public class CelestialSwordHandler implements Listener {
         return ItemBuilder.isCustomItem(plugin, item, ItemRegistry.CELESTIAL_MACE);
     }
 
-    // ── API publique ──────────────────────────────────────────────────────
-
     public boolean isInFlight(Player player) {
         return inFlight.containsKey(player.getUniqueId());
     }
@@ -264,8 +253,6 @@ public class CelestialSwordHandler implements Listener {
             removeMacesFromInventory(player);
         }
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────
 
     private void send(Player p, String message) {
         if (message == null || message.isEmpty()) return;

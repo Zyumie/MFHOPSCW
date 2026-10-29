@@ -8,18 +8,32 @@ import fr.zyumie.money.command.MoneyTopCommand;
 import fr.zyumie.money.command.PayCommand;
 import fr.zyumie.money.listener.PlayerListener;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.logging.Level;
 
 public class Money extends JavaPlugin implements Module {
 
     private MoneyManager moneyManager;
     private VaultEconomyProvider economyProvider;
 
+    private File customConfigFile;
+    private FileConfiguration customConfig;
+
     @Override
     public void onEnable() {
-        saveDefaultConfig();
+        // Remplace saveDefaultConfig() pour cibler plugins/Main/money/config.yml
+        createCustomConfig();
+
         moneyManager = new MoneyManager(this);
         MainAPI.get().getModuleManager().register(this);
     }
@@ -27,7 +41,6 @@ public class Money extends JavaPlugin implements Module {
     @Override
     public void onDisable() {
         if (moneyManager != null) moneyManager.saveAll();
-        // Désenregistre le provider Vault proprement
         getServer().getServicesManager().unregisterAll(this);
     }
 
@@ -36,7 +49,7 @@ public class Money extends JavaPlugin implements Module {
 
     @Override
     public void onModuleEnable() {
-        // Enregistrement Vault — tous les plugins qui utilisent Economy passeront par ici
+        // Enregistrement Vault
         economyProvider = new VaultEconomyProvider(this, moneyManager);
         getServer().getServicesManager().register(
                 Economy.class, economyProvider, this, ServicePriority.Highest);
@@ -74,4 +87,53 @@ public class Money extends JavaPlugin implements Module {
     }
 
     public MoneyManager getMoneyManager() { return moneyManager; }
+
+    // ── Gestion personnalisée du fichier de configuration ──────────────────
+
+    private void createCustomConfig() {
+        // Récupère le dossier du plugin "Main" (plugins/Main)
+        Plugin mainPlugin = Bukkit.getPluginManager().getPlugin("Main");
+        File mainFolder = mainPlugin != null ? mainPlugin.getDataFolder() : new File(getDataFolder().getParentFile(), "Main");
+
+        // Crée le sous-dossier money -> plugins/Main/money/
+        File moneyFolder = new File(mainFolder, "money");
+        if (!moneyFolder.exists()) {
+            moneyFolder.mkdirs();
+        }
+
+        customConfigFile = new File(moneyFolder, "config.yml");
+
+        // Si le fichier n'existe pas, on l'extrait depuis les ressources du JAR de Money
+        if (!customConfigFile.exists()) {
+            try (InputStream in = getResource("config.yml")) {
+                if (in != null) {
+                    Files.copy(in, customConfigFile.toPath());
+                } else {
+                    customConfigFile.createNewFile();
+                }
+            } catch (Exception e) {
+                getLogger().log(Level.SEVERE, "Impossible de créer le fichier de configuration pour Money", e);
+            }
+        }
+
+        customConfig = YamlConfiguration.loadConfiguration(customConfigFile);
+    }
+
+    @Override
+    public FileConfiguration getConfig() {
+        if (customConfig == null) {
+            reloadConfig();
+        }
+        return customConfig;
+    }
+
+    @Override
+    public void reloadConfig() {
+        if (customConfigFile == null) {
+            Plugin mainPlugin = Bukkit.getPluginManager().getPlugin("Main");
+            File mainFolder = mainPlugin != null ? mainPlugin.getDataFolder() : new File(getDataFolder().getParentFile(), "Main");
+            customConfigFile = new File(new File(mainFolder, "Money"), "config.yml");
+        }
+        customConfig = YamlConfiguration.loadConfiguration(customConfigFile);
+    }
 }
