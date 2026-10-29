@@ -3,6 +3,9 @@ package fr.zyumie.customitems.handler.weapon;
 import fr.zyumie.customitems.CustomItems;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -12,6 +15,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class BerserkSwordHandler {
+
+    private static final String MOD_NAME = "berserk_attack_speed";
 
     private final CustomItems plugin;
     private final Map<UUID, Long> cooldowns = new HashMap<>();
@@ -24,7 +29,6 @@ public class BerserkSwordHandler {
     public void activate(Player player) {
         if (!plugin.getWeaponConfig().getBoolean("weapons.berserk-sword.enabled", true)) return;
 
-        // Si déjà actif, on bloque pour éviter la superposition de tâches
         if (activeTasks.containsKey(player.getUniqueId())) {
             send(player, plugin.getWeaponConfig().getString("weapons.berserk-sword.messages.already-active", "<red>Vous êtes déjà en mode Berserk !"));
             return;
@@ -44,18 +48,19 @@ public class BerserkSwordHandler {
         int durationSec = plugin.getWeaponConfig().getInt("weapons.berserk-sword.berserk-duration-seconds", 20);
         if (durationSec <= 0) durationSec = 20;
 
-        int ticks = durationSec * 20; // Ex: 20s * 20 = 400 ticks
+        int ticks = durationSec * 20; // 20s * 20 = 400 ticks
+        double atkSpd = plugin.getWeaponConfig().getDouble("weapons.berserk-sword.attack-speed-value", 1024.0);
 
-        // 1. Applique Force II et Speed I avec override = true (3e paramètre boolean de PotionEffect)
-        applyBerserkEffects(player, ticks);
+        // 1. Applique le mode 1.8 (Attack Speed) + Potions (Force I + Speed I)
+        applyBerserkBuffs(player, ticks, atkSpd);
 
-        // 2. Buff des membres de la même faction
-        buffFactionMembers(player, ticks);
+        // 2. Transmet les buffs aux membres de la faction proches
+        buffFactionMembers(player, ticks, atkSpd);
 
         send(player, plugin.getWeaponConfig().getString("weapons.berserk-sword.messages.activated", "")
                 .replace("{duration}", String.valueOf(durationSec)));
 
-        // 3. Planifie la fin des effets exactement après 'ticks' (400 ticks = 20 secondes)
+        // Tâche de fin
         int taskId = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             deactivate(player);
             cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
@@ -65,24 +70,39 @@ public class BerserkSwordHandler {
     }
 
     private void deactivate(Player player) {
-        removeBerserkEffects(player);
+        removeBerserkBuffs(player);
         send(player, plugin.getWeaponConfig().getString("weapons.berserk-sword.messages.ended", ""));
         activeTasks.remove(player.getUniqueId());
     }
 
-    private void applyBerserkEffects(Player player, int ticks) {
-        // Paramètres: Type, Ticks, Amplifier, Ambient, Particles, Icon
-        // L'amplificateur 1 = Force II | Amplificateur 0 = Speed I
-        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, ticks, 1, false, true, true));
+    private void applyBerserkBuffs(Player player, int ticks, double attackSpeedValue) {
+        // --- PvP 1.8 (Attaque instantanée sans cooldown) ---
+        var attr = player.getAttribute(Attribute.ATTACK_SPEED);
+        if (attr != null) {
+            NamespacedKey key = new NamespacedKey(plugin, MOD_NAME);
+            attr.getModifiers().stream().filter(m -> m.key().equals(key)).toList().forEach(attr::removeModifier);
+            attr.addModifier(new AttributeModifier(key, attackSpeedValue, AttributeModifier.Operation.ADD_NUMBER));
+        }
+
+        // --- Effets de Potions (Force I = amplifier 0, Speed I = amplifier 0) ---
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, ticks, 0, false, true, true));
         player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, ticks, 0, false, true, true));
     }
 
-    private void removeBerserkEffects(Player player) {
+    private void removeBerserkBuffs(Player player) {
+        // Retire l'attribut d'Attack Speed 1.8
+        var attr = player.getAttribute(Attribute.ATTACK_SPEED);
+        if (attr != null) {
+            NamespacedKey key = new NamespacedKey(plugin, MOD_NAME);
+            attr.getModifiers().stream().filter(m -> m.key().equals(key)).toList().forEach(attr::removeModifier);
+        }
+
+        // Retire les effets de potion
         player.removePotionEffect(PotionEffectType.STRENGTH);
         player.removePotionEffect(PotionEffectType.SPEED);
     }
 
-    private void buffFactionMembers(Player activator, int ticks) {
+    private void buffFactionMembers(Player activator, int ticks, double attackSpeedValue) {
         double radius = plugin.getWeaponConfig().getDouble("weapons.berserk-sword.faction-buff-radius", 10.0);
         String factionName = getFactionOf(activator);
 
@@ -92,9 +112,12 @@ public class BerserkSwordHandler {
             String nearbyFaction = getFactionOf(nearby);
             if (factionName == null || !factionName.equals(nearbyFaction)) continue;
 
-            applyBerserkEffects(nearby, ticks);
+            applyBerserkBuffs(nearby, ticks, attackSpeedValue);
             send(nearby, plugin.getWeaponConfig().getString("weapons.berserk-sword.messages.faction-buffed", "")
                     .replace("{player}", activator.getName()));
+
+            // Planifie le retrait des buffs d'attributs spécifiquement pour l'allié
+            Bukkit.getScheduler().runTaskLater(plugin, () -> removeBerserkBuffs(nearby), ticks);
         }
     }
 
@@ -114,7 +137,7 @@ public class BerserkSwordHandler {
     public void cleanup(Player player) {
         Integer taskId = activeTasks.remove(player.getUniqueId());
         if (taskId != null) Bukkit.getScheduler().cancelTask(taskId);
-        removeBerserkEffects(player);
+        removeBerserkBuffs(player);
     }
 
     private void send(Player p, String message) {

@@ -82,31 +82,33 @@ weapons:
     messages:
       teleported: ""
 
-  berserk-sword:
-    enabled: true
-    display-name: "<dark_red><bold>⚡ Épée Berserk"
-    lore:
-      - "<gray>La rage distillée en acier..."
-      - ""
-      - "<dark_red>✦ Clic-droit → Mode Berserk <yellow>20s"
-      - "<gray>  ✦ Effet Force II et Speed I"
-      - "<gray>  ✦ Buff pour les membres de faction à <yellow>10 blocs"
-      - "<gray>(Cooldown: <yellow>3 minutes<gray>)"
-      - ""
-      - "<dark_gray>ID: berserk_sword"
-    material: NETHERITE_SWORD
-    custom-model-data: 3031
-    item-model: "BerserkSword"
-    enchantments:
-      DAMAGE_ALL: 5
-      DURABILITY: 3
-      LOOTING: 3
-    berserk-duration-seconds: 20
-    cooldown-seconds: 180
-    faction-buff-radius: 10.0
-    messages:
-      activated:      "<dark_red>⚡ MODE BERSERK ! <yellow>{duration}s <dark_red>de fureur !"
-      faction-buffed: "<dark_red>⚡ <yellow>{player} <dark_red>active le Berserk ! Tu reçois Force II et Vitesse !"
-      ended:          "<gray>Berserk terminé."
-      cooldown:       "<red>Cooldown actif: <yellow>{remaining}s <red>restant(e)s."
-      already-active: "<red>Vous êtes déjà en mode Berserk !"
+berserk-sword:
+  enabled: true
+  display-name: "<dark_red><bold>⚡ Épée Berserk"
+  lore:
+    - "<gray>La rage distillée en acier..."
+    - ""
+    - "<dark_red>✦ Clic-droit → Mode Berserk <yellow>20s"
+    - "<gray>  ✦ Vitesse d'attaque 1.8 (Attaque instantanée)"
+    - "<gray>  ✦ Effet Force I et Speed I"
+    - "<gray>  ✦ Buff pour les membres de faction à <yellow>10 blocs"
+    - "<gray>(Cooldown: <yellow>3 minutes<gray>)"
+    - ""
+    - "<dark_gray>ID: berserk_sword"
+  material: NETHERITE_SWORD
+  custom-model-data: 3031
+  item-model: "BerserkSword"
+  enchantments:
+    DAMAGE_ALL: 5
+    DURABILITY: 3
+    LOOTING: 3
+  berserk-duration-seconds: 20
+  cooldown-seconds: 180
+  faction-buff-radius: 10.0
+  attack-speed-value: 1024.0
+  messages:
+    activated:      "<dark_red>⚡ MODE BERSERK ! <yellow>{duration}s <dark_red>de fureur !"
+    faction-buffed: "<dark_red>⚡ <yellow>{player} <dark_red>active le Berserk ! Tu reçois le mode PvP 1.8, Force I et Vitesse !"
+    ended:          "<gray>Berserk terminé."
+    cooldown:       "<red>Cooldown actif: <yellow>{remaining}s <red>restant(e)s."
+    already-active: "<red>Vous êtes déjà en mode Berserk !"
