@@ -32,7 +32,8 @@ public class KillListener implements Listener {
         String heldId = ItemBuilder.getItemId(plugin, killer.getInventory().getItemInMainHand());
 
         // Épée Céleste → propulsion
-        if (ItemRegistry.CELESTIAL_SWORD.equals(heldId)) {
+        if (ItemRegistry.CELESTIAL_SWORD.equals(heldId)
+                && !plugin.getCelestialHandler().isBossImmune(event.getEntity())) {
             plugin.getCelestialHandler().onKillWithSword(killer);
         }
 

@@ -27,6 +27,7 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -112,7 +113,29 @@ public class CelestialSwordHandler implements Listener {
         launchPlayer(player);
     }
 
+    /**
+     * Boss immunisés (clés PDC listées dans Weapon.yml → weapons.celestial-sword.boss-immunity-keys).
+     * Sur eux : pas de one-shot, pas de propulsion, la masse inflige simplement ses dégâts normaux.
+     */
+    public boolean isBossImmune(Entity entity) {
+        if (entity == null) return false;
+        var cfg = plugin.getWeaponConfig();
+        List<String> keys = cfg.contains("weapons.celestial-sword.boss-immunity-keys")
+                ? cfg.getStringList("weapons.celestial-sword.boss-immunity-keys")
+                : List.of("endboss:is_endboss");
+        var pdc = entity.getPersistentDataContainer();
+        for (String raw : keys) {
+            NamespacedKey key = NamespacedKey.fromString(raw);
+            if (key == null) continue;
+            if (pdc.has(key, PersistentDataType.BYTE)
+                    || pdc.has(key, PersistentDataType.STRING)
+                    || pdc.has(key, PersistentDataType.INTEGER)) return true;
+        }
+        return false;
+    }
+
     public void onHitWithMace(EntityDamageByEntityEvent event, Player attacker, LivingEntity target) {
+        if (isBossImmune(target)) return; // pas d'annulation de l'event : dégâts vanilla, aucun effet spécial
         if (!inFlight.containsKey(attacker.getUniqueId())) return;
         if (!isMace(attacker.getInventory().getItemInMainHand())) return;
 
