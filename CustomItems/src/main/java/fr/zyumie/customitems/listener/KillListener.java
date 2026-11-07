@@ -12,7 +12,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 
 /**
  * Gère les kills pour :
- * - Épée Céleste : propulsion après kill
+ * - Épée Céleste : propulsion après kill D'UN JOUEUR uniquement
  * - Armure d'Âmes : +2 cœurs par kill
  * - Mort du joueur : reset Âmes + nettoyage Berserk/Céleste
  */
@@ -31,9 +31,11 @@ public class KillListener implements Listener {
 
         String heldId = ItemBuilder.getItemId(plugin, killer.getInventory().getItemInMainHand());
 
-        // Épée Céleste → propulsion
+        // Épée Céleste → propulsion, uniquement si la victime est un autre joueur
         if (ItemRegistry.CELESTIAL_SWORD.equals(heldId)
-                && !plugin.getCelestialHandler().isBossImmune(event.getEntity())) {
+                && event.getEntity() instanceof Player victim
+                && !victim.equals(killer)
+                && !plugin.getCelestialHandler().isBossImmune(victim)) {
             plugin.getCelestialHandler().onKillWithSword(killer);
         }
 
@@ -45,16 +47,9 @@ public class KillListener implements Listener {
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player dead = event.getEntity();
 
-        // Reset Armure d'Âmes
         plugin.getSoulHandler().onDeath(dead);
-
-        // Nettoyage Ghost
         plugin.getGhostHandler().cleanup(dead);
-
-        // Nettoyage Berserk
         plugin.getBerserkHandler().cleanup(dead);
-
-        // Nettoyage Céleste
         plugin.getCelestialHandler().removeFromFlight(dead);
     }
 }

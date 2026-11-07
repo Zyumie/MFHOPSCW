@@ -90,6 +90,7 @@ public class ItemRegistry {
         if (sec == null) return null;
         ItemStack item = ItemBuilder.buildWeapon(plugin, sec, CELESTIAL_SWORD);
         item.setData(DataComponentTypes.TOOLTIP_STYLE, Key.key("minecraft", "celestialsword"));
+        plugin.getCelestialHandler().stampUid(item); // ← UID unique
         return item;
     }
 
