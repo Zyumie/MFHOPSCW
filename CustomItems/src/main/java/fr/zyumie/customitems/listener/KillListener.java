@@ -34,8 +34,7 @@ public class KillListener implements Listener {
         // Épée Céleste → propulsion, uniquement si la victime est un autre joueur
         if (ItemRegistry.CELESTIAL_SWORD.equals(heldId)
                 && event.getEntity() instanceof Player victim
-                && !victim.equals(killer)
-                && !plugin.getCelestialHandler().isBossImmune(victim)) {
+                && !victim.equals(killer)) {
             plugin.getCelestialHandler().onKillWithSword(killer);
         }
 

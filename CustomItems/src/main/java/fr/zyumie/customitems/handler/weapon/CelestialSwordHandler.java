@@ -189,26 +189,6 @@ public class CelestialSwordHandler implements Listener {
         return inFlight.containsKey(player.getUniqueId());
     }
 
-    /**
-     * Boss immunisés (clés PDC listées dans Weapon.yml → weapons.celestial-sword.boss-immunity-keys).
-     */
-    public boolean isBossImmune(Entity entity) {
-        if (entity == null) return false;
-        var cfg = plugin.getWeaponConfig();
-        List<String> keys = cfg.contains("weapons.celestial-sword.boss-immunity-keys")
-                ? cfg.getStringList("weapons.celestial-sword.boss-immunity-keys")
-                : List.of("endboss:is_endboss");
-        var pdc = entity.getPersistentDataContainer();
-        for (String raw : keys) {
-            NamespacedKey key = NamespacedKey.fromString(raw);
-            if (key == null) continue;
-            if (pdc.has(key, PersistentDataType.BYTE)
-                    || pdc.has(key, PersistentDataType.STRING)
-                    || pdc.has(key, PersistentDataType.INTEGER)) return true;
-        }
-        return false;
-    }
-
     public void onHitWithMace(EntityDamageByEntityEvent event, Player attacker, LivingEntity target) {
         ItemStack held = attacker.getInventory().getItemInMainHand();
         if (!isValidMace(attacker, held)) {
@@ -219,7 +199,6 @@ public class CelestialSwordHandler implements Listener {
         // Effets réservés aux joueurs : sur un mob → dégâts vanilla, pas de one-shot, pas de propulsion
         if (!(target instanceof Player pTarget)) return;
         if (pTarget.equals(attacker)) return;
-        if (isBossImmune(target)) return;
 
         event.setCancelled(true);
         pTarget.setHealth(0);
